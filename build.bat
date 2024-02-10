@@ -3,7 +3,7 @@
 where /q cmake
 if ERRORLEVEL 1 (
     ECHO "cmake.exe not found, please add cmake to PATH and make sure cmake is installed"
-    exit 1
+    exit /B 1
 )
 
 if not exist build mkdir build
@@ -16,4 +16,4 @@ ECHO -- Building cabor in Release configuration
 cmake --build . --config Release
 
 cd ..
-exit 0
+exit /B 0
