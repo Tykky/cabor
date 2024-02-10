@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e
+
 command -v cmake >/dev/null 2>&1 || { echo >&2 "cmake not found, please install cmake first"; exit 1; }
 
 mkdir -p build/release
