@@ -1,4 +1,4 @@
-# Cabor
+# Cabor C
 
 
 ## How to build
@@ -9,9 +9,17 @@ The build dependencies are
 
 to build on Windows use
 ```
-build
+build.bat
 ```
-to build on Linux use
+to build on Linux or macOS use
 ```
 ./build.sh
+```
+After building the program can be run on Windows with
+```
+cabor.bat
+```
+and on Linux or macOS with
+```
+./cabor.sh
 ```
