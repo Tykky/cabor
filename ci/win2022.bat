@@ -5,7 +5,7 @@ choco install visualstudio2022buildtools --package-parameters "--add Microsoft.V
 
 refreshenv
 
-CALL "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" x64
+CALL "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" x64
 
 call build.bat
 
