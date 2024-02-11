@@ -2,7 +2,7 @@
 
 set -e
 
-echo "-- installing dependencies"
+echo "-- installing build dependencies"
 
 apt -y update
 apt -y upgrade
