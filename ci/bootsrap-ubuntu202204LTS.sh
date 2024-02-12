@@ -4,6 +4,6 @@ set -e
 
 apt -y update
 apt -y upgrade
-apt -y install cmake
+apt -y install git cmake gcc
 
 exit 0
