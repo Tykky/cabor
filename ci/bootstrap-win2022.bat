@@ -4,7 +4,8 @@ choco install git -y
 choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System' -y
 choco install visualstudio2022buildtools --package-parameters "--add Microsoft.VisualStudio.Workload.VCTools --add Microsoft.VisualStudio.Component.VC.CMake.Project --add Microsoft.VisualStudio.Component.Windows10SDK --add Microsoft.VisualStudio.Component.Windows11SDK.22000 --includeRecommended --quiet --norestart" -y
 
-refreshenv
+call refreshenv
+
 git clone https://github.com/Tykky/cabor
 
 cd cabor
