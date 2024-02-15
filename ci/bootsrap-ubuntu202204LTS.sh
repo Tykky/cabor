@@ -1,7 +1,7 @@
 #!/bin/sh
 
-apt -y update
-apt -y upgrade
-apt -y install git cmake gcc
+apt -y --force-yes update
+apt -y --force-yes upgrade
+apt -y --force-yes install git cmake gcc
 
 git clone https://github.com/Tykky/cabor
