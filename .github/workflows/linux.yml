@@ -16,5 +16,8 @@ jobs:
       - name: run build.sh
         run: export CC=${{ matrix.compiler }}; cd cabor; sudo ./build.sh
   test:
+    needs: build 
+    runs-on: ubuntu-22.04
+    steps:
       - name: run the compiler with --test
         run: cd cabor; ./cabor.sh --test
