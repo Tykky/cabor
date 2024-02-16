@@ -3,10 +3,13 @@ on: [push]
 jobs:
   linux-build:
     runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        compiler: [gcc, clang]
     steps:
       - name: bootstrap ubuntu 2022.04 LTS
         run: curl --output b.sh --url https://raw.githubusercontent.com/Tykky/cabor/main/ci/bootsrap-ubuntu202204LTS.sh; sudo chmod +x b.sh; sudo ./b.sh; cd cabor; sudo chmod +x build.sh; sudo chmod +x cabor.sh
       - name: run build.sh
-        run: cd cabor; sudo ./build.sh
+        run: export CMAKE_C_COMPILER=${{ matrix.compiler }}; cd cabor; sudo ./build.sh
       - name: run the compiler with --test
         run: cd cabor; ./cabor.sh --test
