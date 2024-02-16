@@ -7,6 +7,6 @@ jobs:
       - name: bootstrap ubuntu 2022.04 LTS
         run: curl --output b.sh --url https://raw.githubusercontent.com/Tykky/cabor/main/ci/bootsrap-ubuntu202204LTS.sh; sudo chmod +x b.sh; sudo ./b.sh; cd cabor; sudo chmod +x build.sh; sudo chmod +x cabor.sh
       - name: run build.sh
-        run: sudo ./build.sh
+        run: cd cabor; sudo ./build.sh
       - name: run the compiler with --test
-        run: ./cabor.sh --test
+        run: cd cabor; ./cabor.sh --test
