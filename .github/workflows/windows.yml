@@ -1,5 +1,0 @@
-name: windows
-on: [push]
-jobs:
-  windows-build:
-  runs-on:
