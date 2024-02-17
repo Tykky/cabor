@@ -22,9 +22,9 @@ jobs:
          shell: cmd
       - name: run build.bat
         run: | 
-          build.bat
+          cd cabor & build.bat
           shell: cmd
       - name: run the compiler with --test
         run: | 
-          cabor.bat --test
+          cd cabor & cabor.bat --test
           shell: cmd
