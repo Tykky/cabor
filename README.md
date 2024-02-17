@@ -24,7 +24,7 @@ cabor.bat
 ```
 alternatively, the executables can be found at `build/bin/Debug` or `build/bin/Release`. The `cabor.bat` script runs the release build by default.
 ### Building on Linux/macOS
-For Linux just make sure you have Git, CMake and GCC installed using your package manager of choice. For macOS the easiest options is probably to use [homebrew](https://brew.sh/) to install the said packages. On macOS you could also use [Xcode](https://developer.apple.com/Xcode/) (Apple Clang) to build the project. CMake can generate XCode project for you.
+For Linux/macOS just make sure you have Git, CMake and Xcode/GCC installed using your package manager of choice. For macOS the easiest options is probably to use [homebrew](https://brew.sh/) to install the said packages. On macOS you could also use [Xcode](https://developer.apple.com/Xcode/) (Apple Clang) to build the project. CMake can generate XCode project for you.
 ```
 ./build.sh
 ```
