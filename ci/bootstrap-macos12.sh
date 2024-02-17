@@ -5,3 +5,7 @@
 brew install git cmake mas
 mas install 497799835
 xcode-select --install
+
+git clone https://github.com/Tykky/cabor
+
+cd cabor
