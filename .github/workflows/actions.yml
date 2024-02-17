@@ -18,13 +18,13 @@ jobs:
     steps:
       - name: bootstrap windows server 2022
         run: |
-         curl.exe --output b.bat --url https://raw.githubusercontent.com/Tykky/cabor/main/ci/bootstrap-win2022.bat & b.bat
          shell: cmd
+         curl.exe --output b.bat --url https://raw.githubusercontent.com/Tykky/cabor/main/ci/bootstrap-win2022.bat & b.bat
       - name: run build.bat
         run: | 
-          cd cabor & build.bat
           shell: cmd
+          cd cabor & build.bat
       - name: run the compiler with --test
         run: | 
-          cd cabor & cabor.bat --test
           shell: cmd
+          cd cabor & cabor.bat --test
