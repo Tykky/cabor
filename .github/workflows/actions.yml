@@ -8,11 +8,11 @@ jobs:
         compiler: [gcc, clang]
     steps:
       - name: bootstrap ubuntu 2022.04 LTS
-        run: curl --output b.sh --url https://raw.githubusercontent.com/Tykky/cabor/main/ci/bootsrap-ubuntu202204LTS.sh; sudo chmod +x b.sh; sudo ./b.sh; cd cabor; sudo chmod +x build.sh; sudo chmod +x cabor.sh
+        run: curl --output b.sh --url https://raw.githubusercontent.com/Tykky/cabor/main/ci/bootsrap-ubuntu202204LTS.sh && sudo chmod +x b.sh && sudo ./b.sh && cd cabor && sudo chmod +x build.sh && sudo chmod +x cabor.sh
       - name: run build.sh
-        run: export CC=/usr/bin/${{ matrix.compiler }}; cd cabor; sudo ./build.sh
+        run: CC=/usr/bin/${{ matrix.compiler }} bash -c 'cd cabor && sudo ./build.sh'
       - name: run the compiler with --test
-        run: cd cabor; ./cabor.sh --test
+        run: cd cabor && ./cabor.sh --test
   windows-build:
     runs-on: windows-2022
     steps:
