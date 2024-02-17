@@ -1,23 +1,15 @@
 name: linux
 on: [push]
 jobs:
-  bootstrap:
-    runs-on: ubuntu-22.04
-    steps:
-      - name: bootstrap ubuntu 2022.04 LTS
-        run: curl --output b.sh --url https://raw.githubusercontent.com/Tykky/cabor/main/ci/bootsrap-ubuntu202204LTS.sh; sudo chmod +x b.sh; sudo ./b.sh; cd cabor; sudo chmod +x build.sh; sudo chmod +x cabor.sh
-  build:
-    needs: bootstrap 
+  linux-build:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
         compiler: [gcc, clang]
     steps:
+      - name: bootstrap ubuntu 2022.04 LTS
+        run: curl --output b.sh --url https://raw.githubusercontent.com/Tykky/cabor/main/ci/bootsrap-ubuntu202204LTS.sh; sudo chmod +x b.sh; sudo ./b.sh; cd cabor; sudo chmod +x build.sh; sudo chmod +x cabor.sh
       - name: run build.sh
         run: export CC=${{ matrix.compiler }}; cd cabor; sudo ./build.sh
-  test:
-    needs: build 
-    runs-on: ubuntu-22.04
-    steps:
       - name: run the compiler with --test
         run: cd cabor; ./cabor.sh --test
