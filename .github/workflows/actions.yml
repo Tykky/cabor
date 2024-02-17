@@ -31,9 +31,9 @@ jobs:
   macos-build:
     runs-on: macos-12
     steps:
-      -name: bootstrap macos 12
-       run: curl --output b.sh --url https://raw.githubusercontent.com/Tykky/cabor/main/ci/bootstrap-macos12.sh && sudo chmod +x b.sh && sudo ./b.sh && cd cabor && sudo chmod +x build.sh && sudo chmod +x cabor.sh
-      -name: run build.sh
-       run: cd cabor && sudo ./build.sh
-      -name: run the compiler with --test
-       run: cd cabor && ./cabor.sh --test
+      - name: bootstrap macos 12
+        run: curl --output b.sh --url https://raw.githubusercontent.com/Tykky/cabor/main/ci/bootstrap-macos12.sh && sudo chmod +x b.sh && sudo ./b.sh && cd cabor && sudo chmod +x build.sh && sudo chmod +x cabor.sh
+      - name: run build.sh
+        run: cd cabor && sudo ./build.sh
+      - name: run the compiler with --test
+        run: cd cabor && ./cabor.sh --test
