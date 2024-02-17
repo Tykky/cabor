@@ -1,4 +1,4 @@
-name: linux
+name: gh-actions
 on: [push]
 jobs:
   linux-build:
@@ -13,3 +13,12 @@ jobs:
         run: export CC=${{ matrix.compiler }}; cd cabor; sudo ./build.sh
       - name: run the compiler with --test
         run: cd cabor; ./cabor.sh --test
+  windows-build:
+    runs-on: windows-2022
+    steps:
+      - name: bootstrap windows server 2022
+        run: curl.exe --output b.bat --url https://raw.githubusercontent.com/Tykky/cabor/main/ci/bootstrap-win2022.bat & b.bat & build.bat
+      - name: run build.bat
+        run: build.bat
+      - name: run the compiler with --test
+        run: cabor.bat --test
