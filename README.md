@@ -37,7 +37,7 @@ alternatively, the executables can be found at `build/release/bin` and `build/de
 ## Building on fresh Ubuntu 2022.04 LTS
 For Ubuntu 2022.04 LTS it's possible to run this script to build the project without having any of the dependencies. It's not recommended that you run this as it has the side effect of doing full system upgrade but in case you're running a vm this could be used.
 ```
-curl --output b.sh --url https://raw.githubusercontent.com/Tykky/cabor/main/ci/bootsrap-ubuntu202204LTS.sh; sudo chmod +x b.sh; sudo ./b.sh; cd cabor; sudo chmod +x build.sh; sudo chmod +x cabor.sh; sudo ./build.sh
+curl --output b.sh --url https://raw.githubusercontent.com/Tykky/cabor/main/ci/bootsrap-ubuntu202204LTS.sh && sudo chmod +x b.sh && sudo ./b.sh && cd cabor && sudo chmod +x build.sh && sudo chmod +x cabor.sh && sudo ./build.sh
 ```
 after doing that the program can be run as usual
 ```
