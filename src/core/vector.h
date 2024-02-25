@@ -1,42 +1,65 @@
 #pragma once
 
+#include "../cabor_defines.h"
+#include "../core/memory.h"
+
 #include <stddef.h>
 #include <stdbool.h>
 
 #define CABOR_VECTOR_MULTIPLICATION_FACTOR 2
 
+// Equivalent to std::vector from C++. Since C doesn't support function overloading we 
+// manually create 'overloads' for each type. If Debug build is used the implementation 
+// does runtime checks for types and out of bounds.
+
+typedef enum
+{
+    CABOR_FLOAT,
+    CABOR_DOUBLE,
+    CABOR_INT,
+    CABOR_UINT,
+    CABOR_CHAR,
+    CABOR_UCHAR,
+    CABOR_PTR,
+    CABOR_UNKNOWN
+} cabor_element_type;
+
 typedef struct
 {
-    char*  elements;
-    int    stride;
-    size_t capacity;
-    size_t size;
+    cabor_element_type type;
+    size_t             capacity;
+    size_t             size;
+    cabor_allocation   vector_mem;
 } cabor_vector;
 
-// Allocates vector of initial_size (numer of elements) where each element has size of stride in bytes
-cabor_vector create_vector(size_t initial_size, int stride, bool zero_initialize);
+cabor_vector create_cabor_vector(size_t initial_capacity, cabor_element_type type, bool zero_initialize);
 
-// Pushback new element to vector. Note that the new element
-// should be of the same size as provided in stride when 
-// allocate_vector is called.
-void pushback_vector(cabor_vector* v, void* element);
+void cabor_vector_push_float  (cabor_vector* v, float value);
+void cabor_vector_push_double (cabor_vector* v, double value);
+void cabor_vector_push_int    (cabor_vector* v, int value);
+void cabor_vector_push_uint   (cabor_vector* v, unsigned int value);
+void cabor_vector_push_char   (cabor_vector* v, char value);
+void cabor_vector_push_uchar  (cabor_vector*v, unsigned char value);
+void cabor_vector_push_ptr    (cabor_vector*, void* ptr);
 
-// Resizes the vector to size if size is larger than
-// the current capacity of the vector.
-void reserve_vector(cabor_vector* v, size_t size);
+void cabor_vector_push_str(cabor_vector* v, const char* str, bool push_null_character);
 
-// Gets element specific index from the vector and
-// does bounds checking. Note that casting the void*
-// to the actual type before dereferncing is left to user.
-void* vector_get(cabor_vector* v, size_t idx);
+float         cabor_vector_get_float  (cabor_vector* v, size_t idx);
+double        cabor_vector_get_double (cabor_vector* v, size_t idx);
+int           cabor_vector_get_int    (cabor_vector* v, size_t idx);
+unsigned int  cabor_vector_get_uint   (cabor_vector* v, size_t idx);
+char          cabor_vector_get_char   (cabor_vector* v, size_t idx);
+unsigned char cabor_vector_get_uchar  (cabor_vector* v, size_t idx);
+void*         cabor_vector_get_ptr    (cabor_vector* v, size_t idx);
 
-// Frees vector
-void destroy_vector(cabor_vector* v);
+void cabor_vector_reserve(cabor_vector* v, size_t size);
 
-// Gets next free element from the vector.
-// this doesn't increment the current size
-void* peek_next(cabor_vector* v);
+void cabor_vector_destroy(cabor_vector* v);
 
-// Pushes null terminated string to the vector.
-// For strings we assume stride = 1
-void push_string_to_vector(cabor_vector* v, const char* str, bool push_null_character);
+float         cabor_vector_peek_float  (cabor_vector* v);
+double        cabor_vector_peek_double (cabor_vector* v);
+int           cabor_vector_peek_int    (cabor_vector* v);
+unsigned int  cabor_vector_peek_uint   (cabor_vector* v);
+char          cabor_vector_peek_char   (cabor_vector* v);
+unsigned char cabor_vector_peek_uchar  (cabor_vector* v);
+void*         cabor_vector_peek_ptr    (cabor_vector* v);
