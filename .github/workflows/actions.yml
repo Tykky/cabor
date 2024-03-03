@@ -29,10 +29,7 @@ jobs:
         run: | 
           cd cabor & cabor.bat --test
   macos-build:
-    strategy:
-      matrix:
-        runner: [macos-14-large, macos-14-xlarge]
-    runs-on: ${{ matrix.runner }}
+    runs-on: [macos-14, macos-12]
     steps:
       - name: bootstrap macos 12
         run: curl --output b.sh --url https://raw.githubusercontent.com/Tykky/cabor/main/ci/bootstrap-macos12.sh && chmod +x b.sh && ./b.sh && cd cabor && chmod +x build.sh && chmod +x cabor.sh
