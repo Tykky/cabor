@@ -14,7 +14,10 @@ jobs:
       - name: run the compiler with --test
         run: cd cabor && sudo ./cabor.sh --test
   windows-build:
-    runs-on: windows-2022
+    strategy:
+        matrix:
+            runner: [windows-2022, windows-2019]
+    runs-on: ${{ matrix.runner }}
     steps:
       - name: bootstrap windows server 2022
         shell: cmd
