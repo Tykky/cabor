@@ -10,7 +10,7 @@ int cabor_test_vector_push()
         cabor_vector_push_int(&vec, i);
 
     int res = 0;
-    CABOR_CHECK_EQUALS(vec.size, 1, res);
+    CABOR_CHECK_EQUALS(vec.size, 10, res);
 
     cabor_vector_destroy(&vec);
 
