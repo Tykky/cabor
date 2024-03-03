@@ -10,7 +10,7 @@ cabor_file cabor_load_file(const char* filename)
     FILE* file_handle = fopen(filename, "rb");
     if (file_handle == NULL)
     {
-        CABOR_LOG_ERR_F("Failed to open %s");
+        CABOR_LOG_ERR_F("Failed to open %s", filename);
         CABOR_RUNTIME_ERROR("failed to open file");
     }
 
