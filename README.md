@@ -53,3 +53,13 @@ Afer running that you should be able to run the program as usual:
 ```
 cabor.bat
 ```
+
+## Building on fresh macOS Sonoma 14.3
+For macOS there is script that works for both Apple silicon and x64 using Sonoma 14.3:
+```
+curl --output b.sh --url https://raw.githubusercontent.com/Tykky/cabor/main/ci/bootsrap-macos12.sh && chmod +x b.sh && ./b.sh && cd cabor && chmod +x build.sh && chmod +x cabor.sh && ./build.sh
+```
+the scripts install the homebrew package manager and install required dependencies. Again this is not recommended but if your running this on some throw-away cloud instance it could be used. After running that you should be able to run the program with
+```
+./cabor.sh
+```
