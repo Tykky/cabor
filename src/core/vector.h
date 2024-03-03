@@ -56,10 +56,10 @@ void cabor_vector_reserve(cabor_vector* v, size_t size);
 
 void cabor_vector_destroy(cabor_vector* v);
 
-float         cabor_vector_peek_float  (cabor_vector* v);
-double        cabor_vector_peek_double (cabor_vector* v);
-int           cabor_vector_peek_int    (cabor_vector* v);
-unsigned int  cabor_vector_peek_uint   (cabor_vector* v);
-char          cabor_vector_peek_char   (cabor_vector* v);
-unsigned char cabor_vector_peek_uchar  (cabor_vector* v);
-void*         cabor_vector_peek_ptr    (cabor_vector* v);
+float*         cabor_vector_peek_float  (cabor_vector* v);
+double*        cabor_vector_peek_double (cabor_vector* v);
+int*           cabor_vector_peek_int    (cabor_vector* v);
+unsigned int*  cabor_vector_peek_uint   (cabor_vector* v);
+char*          cabor_vector_peek_char   (cabor_vector* v);
+unsigned char* cabor_vector_peek_uchar  (cabor_vector* v);
+void**         cabor_vector_peek_ptr    (cabor_vector* v);

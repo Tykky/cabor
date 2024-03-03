@@ -38,7 +38,7 @@ cabor_allocation cabor_malloc(cabor_allocator_context* alloc_ctx, size_t size)
 
 cabor_allocation cabor_realloc(cabor_allocator_context* alloc_ctx, cabor_allocation* old_alloc, size_t size)
 {
-    alloc_ctx->allocated_mem = size;
+    alloc_ctx->allocated_mem = alloc_ctx->allocated_mem - old_alloc->size + size;
 
     cabor_allocation new_alloc =
     {
@@ -49,6 +49,7 @@ cabor_allocation cabor_realloc(cabor_allocator_context* alloc_ctx, cabor_allocat
     if (!new_alloc.mem)
     {
         fputs("Failed to cabor_realloc!", stderr);
+        free(old_alloc->mem);
         assert(0);
         exit(1);
     }

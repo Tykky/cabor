@@ -55,7 +55,7 @@ int main(int argc, char **argv)
 	{ 
 		double size;
 		const char* prefix = cabor_convert_bytes_to_human_readable(current_allocated, &size);
-        printf("Leak detected!, there %.2f %s of unfreed memory!\n", size, prefix);
+        printf("Leak detected!, there is %.2f %s of unfreed memory!\n", size, prefix);
 		return 1;
 	}
 	else

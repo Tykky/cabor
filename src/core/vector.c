@@ -33,13 +33,9 @@ static size_t get_element_type_size(cabor_element_type type)
 static void vector_resize(cabor_vector* v, size_t capacity)
 {
     size_t stride = get_element_type_size(v->type);
+    cabor_allocation alloc = CABOR_REALLOC(&v->vector_mem, stride * capacity);
 
-    void* ptr = v->vector_mem.mem;
-    size_t new_size = stride * capacity;
-
-    cabor_allocation alloc = CABOR_REALLOC(v->vector_mem.mem, stride * capacity);
-    char* elements = alloc.mem;
-
+    v->vector_mem = alloc;
     v->capacity = capacity;
 }
 
@@ -195,44 +191,44 @@ void cabor_vector_destroy(cabor_vector* v)
 }
 
 
-float cabor_vector_peek_float(cabor_vector* v)
+float* cabor_vector_peek_float(cabor_vector* v)
 {
     CABOR_ASSERT(v->type == CABOR_FLOAT, "Tried to peek_float non float vector!");
-    return *(float*)peek_next(v);
+    return (float*)peek_next(v);
 }
 
-double cabor_vector_peek_double(cabor_vector* v)
+double* cabor_vector_peek_double(cabor_vector* v)
 {
     CABOR_ASSERT(v->type == CABOR_DOUBLE, "Tried to peek_double non double vector!");
-    return *(double*)peek_next(v);
+    return (double*)peek_next(v);
 }
 
-int cabor_vector_peek_int(cabor_vector* v)
+int* cabor_vector_peek_int(cabor_vector* v)
 {
     CABOR_ASSERT(v->type == CABOR_INT, "Tried to peek_int non int vector!");
-    return *(int*)peek_next(v);
+    return (int*)peek_next(v);
 }
 
-unsigned int cabor_vector_peek_uint(cabor_vector* v)
+unsigned int* cabor_vector_peek_uint(cabor_vector* v)
 {
     CABOR_ASSERT(v->type == CABOR_UINT, "Tried to peek_uint non uint vector!");
-    return *(unsigned int*)peek_next(v);
+    return (unsigned int*)peek_next(v);
 }
 
-char cabor_vector_peek_char(cabor_vector* v)
+char* cabor_vector_peek_char(cabor_vector* v)
 {
     CABOR_ASSERT(v->type == CABOR_CHAR, "Tried to peek_char non char vector!");
-    return *(char*)peek_next(v);
+    return (char*)peek_next(v);
 }
 
-unsigned char cabor_vector_peek_uchar(cabor_vector* v)
+unsigned char* cabor_vector_peek_uchar(cabor_vector* v)
 {
     CABOR_ASSERT(v->type == CABOR_UCHAR, "Tried to peek_uchar non uchar vector!");
-    return *(unsigned char*)peek_next(v);
+    return (unsigned char*)peek_next(v);
 }
 
-void* cabor_vector_peek_ptr(cabor_vector* v)
+void** cabor_vector_peek_ptr(cabor_vector* v)
 {
     CABOR_ASSERT(v->type == CABOR_PTR, "Tried to peek_ptr non ptr vector!");
-    return *(void**)peek_next(v);
+    return (void**)peek_next(v);
 }
