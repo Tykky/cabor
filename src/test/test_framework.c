@@ -30,12 +30,12 @@ int run_cabor_tests(cabor_test_framework_context* ctx)
 		int result = test->test_func();
 		if (!result)
 		{
-			CABOR_LOG_TEST_F("-- (%d/%d) cabor test %s success!", i + 1, ctx->current_size, test->name);
+			CABOR_LOG_TEST_F("-- (%d/%d) %s success!", i + 1, ctx->current_size, test->name);
 			passed++;
 		}
 		else
 		{
-			CABOR_LOG_TEST_F("-- (%d/%d) cabor test %s failed!", i + 1, ctx->current_size, test->name);
+			CABOR_LOG_TEST_F("-- (%d/%d) %s failed!", i + 1, ctx->current_size, test->name);
 			failed++;
 		}
 	}

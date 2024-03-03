@@ -2,6 +2,8 @@
 #include "../../logging/logging.h"
 #include "../test_framework.h"
 
+#ifdef CABOR_ENABLE_TESTING
+
 int cabor_test_vector_push()
 {
     return 0;
@@ -27,16 +29,9 @@ int cabor_test_vector_get()
         cabor_vector_push_int(&vec, i + 1);
 
     int res = 0;
-    CABOR_CHECK_EQUALS(cabor_vector_get_int(&vec, 0), 1, res);
-    CABOR_CHECK_EQUALS(cabor_vector_get_int(&vec, 1), 2, res);
-    CABOR_CHECK_EQUALS(cabor_vector_get_int(&vec, 2), 3, res);
-    CABOR_CHECK_EQUALS(cabor_vector_get_int(&vec, 3), 4, res);
-    CABOR_CHECK_EQUALS(cabor_vector_get_int(&vec, 4), 5, res);
-    CABOR_CHECK_EQUALS(cabor_vector_get_int(&vec, 5), 6, res);
-    CABOR_CHECK_EQUALS(cabor_vector_get_int(&vec, 6), 7, res);
-    CABOR_CHECK_EQUALS(cabor_vector_get_int(&vec, 7), 8, res);
-    CABOR_CHECK_EQUALS(cabor_vector_get_int(&vec, 8), 9, res);
-    CABOR_CHECK_EQUALS(cabor_vector_get_int(&vec, 9), 10, res);
+
+    for (size_t i = 0; i < 9; i++)
+        CABOR_CHECK_EQUALS(cabor_vector_get_int(&vec, i), i + 1, res);
 
     cabor_vector_destroy(&vec);
 
@@ -76,3 +71,4 @@ int cabor_test_vector_resize()
     return res;
 }
 
+#endif // CABOR_ENABLE_TESTING

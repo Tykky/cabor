@@ -8,7 +8,7 @@
 
 #define CABOR_VECTOR_MULTIPLICATION_FACTOR 2
 
-// Equivalent to std::vector from C++. Since C doesn't support function overloading we 
+// Similar to std::vector from C++. Since C doesn't support function overloading we 
 // manually create 'overloads' for each type. If Debug build is used the implementation 
 // does runtime checks for types and out of bounds.
 

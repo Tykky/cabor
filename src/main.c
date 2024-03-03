@@ -38,7 +38,6 @@ int main(int argc, char **argv)
 	unsigned int flags = parse_cmd_args(argc, argv);
 	unsigned int test_results = 0;
 
-
 	if (flags & CABOR_ARG_ENABLE_TESTING)
 	{
 		register_all_tests();
