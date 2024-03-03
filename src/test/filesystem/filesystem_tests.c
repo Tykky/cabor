@@ -2,6 +2,8 @@
 
 #ifdef CABOR_ENABLE_TESTING
 
+#include <string.h>
+
 #include "../../filesystem/filesystem.h"
 #include "../../logging/logging.h"
 #include "../test_framework.h"
