@@ -23,7 +23,7 @@ int run_cabor_tests(cabor_test_framework_context* ctx)
 {
 	unsigned int passed = 0;
 	unsigned int failed = 0;
-	CABOR_LOG_TEST("runig cabor tests...");
+	CABOR_LOG_TEST("running cabor tests...");
 	for (size_t i = 0; i < ctx->current_size; i++)
 	{
 		cabor_test_case* test = &ctx->tests[i];
