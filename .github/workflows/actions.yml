@@ -12,7 +12,7 @@ jobs:
       - name: run build.sh
         run: sudo CC=/usr/bin/${{ matrix.compiler }} bash -c 'cd cabor && ./build.sh'
       - name: run the compiler with --test
-        run: cd cabor && ./cabor.sh --test
+        run: cd cabor && sudo ./cabor.sh --test
   windows-build:
     runs-on: windows-2022
     steps:
