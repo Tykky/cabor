@@ -36,11 +36,13 @@ int main(int argc, char **argv)
 	CABOR_CREATE_LOGGER();
 
 	unsigned int flags = parse_cmd_args(argc, argv);
+	unsigned int test_results = 0;
+
 
 	if (flags & CABOR_ARG_ENABLE_TESTING)
 	{
 		register_all_tests();
-		CABOR_RUN_ALL_TESTS();
+		test_results = CABOR_RUN_ALL_TESTS();
 	}
 
 	CABOR_DUMP_LOG_TO_DISK();
@@ -53,15 +55,15 @@ int main(int argc, char **argv)
 	{ 
 		double size;
 		const char* prefix = cabor_convert_bytes_to_human_readable(current_allocated, &size);
-        printf("Leak detected!, there %.2f %s of unfreed memory!", size, prefix);
+        printf("Leak detected!, there %.2f %s of unfreed memory!\n", size, prefix);
 		return 1;
 	}
 	else
 	{
-		printf("No leak detected!");
+		printf("No leak detected!\n");
 	}
 
 	CABOR_DESTROY_ALLOCATOR();
 
-	return 0;
+	return test_results;
 }

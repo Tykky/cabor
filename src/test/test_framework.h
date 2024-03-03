@@ -26,14 +26,13 @@ typedef struct
 
 typedef struct
 {
-    // so we can avoid dependency to cabor_vector
     cabor_test_case tests[CABOR_TEST_FRAMEWORK_MAX_TESTS];
     size_t current_size;
 } cabor_test_framework_context;
 
 void initialize_cabor_test_framework(cabor_test_framework_context* ctx);
 void add_cabor_test(cabor_test_framework_context* ctx, cabor_test_case* test);
-void run_cabor_tests(cabor_test_framework_context* ctx);
+int run_cabor_tests(cabor_test_framework_context* ctx);
 
 cabor_test_framework_context* get_global_cabor_test_framework_context();
 
