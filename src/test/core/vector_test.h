@@ -13,5 +13,3 @@ int cabor_test_vector_peek();
 int cabor_test_vector_resize();
 
 #endif // CABOR_ENABLE_TESTING
-
-
