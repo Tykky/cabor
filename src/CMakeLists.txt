@@ -9,6 +9,8 @@ set(SOURCES
     "logging/logging.h"
     "filesystem/filesystem.h"
     "filesystem/filesystem.c"
+    "language/tokenizer.h"
+    "language/tokenizer.c"
     "test/test_framework.c"
     "test/test_framework.h"
     "test/registered_tests.c"
@@ -26,6 +28,6 @@ if (MSVC)
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 endif()
 
-add_executable(cabor ${SOURCES}  "test/core/vector_test.c")
+add_executable(cabor ${SOURCES}  "test/core/vector_test.c" "language/tokenizer.h")
 set_property(TARGET cabor PROPERTY C_STANDARD 99)
 

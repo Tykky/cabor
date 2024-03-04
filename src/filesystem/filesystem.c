@@ -34,6 +34,14 @@ cabor_file cabor_load_file(const char* filename)
     return file;
 }
 
+void cabor_dump_file_to_disk(cabor_file* file, const char* filename)
+{
+    FILE* fp = fopen(filename, "w");
+    size_t result = fwrite(file->file_memory.mem, sizeof(char), file->file_memory.size, fp);
+    CABOR_ASSERT(result == file->file_memory.size, "Failed to write all bytes to a file");
+    fclose(fp);
+}
+
 void cabor_destroy_file(cabor_file* file)
 {
     CABOR_FREE(&file->file_memory);

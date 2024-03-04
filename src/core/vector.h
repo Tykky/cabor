@@ -54,7 +54,7 @@ void*         cabor_vector_get_ptr    (cabor_vector* v, size_t idx);
 
 void cabor_vector_reserve(cabor_vector* v, size_t size);
 
-void cabor_vector_destroy(cabor_vector* v);
+void destroy_cabor_vector(cabor_vector* v);
 
 float*         cabor_vector_peek_float  (cabor_vector* v);
 double*        cabor_vector_peek_double (cabor_vector* v);

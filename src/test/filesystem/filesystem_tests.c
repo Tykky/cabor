@@ -8,7 +8,6 @@
 #include "../../logging/logging.h"
 #include "../test_framework.h"
 
-
 int cabor_test_load_file()
 {
     const char* filename = "cabor_test_programs/test.cc";

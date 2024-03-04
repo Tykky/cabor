@@ -64,7 +64,7 @@ cabor_allocation cabor_calloc(cabor_allocator_context* alloc_ctx, size_t num, si
     cabor_allocation alloc =
     {
         .mem = calloc(num, size),
-        .size = size
+        .size = num * size
     };
 
     if (!alloc.mem)

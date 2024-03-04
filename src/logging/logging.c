@@ -24,7 +24,7 @@ void create_cabor_logger(cabor_logging_context* logging_context)
 
 void destroy_cabor_logger(cabor_logging_context* logging_context)
 {
-    cabor_vector_destroy(&logging_context->log_buffer);
+    destroy_cabor_vector(&logging_context->log_buffer);
 }
 
 void push_log(const char* message, cabor_log_type type)
