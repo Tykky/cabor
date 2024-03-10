@@ -5,6 +5,7 @@
 #include "../../../debug/cabor_debug.h"
 
 #include <stdio.h>
+#include <string.h>
 
 #ifdef CABOR_ENABLE_TESTING
 
@@ -14,17 +15,23 @@ int cabor_test_tokenize_hello_world()
 {
     cabor_file file = cabor_load_file("cabor_test_programs/hello_world.cc");
 
+    const char* expected = "['if', '(', 'a', '<=', 'bee', ')', '{', 'print', '(', '420', '-', '123', ')', ';', '}', 'if', '(', 'c', '>=', 'men', ')', '{', 'print', '(', '2', '*', '2', ')', ';', '}']";
+
     cabor_vector tokens = cabor_tokenize(&file);
     char token_string[CABOR_TOKEN_STRINGIFY_STR_SIZE] = { 0 };
 
     cabor_stringify_tokens(token_string, CABOR_TOKEN_STRINGIFY_STR_SIZE, &tokens);
 
-    CABOR_LOG_TEST_F("-- Tokenized file %s: %s", file.filename, token_string);
+    int cmp_result = strcmp(token_string, expected);
+    int res = 0;
+
+    CABOR_CHECK_EQUALS(cmp_result, 0, res);
+    //CABOR_LOG_TEST_F("-- Tokenized file %s: %s", file.filename, token_string);
 
     destroy_cabor_vector(&tokens);
     cabor_destroy_file(&file);
 
-    return 0;
+    return res;
 }
 
 

@@ -21,14 +21,140 @@ static void copy_to_out_token(size_t cursor, size_t size, size_t token_cursor, c
     out_token->data[token_cursor + 1] = '\0';
 }
 
-static size_t match_integer_literals(const char* buffer, size_t cursor, size_t size, cabor_token* out_token)
+static size_t match_comment(const char* buffer, size_t cursor, size_t size)
+{
+    char c = buffer[cursor];
+
+    // No space left so there cant be comment
+    if (size - cursor < 2)
+        return cursor;
+
+    // Line comment, find new line and return cursor to the next character after that
+    if (c == '/' && buffer[cursor + 1] == '/')
+    {
+        for (size_t i = cursor + 2; i < size; i++)
+        {
+            // next character
+            char nc = buffer[i];
+            if (nc == '\n')
+            {
+                return i + 1;
+            }
+        }
+        CABOR_LOG_WARN("No new line found after line comment");
+        return cursor;
+    }
+
+    // Block comment, find ending token and return character after that
+    if (c == '/' && buffer[cursor + 1] == '*')
+    {
+        for (size_t i = cursor + 2; i < size; i++)
+        {
+            // next character
+            char nc = buffer[i];
+            
+            // Not enough characters left raise error
+            if (size - i < 2)
+            {
+                CABOR_LOG_WARN("Not enough characters to close block comment!");
+                return cursor;
+            }
+        
+            // next next character
+            char nnc = buffer[i + 1];
+            if (nc == '*' && nnc == '/')
+            {
+                return i + 1;
+            }
+        }
+        CABOR_LOG_WARN("No closing token found for block comment!");
+    }
+
+    return cursor;
+}
+
+static size_t match_punctuation(const char* buffer, size_t cursor, size_t size, cabor_token* out_token)
+{
+    char c = buffer[cursor];
+
+    if (c == '(' || c == ')' || c == '{' || c == '}' || c == ',' || c == ';')
+    {
+        out_token->data[0] = c;
+        out_token->type = CABOR_PUNCTUATION;
+        return cursor + 1;
+    }
+
+    return cursor;
+}
+
+static size_t match_operator(const char* buffer, size_t cursor, size_t size, cabor_token* out_token)
+{
+    char token[CABOR_TOKENIZER_MAX_TOKEN_LENGTH] = {0};
+    size_t token_cursor = 0;
+
+    size_t i = cursor;
+
+    while (cursor < size)
+    {
+        char c = buffer[cursor];
+        bool is_char_valid = false;
+
+        // Double character operator matched, e.g !=, <=, >=
+        bool dc_matched = false;
+
+        char prev_c = '\0';
+
+        // Check for double character operators
+        if (prev_c == '=' && c == '=')
+        {
+            dc_matched = true;
+        }
+        else if (prev_c == '!' && c == '=')
+        {
+            dc_matched = true;
+        }
+        else if (prev_c == '<' && c == '=')
+        {
+            dc_matched = true;
+        }
+
+        if (dc_matched)
+        {
+            token[token_cursor++] = c;
+            is_char_valid = true;
+            cursor++;
+            break;
+        }
+
+        // We don't do - here as match_integer_literal() already handels it,
+        if (prev_c == '\0' && (c == '+' || c == '*' || c == '/' || c == '=' || c == '<' || c == '>' || c == '!'))
+        {
+            token[token_cursor++] = c;
+            is_char_valid = true;
+            prev_c = c;
+        }
+
+        if (!is_char_valid)
+            break;
+
+        cursor++;
+    }
+
+    if (token_cursor == 0)
+        return cursor;
+
+    copy_to_out_token(cursor, size, token_cursor, token, out_token, CABOR_OPERATOR);
+
+    return cursor;
+
+}
+
+static size_t match_integer_literal(const char* buffer, size_t cursor, size_t size, cabor_token* out_token)
 {
     char token[CABOR_TOKENIZER_MAX_TOKEN_LENGTH] = {0};
     size_t token_cursor = 0;
 
     bool is_integer = false;
-
-    size_t i = cursor;
 
     while (cursor < size)
     {
@@ -36,6 +162,7 @@ static size_t match_integer_literals(const char* buffer, size_t cursor, size_t s
 
         bool is_char_valid = false;
 
+        // Match integers 0-9
         if (c >= '0' && c <= '9')
         {
             token[token_cursor++] = c;
@@ -73,7 +200,6 @@ static size_t match_identifier(const char* buffer, size_t cursor, size_t size, c
     size_t token_cursor = 0;
 
     bool first_char_is_letter = false;
-
     size_t i = cursor;
 
     while(i < size)
@@ -154,6 +280,9 @@ cabor_vector cabor_tokenize(cabor_file* file)
             continue;
         }
 
+        // Skips cursor after comment if comment is found
+        cursor = match_comment(buffer, cursor, size);
+
         cursor = match_identifier(buffer, cursor, size, &token);
         if (is_match(&token))
         {
@@ -161,7 +290,21 @@ cabor_vector cabor_tokenize(cabor_file* file)
             continue;
         }
 
-        cursor = match_integer_literals(buffer, cursor, size, &token);
+        cursor = match_integer_literal(buffer, cursor, size, &token);
+        if (is_match(&token))
+        {
+            append_token(&vector, &token);
+            continue;
+        }
+
+        cursor = match_operator(buffer, cursor, size, &token);
+        if (is_match(&token))
+        {
+            append_token(&vector, &token);
+            continue;
+        }
+
+        cursor = match_punctuation(buffer, cursor, size, &token);
         if (is_match(&token))
         {
             append_token(&vector, &token);
@@ -170,7 +313,7 @@ cabor_vector cabor_tokenize(cabor_file* file)
 
         // if we end up here there were no matches
         CABOR_LOG_WARN_F("Tokenizer encountered character that did not match to anything, the character: %c", c);
-        cursor++;
+        cursor++; // skip over the unmatched character
     }
 
     return vector;
