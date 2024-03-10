@@ -10,6 +10,7 @@ typedef enum
 {
     CABOR_IDENTIFIER,
     CABOR_INTEGER_LITERAL,
+    CABOR_OPERATOR,
     CABOR_TOKEN_UNKNOWN,
 } cabor_token_type;
 

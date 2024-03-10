@@ -30,6 +30,8 @@ static size_t get_element_type_size(cabor_element_type type)
             return sizeof(void*);
         case CABOR_TOKEN:
             return get_cabor_token_size();
+        case CABOR_UNKNOWN:
+            return 0;
     }
     return 0;
 }

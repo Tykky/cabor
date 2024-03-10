@@ -3,6 +3,7 @@
 #include "../logging/logging.h"
 #include "../debug/cabor_debug.h"
 
+#include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
 
@@ -120,11 +121,6 @@ static void append_token(cabor_vector* vec, cabor_token* token)
 size_t get_cabor_token_size()
 {
     return sizeof(cabor_token);
-}
-
-cabor_vector cabor_tokenize_file(cabor_file* file)
-{
-    return cabor_tokenize(file->file_memory.mem, file->file_memory.size);
 }
 
 bool is_match(cabor_token* token)
