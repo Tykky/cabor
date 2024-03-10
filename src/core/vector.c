@@ -8,6 +8,8 @@
 #include "../logging/logging.h"
 #include "../debug/cabor_debug.h"
 
+size_t get_cabor_token_size();
+
 static size_t get_element_type_size(cabor_element_type type)
 {
     switch (type)
@@ -26,6 +28,8 @@ static size_t get_element_type_size(cabor_element_type type)
             return sizeof(unsigned char);
         case CABOR_PTR:
             return sizeof(void*);
+        case CABOR_TOKEN:
+            return get_cabor_token_size();
     }
     return 0;
 }
@@ -118,6 +122,12 @@ void cabor_vector_push_ptr(cabor_vector* v, void* ptr)
     pushback_vector(v, (void*) & ptr);
 }
 
+void cabor_vector_push_token(cabor_vector* v, cabor_token* token)
+{
+    CABOR_ASSERT(v->type == CABOR_TOKEN, "pushing token to non token vector!");
+    pushback_vector(v, (void*) token);
+}
+
 float cabor_vector_get_float(cabor_vector* v, size_t idx)
 {
     CABOR_ASSERT(v->type == CABOR_FLOAT, "getting float from non float vector!");
@@ -158,6 +168,12 @@ void* cabor_vector_get_ptr(cabor_vector* v, size_t idx)
 {
     CABOR_ASSERT(v->type == CABOR_PTR, "getting ptr from non ptr vector!");
     return *(void**)vector_get(v, idx);
+}
+
+cabor_token* cabor_vector_get_token(cabor_vector* v, size_t idx)
+{
+    CABOR_ASSERT(v->type == CABOR_TOKEN, "getting token from non token vector!");
+    return (cabor_token*)vector_get(v, idx);
 }
 
 void cabor_vector_push_str(cabor_vector* v, const char* str, bool push_null_character)
@@ -231,4 +247,10 @@ void** cabor_vector_peek_ptr(cabor_vector* v)
 {
     CABOR_ASSERT(v->type == CABOR_PTR, "Tried to peek_ptr non ptr vector!");
     return (void**)peek_next(v);
+}
+
+cabor_token* cabor_vector_peek_token(cabor_vector* v, size_t idx)
+{
+    CABOR_ASSERT(v->type == CABOR_TOKEN, "Tried to peek_token non token vector!");
+    return (cabor_token*)peek_next(v);
 }

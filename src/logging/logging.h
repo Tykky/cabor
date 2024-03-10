@@ -73,4 +73,6 @@ void dump_cabor_log_to_disk(cabor_logging_context* ctx, const char* filename);
 #define CABOR_CREATE_LOGGER()
 #define CABOR_DESTROY_LOGGER()
 
+#define CABOR_DUMP_LOG_TO_DISK()
+
 #endif

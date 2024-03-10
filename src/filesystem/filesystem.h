@@ -4,6 +4,7 @@
 
 typedef struct
 {
+    const char* filename;
     cabor_allocation file_memory;
 } cabor_file;
 

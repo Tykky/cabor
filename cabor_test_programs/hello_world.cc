@@ -1,7 +1,4 @@
-
-
 if (a <= bee)
 {
-    print_int(123);
+    print(420 - 123);
 }
-

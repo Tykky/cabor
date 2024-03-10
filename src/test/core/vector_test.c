@@ -6,7 +6,6 @@
 
 int cabor_test_vector_push()
 {
-    return 0;
     cabor_vector vec = create_cabor_vector(1024, CABOR_INT, false);
 
     for (size_t i = 0; i < 10; i++)
@@ -22,7 +21,6 @@ int cabor_test_vector_push()
 
 int cabor_test_vector_get()
 {
-    return 0;
     cabor_vector vec = create_cabor_vector(1024, CABOR_INT, false);
 
     for (size_t i = 0; i < 10; i++)
@@ -40,7 +38,6 @@ int cabor_test_vector_get()
 
 int cabor_test_vector_peek()
 {
-    return 0;
     cabor_vector vec = create_cabor_vector(1024, CABOR_INT, false);
 
     for (size_t i = 0; i < 10; i++)

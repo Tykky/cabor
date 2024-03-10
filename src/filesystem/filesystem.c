@@ -20,6 +20,7 @@ cabor_file cabor_load_file(const char* filename)
 
     cabor_file file =
     {
+        .filename = filename,
         .file_memory = CABOR_MALLOC(file_size * sizeof(char))
     };
 

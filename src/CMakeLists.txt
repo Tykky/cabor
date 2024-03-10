@@ -19,6 +19,8 @@ set(SOURCES
     "test/core/vector_test.h"
     "test/filesystem/filesystem_tests.h"
     "test/filesystem/filesystem_tests.c"
+    "test/language/tokenizer/tokenizer_test.c"
+    "test/language/tokenizer/tokenizer_test.c"
     "debug/cabor_debug.h"
     "cabor_defines.h"
 )

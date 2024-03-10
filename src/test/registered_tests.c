@@ -4,6 +4,7 @@
 
 #include "core/vector_test.h"
 #include "filesystem/filesystem_tests.h"
+#include "language/tokenizer/tokenizer_test.h"
 
 void register_all_tests()
 {
@@ -12,7 +13,12 @@ void register_all_tests()
     CABOR_REGISTER_TEST("test_vector_peek", cabor_test_vector_peek);
     CABOR_REGISTER_TEST("test_vector_resize", cabor_test_vector_resize);
     CABOR_REGISTER_TEST("test_vector_zero_initialized", cabor_test_zero_vector_initialized);
-    CABOR_REGISTER_TEST("test_cabor_load_file", cabor_test_load_file);
+
+    CABOR_REGISTER_TEST("test_load_file", cabor_test_load_file);
+
+    CABOR_REGISTER_TEST("test_tokenize_hello_world", cabor_test_tokenize_hello_world);
 }
 
+#else
+void register_all_tests() {}
 #endif

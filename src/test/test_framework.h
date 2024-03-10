@@ -37,8 +37,10 @@ int run_cabor_tests(cabor_test_framework_context* ctx);
 cabor_test_framework_context* get_global_cabor_test_framework_context();
 
 #else
+
+inline void cabor_do_nothing() {}
 #define CABOR_REGISTER_TEST
 #define CABOR_INITIALIZE_TEST_FRAMEWORK()
 #define CABOR_REGISTER_TEST(name, function)
-#define CABOR_RUN_ALL_TESTS()
+#define CABOR_RUN_ALL_TESTS() cabor_do_nothing
 #endif
