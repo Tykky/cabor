@@ -64,7 +64,7 @@ static size_t match_comment(const char* buffer, size_t cursor, size_t size)
             char nnc = buffer[i + 1];
             if (nc == '*' && nnc == '/')
             {
-                return i + 1;
+                return i + 2;
             }
         }
         CABOR_LOG_WARN("No closing token found for block comment!");
