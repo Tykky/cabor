@@ -254,6 +254,11 @@ bool is_match(cabor_token* token)
     return token->type != CABOR_TOKEN_UNKNOWN;
 }
 
+bool is_match_comment(size_t old_cursor, size_t new_cursor)
+{
+    return new_cursor > old_cursor;
+}
+
 cabor_vector cabor_tokenize(cabor_file* file)
 {
     cabor_vector vector = create_cabor_vector(CABOR_TOKENIZER_VECTOR_DEFAULT_CAPACITY, CABOR_TOKEN, true);
@@ -281,7 +286,13 @@ cabor_vector cabor_tokenize(cabor_file* file)
         }
 
         // Skips cursor after comment if comment is found
-        cursor = match_comment(buffer, cursor, size);
+        size_t new_cursor = match_comment(buffer, cursor, size);
+
+        if (is_match_comment(cursor, new_cursor))
+        {
+            cursor = new_cursor;
+            continue;
+        }
 
         cursor = match_identifier(buffer, cursor, size, &token);
         if (is_match(&token))
