@@ -16,7 +16,7 @@
 #define CABOR_CHECK_GREATER(a, b, res) if (!(a > b)) { res = 1; CABOR_LOG_TEST_F("-- CHECK_GREATER failed, %d > %d", a, b); CABOR_TEST_ERROR("CHECK_GREATER failed"); }
 #define CABOR_CHECK_GREATER_EQ(a, b, res) if (!(a >= b)) { res = 1; CABOR_LOG_TEST_F("-- CHECK_GREATER_EQ failed, %d >= %d", a, b); CABOR_TEST_ERROR("CHECK_GREATER_EQ failed"); }
 #define CABOR_CHECK_LESS(a, b, res) if (!(a < b)) { *res = 1; CABOR_LOG_TEST_F("-- CHECK_LESS failed, %d < %d", a, b); CABOR_TEST_ERROR("CHECK_LESS failed"); }
-#define CABOR_CHECK_LESS_EQ(a, b, bres) if (!(a <= b)) { res = 1; CABOR_LOG_TEST_F("-- CHECK_LESS_EQ failed, %d < %d", a, b); CABOR_TEST_ERROR("CHECK_LESS_EQ failed"); }
+#define CABOR_CHECK_LESS_EQ(a, b, res) if (!(a <= b)) { res = 1; CABOR_LOG_TEST_F("-- CHECK_LESS_EQ failed, %d < %d", a, b); CABOR_TEST_ERROR("CHECK_LESS_EQ failed"); }
 
 typedef struct
 {
@@ -43,4 +43,5 @@ inline void cabor_do_nothing() {}
 #define CABOR_INITIALIZE_TEST_FRAMEWORK()
 #define CABOR_REGISTER_TEST(name, function)
 #define CABOR_RUN_ALL_TESTS() cabor_do_nothing
+
 #endif

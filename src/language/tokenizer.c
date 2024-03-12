@@ -14,11 +14,19 @@ static bool check_for_ignored_characters(const char c)
 
 static void copy_to_out_token(size_t cursor, size_t size, size_t token_cursor, char* temp_token, cabor_token* out_token, cabor_token_type type)
 {
-    // Copy results to out_token and add null terminator
-    CABOR_ASSERT(size - cursor >= token_cursor + 2, "Not enough space to fit token and null terminator!");
-    memcpy(out_token->data, temp_token, token_cursor + 1);
-    out_token->type = type;
-    out_token->data[token_cursor + 1] = '\0';
+    if (token_cursor < CABOR_TOKENIZER_MAX_TOKEN_LENGTH)
+    {
+        // Copy results to out_token and add null terminator
+        CABOR_ASSERT(size - cursor >= token_cursor + 2, "Not enough space to fit token and null terminator!");
+        memcpy(out_token->data, temp_token, token_cursor + 1);
+        out_token->type = type;
+        out_token->data[token_cursor + 1] = '\0';
+    }
+    else
+    {
+        CABOR_LOG_ERR_F("Token size was %d when max size is %d", token_cursor + 1, CABOR_TOKENIZER_MAX_TOKEN_LENGTH);
+        CABOR_RUNTIME_ERROR("token is larger than CABOR_TOKENIZER_MAX_TOKEN_LENGTH!");
+    }
 }
 
 static size_t match_comment(const char* buffer, size_t cursor, size_t size)

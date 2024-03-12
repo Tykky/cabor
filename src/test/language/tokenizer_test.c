@@ -1,8 +1,8 @@
 #include "tokenizer_test.h"
 
-#include "../../../filesystem/filesystem.h"
-#include "../../../logging/logging.h"
-#include "../../../debug/cabor_debug.h"
+#include "../../filesystem/filesystem.h"
+#include "../../logging/logging.h"
+#include "../../debug/cabor_debug.h"
 
 #include <stdio.h>
 #include <string.h>
