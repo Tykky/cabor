@@ -5,14 +5,20 @@
 
 #include "core/vector.h"
 #include "core/memory.h"
+#include "filesystem/filesystem.h"
+#include "language/tokenizer.h"
+#include "language/parser.h"
+
 #include "logging/logging.h"
 
 #include "test/test_framework.h"
 #include "test/registered_tests.h" 
 
 #define CABOR_ARG_ENABLE_TESTING (1 << 0)
+#define CABOR_ARG_TOKENIZE (1 << 1)
+#define CABOR_ARG_PARSE (1 << 2)
 
-static unsigned int parse_cmd_args(int argc, char** argv)
+static unsigned int parse_cmd_args(int argc, char** argv, int* tokenize_arg, int* parse_arg)
 {
 	if (argc < 2)
 		return 0;
@@ -22,11 +28,44 @@ static unsigned int parse_cmd_args(int argc, char** argv)
 	for (int i = 1; i < argc; i++)
 	{
 		char* arg = argv[i];
-		if (!strcmp(arg, "--test"))
+		if (!strcmp(arg, "--test") || !strcmp(arg, "-te"))
+		{
 			bit_flags |= CABOR_ARG_ENABLE_TESTING;
+		}
+
+		if (!strcmp(arg, "--tokenize") || !strcmp(arg, "-to"))
+		{
+			bit_flags |= CABOR_ARG_TOKENIZE;
+			*tokenize_arg = i + 1;
+		}
+
+		if (!strcmp(arg, "--parse") || !strcmp(arg, "-p"))
+		{
+			bit_flags |= CABOR_ARG_PARSE;
+			*parse_arg = i + 1;
+		}
 	}
 
 	return bit_flags;
+}
+
+static void run_tokenizer(const char* filename)
+{
+	cabor_file file = cabor_load_file(filename);
+	cabor_vector tokens = cabor_tokenize(&file);
+
+	size_t buffer_size = tokens.size * sizeof(cabor_token);
+	cabor_allocation buffer = CABOR_MALLOC(buffer_size);
+	cabor_stringify_tokens(buffer.mem, buffer_size, &tokens);
+	CABOR_LOG_F("%s", buffer);
+
+	cabor_destroy_file(&file);
+	destroy_cabor_vector(&tokens);
+	CABOR_FREE(&buffer);
+}
+
+static void run_parser(const char* filename)
+{
 }
 
 int main(int argc, char **argv) 
@@ -35,13 +74,26 @@ int main(int argc, char **argv)
 	CABOR_INITIALIZE_TEST_FRAMEWORK();
 	CABOR_CREATE_LOGGER();
 
-	unsigned int flags = parse_cmd_args(argc, argv);
+	int tokenize_arg;
+	int parse_arg;
+
+	unsigned int flags = parse_cmd_args(argc, argv, &tokenize_arg, &parse_arg);
 	unsigned int test_results = 0;
 
 	if (flags & CABOR_ARG_ENABLE_TESTING)
 	{
 		register_all_tests();
 		test_results = CABOR_RUN_ALL_TESTS();
+	}
+
+	if (flags & CABOR_ARG_TOKENIZE)
+	{
+		run_tokenizer(argv[tokenize_arg]);
+	}
+
+	if (flags & CABOR_ARG_PARSE)
+	{
+		run_parser(argv[tokenize_arg]);
 	}
 
 	CABOR_DUMP_LOG_TO_DISK();
