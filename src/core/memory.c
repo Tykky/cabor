@@ -83,9 +83,11 @@ cabor_allocation cabor_calloc(cabor_allocator_context* alloc_ctx, size_t num, si
     return alloc;
 }
 
-void cabor_free(cabor_allocator_context* alloc_ctx, cabor_allocation* alloc)
+void cabor_free(cabor_allocator_context* alloc_ctx, cabor_allocation* alloc, const char* dealloc)
 {
     alloc_ctx->allocated_mem -= alloc->size;
+    alloc_ctx->dealloc[alloc_ctx->dealloc_size++] = dealloc;
+    
     free(alloc->mem);
     alloc->size = 0;
 }

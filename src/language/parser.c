@@ -245,6 +245,8 @@ cabor_vector cabor_get_ast_node_list(cabor_ast_allocated_node* root)
         }
     }
 
+    destroy_cabor_vector(&stack);
+
     return nodes;
 }
 
