@@ -25,6 +25,8 @@
 
 #define CABOR_MEMORY_DEBUG_ARRAY_SIZE 4096
 
+#define CABOR_ENABLE_MEMORY_DEBUGGING 1
+
 typedef struct
 {
     void* mem;
@@ -35,6 +37,7 @@ typedef struct
 {
     size_t allocated_mem;
 
+#if CABOR_ENABLE_MEMORY_DEBUGGING
     // Debug info for allocations
     char* debug[CABOR_MEMORY_DEBUG_ARRAY_SIZE];
     size_t debug_size;
@@ -42,6 +45,7 @@ typedef struct
     // Debug info for deallocation
     char* dealloc[CABOR_MEMORY_DEBUG_ARRAY_SIZE];
     size_t dealloc_size;
+#endif
 
 } cabor_allocator_context;
 

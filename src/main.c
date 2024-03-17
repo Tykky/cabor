@@ -56,6 +56,7 @@ int main(int argc, char **argv)
 		double size;
 		const char* prefix = cabor_convert_bytes_to_human_readable(current_allocated, &size);
         printf("\nLeak detected!, there is %.2f %s of unfreed memory!\n", size, prefix);
+#if CABOR_ENABLE_MEMORY_DEBUGGING 
 		printf("\n------------PRINTING ALL ALLOCATOR CALL LOCATIONS------------------\n\n");
 		for (size_t i = 0; i < allocator->debug_size; i++)
 		{
@@ -68,6 +69,7 @@ int main(int argc, char **argv)
 			printf("%s", allocator->dealloc[i]);
 		}
 		printf("\n----------------END PRINTING DEALLOCATOR CALLS---------------------\n");
+#endif
 
 		return 1;
 	}
