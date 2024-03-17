@@ -21,7 +21,8 @@ void register_all_tests()
 
     // Language tests
     CABOR_REGISTER_TEST("test_tokenize_hello_world", cabor_test_tokenize_hello_world);
-    CABOR_REGISTER_TEST("test_parse_tokens_hello_world", cabor_test_parse_tokens);
+    CABOR_REGISTER_TEST("test_parse_expression_abc", cabor_test_parse_expression_abc);
+    CABOR_REGISTER_TEST("test_parse_expression_cba", cabor_test_parse_expression_cba);
 }
 
 #else
