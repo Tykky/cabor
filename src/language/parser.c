@@ -166,7 +166,7 @@ cabor_ast_allocated_node cabor_allocate_ast_node(size_t token_index, cabor_ast_a
 
 static void stack_push(cabor_vector* stack, size_t* stack_capacity, size_t* top_of_stack, cabor_ast_node* element)
 {
-    if (*top_of_stack >= stack_capacity)
+    if (*top_of_stack >= *stack_capacity)
     {
         // A hack to grow the capacity of the vector,
         // pushing stack_capacity number of elements effectively
