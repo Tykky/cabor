@@ -336,5 +336,6 @@ cabor_ast_node* cabor_access_ast_node(cabor_ast_allocated_node* node)
 
 cabor_ast cabor_parse_tokens(cabor_vector* tokens)
 {
-    return;
+    cabor_ast ast;
+    return ast;
 }
