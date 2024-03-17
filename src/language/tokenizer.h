@@ -15,7 +15,7 @@ typedef enum
     CABOR_TOKEN_UNKNOWN,
 } cabor_token_type;
 
-typedef struct cabor_token
+typedef struct cabor_token_t
 {
     cabor_token_type type;
     char data[CABOR_TOKENIZER_MAX_TOKEN_LENGTH];

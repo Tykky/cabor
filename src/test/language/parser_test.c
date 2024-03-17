@@ -70,7 +70,7 @@ int cabor_test_parse_expression_abc()
         };
         memset(buffer, 0, 100);
         cabor_ast_node_to_string(&tokens, &an, buffer, 100);
-        CABOR_LOG_TRACE_F("%s", buffer);
+        //CABOR_LOG_TRACE_F("%s", buffer);
     }
 
     cabor_ast_node* plus = cabor_access_ast_node(&ast);
@@ -90,6 +90,9 @@ int cabor_test_parse_expression_abc()
     CABOR_CHECK_EQUALS(star_t->data[0], '*', res);
     CABOR_CHECK_EQUALS(b_t->data[0], 'b', res);
     CABOR_CHECK_EQUALS(c_t->data[0], 'c', res);
+
+    destroy_cabor_vector(&ast_nodes);
+    cabor_free_ast(&ast);
 
     destroy_cabor_vector(&tokens);
 
@@ -148,7 +151,7 @@ int cabor_test_parse_expression_cba()
         };
         memset(buffer, 0, 100);
         cabor_ast_node_to_string(&tokens, &an, buffer, 100);
-        CABOR_LOG_TRACE_F("%s", buffer);
+        //CABOR_LOG_TRACE_F("%s", buffer);
     }
 
     cabor_ast_node* plus = cabor_access_ast_node(&ast);
@@ -168,6 +171,9 @@ int cabor_test_parse_expression_cba()
     CABOR_CHECK_EQUALS(star_t->data[0], '*', res);
     CABOR_CHECK_EQUALS(b_t->data[0], 'b', res);
     CABOR_CHECK_EQUALS(c_t->data[0], 'c', res);
+
+    destroy_cabor_vector(&ast_nodes);
+    cabor_free_ast(&ast);
 
     destroy_cabor_vector(&tokens);
 

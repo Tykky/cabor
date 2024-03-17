@@ -8,7 +8,7 @@
 
 #define CABOR_VECTOR_MULTIPLICATION_FACTOR 2
 
-typedef struct cabor_token cabor_token;
+typedef struct cabor_token_t cabor_token;
 
 // Similar to std::vector from C++. Since C doesn't support function overloading or templates we 
 // manually create 'overload' for each type. If Debug build is used the implementation 
