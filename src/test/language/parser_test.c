@@ -14,7 +14,7 @@ static cabor_token create_token(const char* data, cabor_token_type type)
     cabor_token t;
     t.type = type;
     size_t size = strlen(data);
-    strcpy_s(t.data, 100, data);
+    strcpy(t.data, data);
     return t;
 }
 
