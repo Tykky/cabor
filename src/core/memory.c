@@ -10,16 +10,20 @@ static cabor_allocator_context g_allocator;
 void create_cabor_allocator_context(cabor_allocator_context* alloc_ctx)
 {
     alloc_ctx->allocated_mem = 0;
+    alloc_ctx->debug_size = 0;
 }
 
 void destroy_cabor_allocator_context(cabor_allocator_context* alloc_ctx)
 {
     alloc_ctx->allocated_mem = 0;
+    alloc_ctx->debug_size = 0;
 }
 
-cabor_allocation cabor_malloc(cabor_allocator_context* alloc_ctx, size_t size)
+cabor_allocation cabor_malloc(cabor_allocator_context* alloc_ctx, size_t size, const char* debug)
 {
     alloc_ctx->allocated_mem += size;
+    alloc_ctx->debug[alloc_ctx->debug_size++] = debug;
+
     cabor_allocation alloc =
     {
         .mem = malloc(size),
@@ -36,9 +40,10 @@ cabor_allocation cabor_malloc(cabor_allocator_context* alloc_ctx, size_t size)
     return alloc;
 }
 
-cabor_allocation cabor_realloc(cabor_allocator_context* alloc_ctx, cabor_allocation* old_alloc, size_t size)
+cabor_allocation cabor_realloc(cabor_allocator_context* alloc_ctx, cabor_allocation* old_alloc, size_t size, const char* debug)
 {
     alloc_ctx->allocated_mem = alloc_ctx->allocated_mem - old_alloc->size + size;
+    alloc_ctx->debug[alloc_ctx->debug_size++] = debug;
 
     cabor_allocation new_alloc =
     {
@@ -57,9 +62,10 @@ cabor_allocation cabor_realloc(cabor_allocator_context* alloc_ctx, cabor_allocat
     return new_alloc;
 }
 
-cabor_allocation cabor_calloc(cabor_allocator_context* alloc_ctx, size_t num, size_t size)
+cabor_allocation cabor_calloc(cabor_allocator_context* alloc_ctx, size_t num, size_t size, const char* debug)
 {
     alloc_ctx->allocated_mem += num * size;
+    alloc_ctx->debug[alloc_ctx->debug_size++] = debug;
 
     cabor_allocation alloc =
     {
