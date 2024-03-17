@@ -124,7 +124,7 @@ void cabor_vector_push_ptr(cabor_vector* v, void* ptr)
     pushback_vector(v, (void*) & ptr);
 }
 
-void cabor_vector_push_token(cabor_vector* v, cabor_token* token)
+void cabor_vector_push_token(cabor_vector* v, struct cabor_token_t* token)
 {
     CABOR_ASSERT(v->type == CABOR_TOKEN, "pushing token to non token vector!");
     pushback_vector(v, (void*) token);
@@ -172,10 +172,10 @@ void* cabor_vector_get_ptr(cabor_vector* v, size_t idx)
     return *(void**)vector_get(v, idx);
 }
 
-cabor_token* cabor_vector_get_token(cabor_vector* v, size_t idx)
+struct cabor_token_t* cabor_vector_get_token(cabor_vector* v, size_t idx)
 {
     CABOR_ASSERT(v->type == CABOR_TOKEN, "getting token from non token vector!");
-    return (cabor_token*)vector_get(v, idx);
+    return (struct cabor_token_t*)vector_get(v, idx);
 }
 
 void cabor_vector_push_str(cabor_vector* v, const char* str, bool push_null_character)
@@ -207,7 +207,6 @@ void destroy_cabor_vector(cabor_vector* v)
     v->capacity = 0;
     v->size = 0;
 }
-
 
 float* cabor_vector_peek_float(cabor_vector* v)
 {
@@ -251,8 +250,8 @@ void** cabor_vector_peek_ptr(cabor_vector* v)
     return (void**)peek_next(v);
 }
 
-cabor_token* cabor_vector_peek_token(cabor_vector* v, size_t idx)
+struct cabor_token_t* cabor_vector_peek_token(cabor_vector* v, size_t idx)
 {
     CABOR_ASSERT(v->type == CABOR_TOKEN, "Tried to peek_token non token vector!");
-    return (cabor_token*)peek_next(v);
+    return (struct cabor_token_t*)peek_next(v);
 }

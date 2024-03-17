@@ -8,7 +8,7 @@
 
 #define CABOR_VECTOR_MULTIPLICATION_FACTOR 2
 
-typedef struct cabor_token_t cabor_token;
+struct cabor_token_t;
 
 // Similar to std::vector from C++. Since C doesn't support function overloading or templates we 
 // manually create 'overload' for each type. If Debug build is used the implementation 
@@ -44,7 +44,7 @@ void cabor_vector_push_uint   (cabor_vector* v, unsigned int value);
 void cabor_vector_push_char   (cabor_vector* v, char value);
 void cabor_vector_push_uchar  (cabor_vector*v, unsigned char value);
 void cabor_vector_push_ptr    (cabor_vector* v, void* ptr);
-void cabor_vector_push_token  (cabor_vector* v, cabor_token* token);
+void cabor_vector_push_token  (cabor_vector* v, struct cabor_token_t* token);
 
 void cabor_vector_push_str(cabor_vector* v, const char* str, bool push_null_character);
 
@@ -55,7 +55,7 @@ unsigned int  cabor_vector_get_uint   (cabor_vector* v, size_t idx);
 char          cabor_vector_get_char   (cabor_vector* v, size_t idx);
 unsigned char cabor_vector_get_uchar  (cabor_vector* v, size_t idx);
 void*         cabor_vector_get_ptr    (cabor_vector* v, size_t idx);
-cabor_token*  cabor_vector_get_token  (cabor_vector* v, size_t idx);
+struct cabor_token_t*  cabor_vector_get_token  (cabor_vector* v, size_t idx);
 
 void cabor_vector_reserve(cabor_vector* v, size_t size);
 
@@ -68,4 +68,4 @@ unsigned int*  cabor_vector_peek_uint   (cabor_vector* v);
 char*          cabor_vector_peek_char   (cabor_vector* v);
 unsigned char* cabor_vector_peek_uchar  (cabor_vector* v);
 void**         cabor_vector_peek_ptr    (cabor_vector* v);
-cabor_token*   cabor_vector_peek_token  (cabor_vector* v, size_t idx);
+struct cabor_token_t*   cabor_vector_peek_token  (cabor_vector* v, size_t idx);
