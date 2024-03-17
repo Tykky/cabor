@@ -36,6 +36,21 @@ cabor_ast_allocated_node cabor_parse_integer_literal(cabor_vector* tokens, size_
     return root_alloc;
 }
 
+cabor_ast_allocated_node cabor_parse_parenthesized(cabor_vector* tokens, size_t* op_index)
+{
+    cabor_token* begin = cabor_vector_get_token(tokens, *op_index);
+    CABOR_ASSERT(begin->data[0] == '(', "Begin token not (");
+
+    ++(*op_index);
+    cabor_ast_allocated_node expr = cabor_parse_expression(tokens, op_index);
+    ++(*op_index);
+
+    cabor_token* end = cabor_vector_get_token(tokens, *op_index);
+    CABOR_ASSERT(end->data[0] == ')', "End token not )");
+
+    return expr;
+}
+
 cabor_ast_allocated_node cabor_parse_operator(cabor_vector* tokens, size_t op_index, cabor_ast_allocated_node left, cabor_ast_allocated_node right)
 {
     cabor_token* left_token = cabor_vector_get_token(tokens, cabor_access_ast_node(&left)->token_index);
@@ -85,7 +100,7 @@ cabor_ast_allocated_node cabor_parse_expression(cabor_vector* tokens, size_t* cu
 // Parse * / term
 cabor_ast_allocated_node cabor_parse_term(cabor_vector* tokens, size_t* cursor)
 {
-    cabor_ast_allocated_node left = cabor_parse_factor(tokens, *cursor);
+    cabor_ast_allocated_node left = cabor_parse_factor(tokens, cursor);
 
     if (*cursor + 1 >= tokens->size)
         return left;
@@ -99,7 +114,7 @@ cabor_ast_allocated_node cabor_parse_term(cabor_vector* tokens, size_t* cursor)
         cabor_token* op = cabor_vector_get_token(tokens, *cursor);
         size_t opi = *cursor;
         ++(*cursor);
-        cabor_ast_allocated_node right = cabor_parse_factor(tokens, *cursor);
+        cabor_ast_allocated_node right = cabor_parse_factor(tokens, cursor);
 
         left = cabor_parse_operator(tokens, opi, left, right);
 
@@ -112,19 +127,30 @@ cabor_ast_allocated_node cabor_parse_term(cabor_vector* tokens, size_t* cursor)
     return left;
 }
 
-cabor_ast_allocated_node cabor_parse_factor(cabor_vector* tokens, size_t op_index)
+cabor_ast_allocated_node cabor_parse_factor(cabor_vector* tokens, size_t* op_index)
 {
-    cabor_token* token = cabor_vector_get_token(tokens, op_index);
+    cabor_token* token = cabor_vector_get_token(tokens, *op_index);
 
     switch (token->type)
     {
         case CABOR_IDENTIFIER:
         {
-            return cabor_parse_identifier(tokens, op_index);
+            return cabor_parse_identifier(tokens, *op_index);
         }
         case CABOR_INTEGER_LITERAL:
         {
-            return cabor_parse_integer_literal(tokens, op_index);
+            return cabor_parse_integer_literal(tokens, *op_index);
+        }
+        case CABOR_PUNCTUATION:
+        {
+            if (token->data[0] == '(' || token->data[0] == ')')
+            {
+                return cabor_parse_parenthesized(tokens, op_index);
+            }
+            else
+            {
+                CABOR_RUNTIME_ERROR("Failed to parse factor! punctuation was not ( or )");
+            }
         }
         default:
             CABOR_RUNTIME_ERROR("Failed to parse factor!");

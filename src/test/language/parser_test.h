@@ -9,6 +9,7 @@
 
 int cabor_test_parse_expression_abc();
 int cabor_test_parse_expression_cba();
+int cabor_test_parse_expression_abc_parenthesized();
 
 #endif // CABOR_ENABLE_TESTING
 
