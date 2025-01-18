@@ -34,7 +34,7 @@ jobs:
   macos-build:
     strategy:
         matrix:
-            runner: [macos-14, macos-13, macos-12]
+            runner: [macos-14, macos-13]
     runs-on: ${{ matrix.runner }}
     steps:
       - name: bootstrap macos 12
