@@ -11,14 +11,16 @@
 
 #include "logging/logging.h"
 
+#include "network/network.h"
+
 #include "test/test_framework.h"
 #include "test/registered_tests.h" 
 
-#include <jansson.h>
 
 #define CABOR_ARG_ENABLE_TESTING (1 << 0)
 #define CABOR_ARG_TOKENIZE (1 << 1)
 #define CABOR_ARG_PARSE (1 << 2)
+#define CABOR_ARG_SERVER (1 << 3)
 
 static unsigned int parse_cmd_args(int argc, char** argv, int* tokenize_arg, int* parse_arg)
 {
@@ -46,6 +48,12 @@ static unsigned int parse_cmd_args(int argc, char** argv, int* tokenize_arg, int
 			bit_flags |= CABOR_ARG_PARSE;
 			*parse_arg = i + 1;
 		}
+
+		if (!strcmp(arg, "--server") || !strcmp(arg, "-s"))
+		{
+			bit_flags |= CABOR_ARG_SERVER;
+		}
+
 	}
 
 	return bit_flags;
@@ -69,6 +77,13 @@ static void run_tokenizer(const char* filename)
 
 static void run_parser(const char* filename)
 {
+	// TODO
+}
+
+static void run_server()
+{
+	cabor_server_context ctx;
+	cabor_start_compile_server(&ctx);
 }
 
 int main(int argc, char **argv) 
@@ -97,6 +112,11 @@ int main(int argc, char **argv)
 	if (flags & CABOR_ARG_PARSE)
 	{
 		run_parser(argv[tokenize_arg]);
+	}
+
+	if (flags & CABOR_ARG_SERVER)
+	{
+		run_server();
 	}
 
 	CABOR_DUMP_LOG_TO_DISK();

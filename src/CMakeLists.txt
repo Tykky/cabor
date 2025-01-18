@@ -26,8 +26,8 @@ set(SOURCES
     "test/language/parser_test.h"
     "debug/cabor_debug.h"
     "cabor_defines.h"
-	 "network/network.h"
-     "network/network.c"
+	"network/network.h"
+    "network/network.c"
 )
 
 if (MSVC)

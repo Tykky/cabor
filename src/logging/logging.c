@@ -85,7 +85,7 @@ void push_log_f(const char* message, cabor_log_type type, ...)
 
     va_list args;
     va_start(args, type);
-    int result = vsnprintf(buffer, 1024, message, args);
+    int result = vsnprintf(buffer, CABOR_LOGGER_FORMAT_STR_BUFFER_SIZE, message, args);
     va_end(args);
 
     if (result <= 0)
