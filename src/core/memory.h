@@ -36,7 +36,7 @@ typedef struct
     void* mem;
 #ifdef CABOR_ENABLE_ALLOCATOR_FAT_POINTERS
     size_t size;
-#endif CABOR_ENABLE_ALLOCATOR_FAT_POINTERS
+#endif
 } cabor_allocation;
 
 typedef struct 
