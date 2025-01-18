@@ -21,6 +21,7 @@ cabor_file cabor_load_file(const char* filename)
     cabor_file file =
     {
         .filename = filename,
+        .size = file_size * sizeof(char),
         .file_memory = CABOR_MALLOC(file_size * sizeof(char))
     };
 
@@ -38,8 +39,8 @@ cabor_file cabor_load_file(const char* filename)
 void cabor_dump_file_to_disk(cabor_file* file, const char* filename)
 {
     FILE* fp = fopen(filename, "w");
-    size_t result = fwrite(file->file_memory.mem, sizeof(char), file->file_memory.size, fp);
-    CABOR_ASSERT(result == file->file_memory.size, "Failed to write all bytes to a file");
+    size_t result = fwrite(file->file_memory.mem, sizeof(char), file->size, fp);
+    CABOR_ASSERT(result == file->size, "Failed to write all bytes to a file");
     fclose(fp);
 }
 
@@ -47,11 +48,14 @@ void cabor_destroy_file(cabor_file* file)
 {
     CABOR_FREE(&file->file_memory);
     file->file_memory.mem = NULL;
+    file->size = 0;
+#ifdef CABOR_ENABLE_ALLOCATOR_FAT_POINTERS
     file->file_memory.size = 0;
+#endif
 }
 
 char cabor_read_byte_from_file(cabor_file* file, size_t idx)
 {
-    CABOR_ASSERT(idx < file->file_memory.size, "File out of bounds!");
+    CABOR_ASSERT(idx < file->size, "File out of bounds!");
     return ((char*)file->file_memory.mem)[idx];
 }

@@ -16,9 +16,10 @@ int cabor_test_load_file()
     cabor_file file = cabor_load_file(filename);
 
     int res = 0;
-    CABOR_CHECK_EQUALS(file.file_memory.size, strlen(expected), res);
 
-    for (size_t i = 0; i < file.file_memory.size; i++)
+    CABOR_CHECK_EQUALS(file.size, strlen(expected), res);
+
+    for (size_t i = 0; i < file.size; i++)
     {
         char a = cabor_read_byte_from_file(&file, i);
         char b = expected[i];

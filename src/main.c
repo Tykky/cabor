@@ -14,6 +14,8 @@
 #include "test/test_framework.h"
 #include "test/registered_tests.h" 
 
+#include <jansson.h>
+
 #define CABOR_ARG_ENABLE_TESTING (1 << 0)
 #define CABOR_ARG_TOKENIZE (1 << 1)
 #define CABOR_ARG_PARSE (1 << 2)
@@ -61,6 +63,7 @@ static void run_tokenizer(const char* filename)
 
 	cabor_destroy_file(&file);
 	destroy_cabor_vector(&tokens);
+
 	CABOR_FREE(&buffer);
 }
 
@@ -99,6 +102,8 @@ int main(int argc, char **argv)
 	CABOR_DUMP_LOG_TO_DISK();
 	CABOR_DESTROY_LOGGER();
 
+#if CABOR_ENABLE_MEMORY_DEBUGGING 
+
 	size_t current_allocated = CABOR_GET_ALLOCATED();
 	cabor_allocator_context* allocator = CABOR_GET_ALLOCATOR();
 
@@ -129,6 +134,8 @@ int main(int argc, char **argv)
 	{
 		printf("No leak detected!\n");
 	}
+
+#endif
 
 	CABOR_DESTROY_ALLOCATOR();
 

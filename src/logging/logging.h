@@ -9,7 +9,6 @@
 #define CABOR_LOGGER_INITIAL_BUFFER_SIZE 1024
 #define CABOR_LOGGER_FORMAT_STR_BUFFER_SIZE 1024
 
-
 // Logging without formatting
 #define CABOR_LOG_TRACE(msg) push_log(msg, CABOR_TRACE)
 #define CABOR_LOG_WARN(msg) push_log(msg, CABOR_WARNING)

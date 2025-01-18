@@ -272,7 +272,8 @@ cabor_vector cabor_tokenize(cabor_file* file)
     cabor_vector vector = create_cabor_vector(CABOR_TOKENIZER_VECTOR_DEFAULT_CAPACITY, CABOR_TOKEN, true);
 
     char* buffer = file->file_memory.mem;
-    size_t size = file->file_memory.size;
+    size_t size = file->size;
+
     size_t cursor = 0;
 
     while (cursor < size)

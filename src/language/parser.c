@@ -204,7 +204,9 @@ static void stack_push(cabor_vector* stack, size_t* stack_capacity, size_t* top_
         *stack_capacity *= 2;
     }
 
+#ifdef CABOR_ENABLE_ALLOCATOR_FAT_POINTERS
     CABOR_ASSERT(stack->vector_mem.size >= *stack_capacity, "Failed to grow stack capacity!");
+#endif
     cabor_ast_node** stack_base = stack->vector_mem.mem;
 
     stack_base[(*top_of_stack)++] = element;
@@ -316,7 +318,9 @@ void cabor_free_ast(cabor_ast_allocated_node* root)
         cabor_allocation allocation =
         {
             .mem = node,
+#ifdef CABOR_ENABLE_ALLOCATOR_FAT_POINTERS
             .size = sizeof(cabor_ast_node)
+#endif
         };
 
         cabor_ast_allocated_node allocated_node =

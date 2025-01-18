@@ -1,4 +1,3 @@
-
 set(SOURCES
     "main.c"
     "core/vector.c"
@@ -27,6 +26,8 @@ set(SOURCES
     "test/language/parser_test.h"
     "debug/cabor_debug.h"
     "cabor_defines.h"
+	 "network/network.h"
+     "network/network.c"
 )
 
 if (MSVC)
@@ -34,6 +35,6 @@ if (MSVC)
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 endif()
 
-add_executable(cabor ${SOURCES}  "test/core/vector_test.c" "language/tokenizer.h")
+add_executable(cabor ${SOURCES})
 set_property(TARGET cabor PROPERTY C_STANDARD 99)
 

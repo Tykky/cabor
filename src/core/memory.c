@@ -9,7 +9,9 @@ static cabor_allocator_context g_allocator;
 
 void create_cabor_allocator_context(cabor_allocator_context* alloc_ctx)
 {
+#ifdef CABOR_ENABLE_ALLOCATOR_FAT_POINTERS
     alloc_ctx->allocated_mem = 0;
+#endif
 #if CABOR_ENABLE_MEMORY_DEBUGGING
     alloc_ctx->debug_size = 0;
 #endif
@@ -17,7 +19,9 @@ void create_cabor_allocator_context(cabor_allocator_context* alloc_ctx)
 
 void destroy_cabor_allocator_context(cabor_allocator_context* alloc_ctx)
 {
+#ifdef CABOR_ENABLE_ALLOCATOR_FAT_POINTERS
     alloc_ctx->allocated_mem = 0;
+#endif
 #if CABOR_ENABLE_MEMORY_DEBUGGING
     alloc_ctx->debug_size = 0;
 #endif
@@ -25,7 +29,9 @@ void destroy_cabor_allocator_context(cabor_allocator_context* alloc_ctx)
 
 cabor_allocation cabor_malloc(cabor_allocator_context* alloc_ctx, size_t size, const char* debug)
 {
+#ifdef CABOR_ENABLE_ALLOCATOR_FAT_POINTERS
     alloc_ctx->allocated_mem += size;
+#endif
 #if ENABLE_CABOR_MEMORY_DEBUGGING
     alloc_ctx->debug[alloc_ctx->debug_size++] = debug;
 #endif
@@ -33,7 +39,9 @@ cabor_allocation cabor_malloc(cabor_allocator_context* alloc_ctx, size_t size, c
     cabor_allocation alloc =
     {
         .mem = malloc(size),
+#ifdef CABOR_ENABLE_ALLOCATOR_FAT_POINTERS
         .size = size
+#endif
     };
 
     if (!alloc.mem)
@@ -48,7 +56,9 @@ cabor_allocation cabor_malloc(cabor_allocator_context* alloc_ctx, size_t size, c
 
 cabor_allocation cabor_realloc(cabor_allocator_context* alloc_ctx, cabor_allocation* old_alloc, size_t size, const char* debug)
 {
+#ifdef CABOR_ENABLE_ALLOCATOR_FAT_POINTERS
     alloc_ctx->allocated_mem = alloc_ctx->allocated_mem - old_alloc->size + size;
+#endif
 #if CABOR_ENABLE_MEMORY_DEBUGGING
     alloc_ctx->debug[alloc_ctx->debug_size++] = debug;
 #endif
@@ -56,7 +66,9 @@ cabor_allocation cabor_realloc(cabor_allocator_context* alloc_ctx, cabor_allocat
     cabor_allocation new_alloc =
     {
         .mem = realloc(old_alloc->mem, size),
+#ifdef CABOR_ENABLE_ALLOCATOR_FAT_POINTERS
         .size = size
+#endif
     };
 
     if (!new_alloc.mem)
@@ -72,7 +84,9 @@ cabor_allocation cabor_realloc(cabor_allocator_context* alloc_ctx, cabor_allocat
 
 cabor_allocation cabor_calloc(cabor_allocator_context* alloc_ctx, size_t num, size_t size, const char* debug)
 {
+#ifdef CABOR_ENABLE_ALLOCATOR_FAT_POINTERS
     alloc_ctx->allocated_mem += num * size;
+#endif
 #if CABOR_ENABLE_MEMORY_DEBUGGING
     alloc_ctx->debug[alloc_ctx->debug_size++] = debug;
 #endif
@@ -80,7 +94,9 @@ cabor_allocation cabor_calloc(cabor_allocator_context* alloc_ctx, size_t num, si
     cabor_allocation alloc =
     {
         .mem = calloc(num, size),
+#ifdef CABOR_ENABLE_ALLOCATOR_FAT_POINTERS
         .size = num * size
+#endif
     };
 
     if (!alloc.mem)
@@ -95,16 +111,22 @@ cabor_allocation cabor_calloc(cabor_allocator_context* alloc_ctx, size_t num, si
 
 void cabor_free(cabor_allocator_context* alloc_ctx, cabor_allocation* alloc, const char* dealloc)
 {
+#ifdef CABOR_ENABLE_ALLOCATOR_FAT_POINTERS
     alloc_ctx->allocated_mem -= alloc->size;
+#endif
+
 #if CABOR_ENABLE_MEMORY_DEBUGGING
     alloc_ctx->dealloc[alloc_ctx->dealloc_size++] = dealloc;
 #endif
     
     free(alloc->mem);
+
+#ifdef CABOR_ENABLE_ALLOCATOR_FAT_POINTERS
     alloc->size = 0;
+#endif
 }
 
-cabor_allocator_context* get_global_cabor_allocator_context()
+cabor_allocator_context* cabor_get_global_allocator_context()
 {
     return &g_allocator;
 }

@@ -66,7 +66,9 @@ int cabor_test_parse_expression_abc()
         cabor_ast_allocated_node an =
         {
             .node_mem.mem = n,
+#ifdef CABOR_ENABLE_ALLOCATOR_FAT_POINTERS
             .node_mem.size = sizeof(cabor_ast_node),
+#endif
         };
         memset(buffer, 0, 100);
         cabor_ast_node_to_string(&tokens, &an, buffer, 100);
@@ -147,7 +149,9 @@ int cabor_test_parse_expression_cba()
         cabor_ast_allocated_node an =
         {
             .node_mem.mem = n,
+#ifdef CABOR_ENABLE_ALLOCATOR_FAT_POINTERS
             .node_mem.size = sizeof(cabor_ast_node),
+#endif
         };
         memset(buffer, 0, 100);
         cabor_ast_node_to_string(&tokens, &an, buffer, 100);
@@ -230,7 +234,9 @@ int cabor_test_parse_expression_abc_parenthesized()
         cabor_ast_allocated_node an =
         {
             .node_mem.mem = n,
+#ifdef CABOR_ENABLE_ALLOCATOR_FAT_POINTERS
             .node_mem.size = sizeof(cabor_ast_node),
+#endif
         };
         memset(buffer, 0, 100);
         cabor_ast_node_to_string(&tokens, &an, buffer, 100);
