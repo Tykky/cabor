@@ -19,7 +19,7 @@ static cabor_logging_context g_logging_ctx;
 
 void create_cabor_logger(cabor_logging_context* logging_context)
 {
-    logging_context->log_buffer = create_cabor_vector(CABOR_LOGGER_INITIAL_BUFFER_SIZE, CABOR_CHAR, false);
+    logging_context->log_buffer = cabor_create_vector(CABOR_LOGGER_INITIAL_BUFFER_SIZE, CABOR_CHAR, false);
 }
 
 void destroy_cabor_logger(cabor_logging_context* logging_context)

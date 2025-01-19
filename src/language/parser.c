@@ -245,11 +245,11 @@ cabor_vector cabor_get_ast_node_list(cabor_ast_allocated_node* root)
     // using cabor_vector to implement/emulate stack
 
     size_t stack_capacity = 100;
-    cabor_vector stack = create_cabor_vector(stack_capacity, CABOR_PTR, true);
+    cabor_vector stack = cabor_create_vector(stack_capacity, CABOR_PTR, true);
     size_t top_of_stack = 0; // index to top of stack
     cabor_ast_node** stack_base = stack.vector_mem.mem;
 
-    cabor_vector nodes = create_cabor_vector(100, CABOR_PTR, true);
+    cabor_vector nodes = cabor_create_vector(100, CABOR_PTR, true);
     cabor_ast_node* root_node = cabor_access_ast_node(root);
 
     stack_push(&stack, &stack_capacity, &top_of_stack, root_node);

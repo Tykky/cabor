@@ -21,7 +21,7 @@ static cabor_token create_token(const char* data, cabor_token_type type)
 // Try to parse expression: a + b * c
 int cabor_test_parse_expression_abc()
 {
-    cabor_vector tokens = create_cabor_vector(100, CABOR_TOKEN, true);
+    cabor_vector tokens = cabor_create_vector(100, CABOR_TOKEN, true);
 
     cabor_token tmp[5] = { 0 };
     size_t i = 0;
@@ -104,7 +104,7 @@ int cabor_test_parse_expression_abc()
 // Try to parse expression: c * b + a
 int cabor_test_parse_expression_cba()
 {
-    cabor_vector tokens = create_cabor_vector(100, CABOR_TOKEN, true);
+    cabor_vector tokens = cabor_create_vector(100, CABOR_TOKEN, true);
 
     cabor_token tmp[5] = { 0 };
     size_t i = 0;
@@ -187,7 +187,7 @@ int cabor_test_parse_expression_cba()
 // Try to parse expression (a + b) * c
 int cabor_test_parse_expression_abc_parenthesized()
 {
-    cabor_vector tokens = create_cabor_vector(100, CABOR_TOKEN, true);
+    cabor_vector tokens = cabor_create_vector(100, CABOR_TOKEN, true);
 
     cabor_token tmp[7] = { 0 };
     size_t i = 0;

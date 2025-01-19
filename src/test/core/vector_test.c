@@ -6,7 +6,7 @@
 
 int cabor_test_vector_push()
 {
-    cabor_vector vec = create_cabor_vector(1024, CABOR_INT, false);
+    cabor_vector vec = cabor_create_vector(1024, CABOR_INT, false);
 
     for (size_t i = 0; i < 10; i++)
         cabor_vector_push_int(&vec, i);
@@ -21,7 +21,7 @@ int cabor_test_vector_push()
 
 int cabor_test_vector_get()
 {
-    cabor_vector vec = create_cabor_vector(1024, CABOR_INT, false);
+    cabor_vector vec = cabor_create_vector(1024, CABOR_INT, false);
 
     for (size_t i = 0; i < 10; i++)
         cabor_vector_push_int(&vec, i + 1);
@@ -38,7 +38,7 @@ int cabor_test_vector_get()
 
 int cabor_test_vector_peek()
 {
-    cabor_vector vec = create_cabor_vector(1024, CABOR_INT, false);
+    cabor_vector vec = cabor_create_vector(1024, CABOR_INT, false);
 
     for (size_t i = 0; i < 10; i++)
         cabor_vector_push_int(&vec, i + 1);
@@ -55,7 +55,7 @@ int cabor_test_vector_peek()
 
 int cabor_test_vector_resize()
 {
-    cabor_vector vec = create_cabor_vector(1, CABOR_INT, false);
+    cabor_vector vec = cabor_create_vector(1, CABOR_INT, false);
 
     for (size_t i = 0; i < 10; i++)
         cabor_vector_push_int(&vec, i + 1);
@@ -71,7 +71,7 @@ int cabor_test_vector_resize()
 
 int cabor_test_zero_vector_initialized()
 {
-    cabor_vector vec = create_cabor_vector(1024, CABOR_CHAR, true);
+    cabor_vector vec = cabor_create_vector(1024, CABOR_CHAR, true);
 
     int res = 0;
     for (size_t i = 0; i < vec.size; i++)

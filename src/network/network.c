@@ -1,12 +1,13 @@
 #include "network.h"
 #include "../logging/logging.h"
+#include "../core/vector.h"
 
 #include <uv.h>
 #include <jansson.h>
 
 #define CABOR_SERVER_PORT 4120
 #define CABOR_SERVER_BACKLOG 128
-#define CABOR_IDLE_TIMEOUT_MS 5000
+#define CABOR_IDLE_TIMEOUT_MS 120000
 
 // For each concurrent tcp connection we allocate
 // cabor_tcp_timeout and cabor_tcp_client
@@ -27,6 +28,7 @@ struct cabor_tcp_client
 {
     uv_tcp_t handle;
     cabor_tcp_timeout* timeout;
+    cabor_vector data;
 };
 
 static void on_close_timeout(uv_handle_t* timeout)
@@ -34,7 +36,9 @@ static void on_close_timeout(uv_handle_t* timeout)
     cabor_tcp_timeout* cabor_timeout = timeout->data;
     cabor_allocation alloc = {
         .mem = cabor_timeout,
+#ifdef CABOR_ENABLE_ALLOCATOR_FAT_POINTERS
         .size = sizeof(cabor_tcp_timeout)
+#endif
     };
     CABOR_FREE(&alloc);
 }
@@ -42,9 +46,12 @@ static void on_close_timeout(uv_handle_t* timeout)
 static void on_close_tcp_client(uv_handle_t* client)
 {
     cabor_tcp_client* cabor_client = client->data;
+    destroy_cabor_vector(&cabor_client->data);
     cabor_allocation alloc = {
         .mem  = cabor_client,
+#ifdef CABOR_ENABLE_ALLOCATOR_FAT_POINTERS
         .size = sizeof(cabor_tcp_client)
+#endif
     };
     CABOR_FREE(&alloc);
 }
@@ -62,8 +69,14 @@ static void on_timeout(uv_timer_t* timeout)
 
 static void alloc_buffer(uv_handle_t* client, size_t suggested_size, uv_buf_t* buf)
 {
-    cabor_allocation mem = CABOR_MALLOC(suggested_size);
-    buf->base = mem.mem;
+    cabor_tcp_client* cabor_client = client->data;
+    size_t current_size = cabor_client->data.size;
+
+    // Reserve enough space at the end of the vector for incoming data
+    cabor_vector_reserve(&cabor_client->data, current_size + suggested_size);
+    void* buffer_begin_addr = cabor_vector_peek_uchar(&cabor_client->data);
+
+    buf->base = buffer_begin_addr;
     buf->len = suggested_size;
 }
 
@@ -76,16 +89,17 @@ static void on_read(uv_stream_t* client, ssize_t nread, const uv_buf_t* buf)
 
     if (nread > 0)
     {
-        CABOR_LOG_F("Received %zd bytes %.*s", nread, (int)nread, buf->base);
+        //CABOR_LOG_F("Received %zd bytes", nread);
+        cabor_client->data.size += nread;
 
         // Reset timer
         uv_timer_stop(timeout);
         uv_timer_start(timeout, on_timeout, CABOR_IDLE_TIMEOUT_MS, 0);
 
-        cabor_allocation reqbuf = CABOR_MALLOC(sizeof(uv_write_t));
-        uv_write_t* req = (uv_write_t*)reqbuf.mem;
-        uv_buf_t wrbuf = uv_buf_init(buf->base, nread);
-        uv_write(req, client, &wrbuf, 1, NULL);
+        //cabor_allocation reqbuf = CABOR_MALLOC(sizeof(uv_write_t));
+        //uv_write_t* req = (uv_write_t*)reqbuf.mem;
+        //uv_buf_t wrbuf = uv_buf_init(buf->base, nread);
+        //uv_write(req, client, &wrbuf, 1, NULL);
     }
     else if (nread < 0)
     {
@@ -106,17 +120,16 @@ static void on_read(uv_stream_t* client, ssize_t nread, const uv_buf_t* buf)
             CABOR_LOG_F("Received: EMFILE");
         }
 
+        // Reading data is completed
+        cabor_vector_push_uchar(&cabor_client->data, '\0');
+
+        double recieved_amount;
+        const char* prefix = cabor_convert_bytes_to_human_readable(cabor_client->data.size, &recieved_amount);
+        CABOR_LOG_F("data received %.3f %s", recieved_amount, prefix);
+
         uv_close(timeout, on_close_timeout);
         uv_close(client, on_close_tcp_client);
     }
-
-    cabor_allocation bufalloc =
-    {
-        .mem = buf->base,
-        .size = buf->len
-    };
-
-    CABOR_FREE(&bufalloc);
 }
 
 static void on_new_connection(uv_stream_t* server, int status) 
@@ -131,6 +144,7 @@ static void on_new_connection(uv_stream_t* server, int status)
 
     cabor_allocation clientmem = CABOR_MALLOC(sizeof(cabor_tcp_client));
     cabor_tcp_client* cabor_client = clientmem.mem;
+    cabor_client->data = cabor_create_vector(1024, CABOR_UCHAR, true);
 
     cabor_allocation timeoutmem = CABOR_MALLOC(sizeof(cabor_tcp_timeout));
     cabor_tcp_timeout* cabor_timeout = timeoutmem.mem;

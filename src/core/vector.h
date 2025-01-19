@@ -36,7 +36,7 @@ typedef struct
 } cabor_vector;
 
 
-cabor_vector create_cabor_vector(size_t initial_capacity, cabor_element_type type, bool zero_initialize);
+cabor_vector cabor_create_vector(size_t initial_capacity, cabor_element_type type, bool zero_initialize);
 
 void cabor_vector_push_float  (cabor_vector* v, float value);
 void cabor_vector_push_double (cabor_vector* v, double value);
