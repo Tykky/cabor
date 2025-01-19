@@ -84,7 +84,7 @@ static void on_read(uv_stream_t* client, ssize_t nread, const uv_buf_t* buf)
 
         cabor_allocation reqbuf = CABOR_MALLOC(sizeof(uv_write_t));
         uv_write_t* req = (uv_write_t*)reqbuf.mem;
-        uv_buf_t wrbuf = uv_buf_init(buf->base, buf->len);
+        uv_buf_t wrbuf = uv_buf_init(buf->base, nread);
         uv_write(req, client, &wrbuf, 1, NULL);
     }
     else if (nread < 0)
