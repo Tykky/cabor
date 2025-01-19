@@ -7,7 +7,7 @@
 
 #define CABOR_SERVER_PORT 4120
 #define CABOR_SERVER_BACKLOG 128
-#define CABOR_IDLE_TIMEOUT_MS 120000
+#define CABOR_IDLE_TIMEOUT_MS 60000
 
 // For each concurrent tcp connection we allocate
 // cabor_tcp_timeout and cabor_tcp_client
