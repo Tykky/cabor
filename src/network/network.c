@@ -9,8 +9,7 @@
 #define CABOR_IDLE_TIMEOUT_MS 5000
 
 // For each concurrent tcp connection we allocate
-// cabor_tcp_timeout and cabor_tcp_client. These
-// need to be separate objects due to how libuv works
+// cabor_tcp_timeout and cabor_tcp_client
 
 struct cabor_tcp_timeout;
 typedef struct cabor_tcp_timeout cabor_tcp_timeout;
@@ -56,7 +55,7 @@ static void on_timeout(uv_timer_t* timeout)
     cabor_tcp_client* cabor_client = cabor_timeout->client;
     uv_tcp_t* client = &cabor_client->handle;
 
-    CABOR_LOG_F("client timed out, closing connection.\n");
+    CABOR_LOG_F("client timed out, closing connection.");
     uv_close(client, on_close_tcp_client);
     uv_close(timeout, on_close_timeout);
 }
@@ -77,7 +76,7 @@ static void on_read(uv_stream_t* client, ssize_t nread, const uv_buf_t* buf)
 
     if (nread > 0)
     {
-        CABOR_LOG_F("Received %zd bytes %.*s\n", nread, (int)nread, buf->base);
+        CABOR_LOG_F("Received %zd bytes %.*s", nread, (int)nread, buf->base);
 
         // Reset timer
         uv_timer_stop(timeout);
@@ -92,9 +91,22 @@ static void on_read(uv_stream_t* client, ssize_t nread, const uv_buf_t* buf)
     {
         if (nread == UV_EOF)
         {
-            CABOR_LOG_F("Received: EOF\n");
+            CABOR_LOG_F("Received: EOF");
+        }
+        else if (nread == UV_ECONNRESET)
+        {
+            CABOR_LOG_F("Received: ECONNRESET");
+        }
+        else if (nread == UV_ENOBUFS)
+        {
+            CABOR_LOG_F("Received: ENOBUFS");
+        }
+        else if (nread == UV_EMFILE)
+        {
+            CABOR_LOG_F("Received: EMFILE");
         }
 
+        uv_close(timeout, on_close_timeout);
         uv_close(client, on_close_tcp_client);
     }
 
@@ -113,7 +125,7 @@ static void on_new_connection(uv_stream_t* server, int status)
 
     if (status < 0) 
     {
-        CABOR_LOG_ERR_F("New connection error: {}", uv_strerror(status));
+        CABOR_LOG_ERR_F("New connection error: %s", uv_strerror(status));
         return;
     }
 
@@ -138,7 +150,7 @@ static void on_new_connection(uv_stream_t* server, int status)
 
     if (uv_accept(server, client) == 0) 
     {
-        CABOR_LOG("New client connected\n");
+        CABOR_LOG("New client connected");
         uv_read_start(client, alloc_buffer, on_read);
         uv_timer_start(timeout, on_timeout, CABOR_IDLE_TIMEOUT_MS, 0);
     }
@@ -167,11 +179,11 @@ int cabor_start_compile_server(cabor_server_context* ctx)
     int r = uv_listen(server, CABOR_SERVER_BACKLOG, on_new_connection);
     if (r)
     {
-        CABOR_LOG_ERR_F("Listen error: %s\n", uv_strerror(r));
+        CABOR_LOG_ERR_F("Listen error: %s", uv_strerror(r));
         return 1;
     }
 
-    CABOR_LOG_F("TCP server running on port %d\n", CABOR_SERVER_PORT);
+    CABOR_LOG_F("TCP server running on port %d", CABOR_SERVER_PORT);
     uv_run(loop, UV_RUN_DEFAULT);
 
     uv_loop_close(loop);
