@@ -62,7 +62,7 @@ static void on_timeout(uv_timer_t* timeout)
     cabor_tcp_client* cabor_client = cabor_timeout->client;
     uv_tcp_t* client = &cabor_client->handle;
 
-    CABOR_LOG_F("client timed out, closing connection.");
+    CABOR_LOG("client timed out, closing connection.");
     uv_close(client, on_close_tcp_client);
     uv_close(timeout, on_close_timeout);
 }
@@ -126,6 +126,9 @@ static void on_read(uv_stream_t* client, ssize_t nread, const uv_buf_t* buf)
         double recieved_amount;
         const char* prefix = cabor_convert_bytes_to_human_readable(cabor_client->data.size, &recieved_amount);
         CABOR_LOG_F("data received %.3f %s", recieved_amount, prefix);
+
+        cabor_network_request request;
+        cabor_decode_network_request(cabor_client->data.vector_mem.mem, cabor_client->data.vector_mem.mem, &request);
 
         uv_close(timeout, on_close_timeout);
         uv_close(client, on_close_tcp_client);
@@ -205,8 +208,39 @@ int cabor_start_compile_server(cabor_server_context* ctx)
     return 0;
 }
 
-void cabor_decode_network_request(const void* buffer, const size_t buffer_size, cabor_network_request* request)
+int cabor_decode_network_request(const void* buffer, const size_t buffer_size, cabor_network_request* request)
 {
+    // TODO: provide jansson custom allocator
+
+    json_t* root;
+    json_error_t error;
+
+    root = json_loads(buffer, 0, &error);
+
+    if (!root)
+    {
+        CABOR_LOG_F("Error parsing JSON");
+        return 1;
+    }
+
+    const char* type = json_string_value(json_object_get(root, "command"));
+    if (strcmp(type, "compile") == 0)
+    {
+        request->type = CABOR_COMPILE;
+
+        const char* source = json_string_value(json_object_get(root, "code"));
+        size_t sourcelen = strlen(source);
+
+        request->source = CABOR_MALLOC(sourcelen);
+        memcpy_s(request->source.mem, sourcelen, source, sourcelen);
+        return 0;
+    }
+    else if (strcmp(type, "ping"))
+    {
+        request->type = CABOR_PING;
+        return 0;
+    }
+    return 1;
 }
 
 void cabor_encode_network_request(const cabor_network_response* response, void* buffer, size_t* buffer_size)
