@@ -251,7 +251,7 @@ int cabor_decode_network_request(const void* buffer, const size_t buffer_size, c
 
     if (!root)
     {
-        CABOR_LOG_F("Error parsing JSON");
+        CABOR_LOG("Error parsing JSON");
         return 1;
     }
 
