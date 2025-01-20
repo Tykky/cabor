@@ -33,4 +33,4 @@ int cabor_start_compile_server(cabor_server_context* ctx);
 int cabor_shutdown_compile_server(cabor_server_context* ctx);
 
 int cabor_decode_network_request(const void* buffer, const size_t buffer_size, cabor_network_request* request);
-void cabor_encode_network_request(const cabor_network_response* response, void* buffer, size_t* buffer_size);
+void cabor_encode_network_response(const cabor_network_response* response, void* buffer, size_t* buffer_size);

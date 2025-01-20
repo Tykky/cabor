@@ -105,19 +105,19 @@ static void on_read(uv_stream_t* client, ssize_t nread, const uv_buf_t* buf)
     {
         if (nread == UV_EOF)
         {
-            CABOR_LOG_F("Received: EOF");
+            CABOR_LOG("Received: EOF");
         }
         else if (nread == UV_ECONNRESET)
         {
-            CABOR_LOG_F("Received: ECONNRESET");
+            CABOR_LOG("Received: ECONNRESET");
         }
         else if (nread == UV_ENOBUFS)
         {
-            CABOR_LOG_F("Received: ENOBUFS");
+            CABOR_LOG("Received: ENOBUFS");
         }
         else if (nread == UV_EMFILE)
         {
-            CABOR_LOG_F("Received: EMFILE");
+            CABOR_LOG("Received: EMFILE");
         }
 
         // Reading data is completed
@@ -129,6 +129,38 @@ static void on_read(uv_stream_t* client, ssize_t nread, const uv_buf_t* buf)
 
         cabor_network_request request;
         cabor_decode_network_request(cabor_client->data.vector_mem.mem, cabor_client->data.vector_mem.mem, &request);
+
+        if (request.type == CABOR_COMPILE)
+        {
+            // run compiler ... respond with program
+            const char* program = "base64-encoded statically linked x86_64 program";
+
+            cabor_network_response resp =
+            {
+                .program_text = program,
+                .size = strlen(program),
+                .error = false
+            };
+
+            cabor_allocation response_alloc;
+            size_t response_size;
+
+            cabor_encode_network_response(&resp, &response_alloc, &response_size);
+
+            cabor_allocation reqbuf = CABOR_MALLOC(sizeof(uv_write_t));
+            uv_write_t* req = (uv_write_t*)reqbuf.mem;
+            uv_buf_t wrbuf =
+            {
+                .base = response_alloc.mem,
+                .len = response_alloc.size 
+            };
+
+            uv_write(req, client, &wrbuf, 1, NULL);
+
+        }
+        else if (request.type == CABOR_PING)
+        {
+        }
 
         uv_close(timeout, on_close_timeout);
         uv_close(client, on_close_tcp_client);
@@ -243,6 +275,25 @@ int cabor_decode_network_request(const void* buffer, const size_t buffer_size, c
     return 1;
 }
 
-void cabor_encode_network_request(const cabor_network_response* response, void* buffer, size_t* buffer_size)
+void cabor_encode_network_response(const cabor_network_response* response, cabor_allocation* alloc, size_t* buffer_size)
 {
+    json_t* root = json_object();
+
+    if (!response->error)
+    {
+        json_object_set_new(root, "program", json_string(response->program_text));
+    }
+    else
+    {
+        json_object_set_new(root, "error", json_string(response->program_text));
+    }
+
+    char* json_str = json_dumps(root, JSON_INDENT(4));
+    size_t jsonlen = strlen(json_str);
+
+    *alloc = CABOR_MALLOC(jsonlen);
+    memcpy_s(alloc->mem, jsonlen, json_str, jsonlen);
+
+    json_decref(root);
+    free(json_str);
 }
