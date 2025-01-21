@@ -128,7 +128,7 @@ static void on_read(uv_stream_t* client, ssize_t nread, const uv_buf_t* buf)
         CABOR_LOG_F("data received %.3f %s", recieved_amount, prefix);
 
         cabor_network_request request;
-        cabor_decode_network_request(cabor_client->data.vector_mem.mem, cabor_client->data.vector_mem.mem, &request);
+        cabor_decode_network_request(cabor_client->data.vector_mem.mem, cabor_client->data.size, &request);
 
         if (request.type == CABOR_COMPILE)
         {
