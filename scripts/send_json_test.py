@@ -2,7 +2,7 @@ import socket
 import json
 
 data = {
-    "command": "compile",
+    "command": "ping",
     "code": "source code text"
 }
 
@@ -13,6 +13,7 @@ sock.sendall(json_data.encode())
 sock.shutdown(socket.SHUT_WR)
 
 response = sock.recv(1024)
-#json_response = json.loads(response)
-#print(json_response)
+if len(response) > 0:
+    json_response = json.loads(response)
+    print(json_response)
 sock.close()

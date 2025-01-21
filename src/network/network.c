@@ -2,6 +2,7 @@
 #include "../logging/logging.h"
 #include "../core/vector.h"
 
+#include <stddef.h>
 #include <uv.h>
 #include <jansson.h>
 
@@ -67,6 +68,22 @@ static void on_timeout(uv_timer_t* timeout)
     uv_close(timeout, on_close_timeout);
 }
 
+void on_write(uv_write_t* req, int status)
+{
+    if (status < 0)
+    {
+        CABOR_LOG_ERR_F("write error: %s", uv_strerror(status));
+    }
+
+    cabor_allocation alloc =
+    {
+        .mem = req,
+        .size = sizeof(uv_write_t)
+    };
+
+    CABOR_FREE(&alloc);
+}
+
 static void alloc_buffer(uv_handle_t* client, size_t suggested_size, uv_buf_t* buf)
 {
     cabor_tcp_client* cabor_client = client->data;
@@ -130,9 +147,12 @@ static void on_read(uv_stream_t* client, ssize_t nread, const uv_buf_t* buf)
         cabor_network_request request;
         cabor_decode_network_request(cabor_client->data.vector_mem.mem, cabor_client->data.size, &request);
 
+        cabor_allocation reqbuf = CABOR_MALLOC(sizeof(uv_write_t));
+        uv_write_t* req = (uv_write_t*)reqbuf.mem;
+
         if (request.type == CABOR_COMPILE)
         {
-            // run compiler ... respond with program
+            // run compiler (TODO) ... respond with program
             const char* program = "base64-encoded statically linked x86_64 program";
 
             cabor_network_response resp =
@@ -147,19 +167,28 @@ static void on_read(uv_stream_t* client, ssize_t nread, const uv_buf_t* buf)
 
             cabor_encode_network_response(&resp, &response_alloc, &response_size);
 
-            cabor_allocation reqbuf = CABOR_MALLOC(sizeof(uv_write_t));
-            uv_write_t* req = (uv_write_t*)reqbuf.mem;
             uv_buf_t wrbuf =
             {
                 .base = response_alloc.mem,
                 .len = response_alloc.size 
             };
 
-            uv_write(req, client, &wrbuf, 1, NULL);
+            uv_write(req, client, &wrbuf, 1, on_write);
 
         }
         else if (request.type == CABOR_PING)
         {
+            uv_buf_t wrbuf =
+            {
+                .base = NULL,
+                .len = 0
+            };
+
+            uv_write(req, client, &wrbuf, 1, on_write);
+        }
+        else
+        {
+            CABOR_FREE(&req);
         }
 
         uv_close(timeout, on_close_timeout);
@@ -267,7 +296,7 @@ int cabor_decode_network_request(const void* buffer, const size_t buffer_size, c
         memcpy(request->source.mem, source, sourcelen);
         return 0;
     }
-    else if (strcmp(type, "ping"))
+    else if (strcmp(type, "ping") == 0)
     {
         request->type = CABOR_PING;
         return 0;
