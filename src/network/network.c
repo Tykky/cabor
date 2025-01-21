@@ -106,17 +106,11 @@ static void on_read(uv_stream_t* client, ssize_t nread, const uv_buf_t* buf)
 
     if (nread > 0)
     {
-        //CABOR_LOG_F("Received %zd bytes", nread);
         cabor_client->data.size += nread;
 
         // Reset timer
         uv_timer_stop(timeout);
         uv_timer_start(timeout, on_timeout, CABOR_IDLE_TIMEOUT_MS, 0);
-
-        //cabor_allocation reqbuf = CABOR_MALLOC(sizeof(uv_write_t));
-        //uv_write_t* req = (uv_write_t*)reqbuf.mem;
-        //uv_buf_t wrbuf = uv_buf_init(buf->base, nread);
-        //uv_write(req, client, &wrbuf, 1, NULL);
     }
     else if (nread < 0)
     {
