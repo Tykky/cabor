@@ -264,7 +264,7 @@ int cabor_decode_network_request(const void* buffer, const size_t buffer_size, c
         size_t sourcelen = strlen(source);
 
         request->source = CABOR_MALLOC(sourcelen);
-        memcpy_s(request->source.mem, sourcelen, source, sourcelen);
+        memcpy(request->source.mem, source, sourcelen);
         return 0;
     }
     else if (strcmp(type, "ping"))
