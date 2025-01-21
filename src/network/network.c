@@ -292,7 +292,7 @@ void cabor_encode_network_response(const cabor_network_response* response, cabor
     size_t jsonlen = strlen(json_str);
 
     *alloc = CABOR_MALLOC(jsonlen);
-    memcpy_s(alloc->mem, jsonlen, json_str, jsonlen);
+    memcpy(alloc->mem, json_str, jsonlen);
 
     json_decref(root);
     free(json_str);
