@@ -146,6 +146,7 @@ static void on_read(uv_stream_t* client, ssize_t nread, const uv_buf_t* buf)
 
         if (request.type == CABOR_COMPILE)
         {
+            CABOR_LOG_F("Compile request: %.*s", request.source_size, request.source.mem);
             // run compiler (TODO) ... respond with program
             const char* program = "base64-encoded statically linked x86_64 program";
 
@@ -202,7 +203,7 @@ static void on_new_connection(uv_stream_t* server, int status)
 
     cabor_allocation clientmem = CABOR_MALLOC(sizeof(cabor_tcp_client));
     cabor_tcp_client* cabor_client = clientmem.mem;
-    cabor_client->data = cabor_create_vector(1024, CABOR_UCHAR, true);
+    cabor_client->data = cabor_create_vector(2, CABOR_UCHAR, true);
 
     cabor_allocation timeoutmem = CABOR_MALLOC(sizeof(cabor_tcp_timeout));
     cabor_tcp_timeout* cabor_timeout = timeoutmem.mem;
@@ -265,8 +266,6 @@ int cabor_start_compile_server(cabor_server_context* ctx)
 
 int cabor_decode_network_request(const void* buffer, const size_t buffer_size, cabor_network_request* request)
 {
-    // TODO: provide jansson custom allocator
-
     json_t* root;
     json_error_t error;
 
@@ -288,13 +287,17 @@ int cabor_decode_network_request(const void* buffer, const size_t buffer_size, c
 
         request->source = CABOR_MALLOC(sourcelen);
         memcpy(request->source.mem, source, sourcelen);
+        request->source_size = sourcelen;
+        json_decref(root);
         return 0;
     }
     else if (strcmp(type, "ping") == 0)
     {
         request->type = CABOR_PING;
+        json_decref(root);
         return 0;
     }
+    json_decref(root);
     return 1;
 }
 

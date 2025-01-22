@@ -20,6 +20,7 @@ typedef struct
 {
     cabor_command_type type;
     cabor_allocation source;
+    size_t source_size;
 } cabor_network_request;
 
 typedef struct

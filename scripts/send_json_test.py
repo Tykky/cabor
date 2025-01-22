@@ -2,7 +2,7 @@ import socket
 import json
 
 data = {
-    "command": "ping",
+    "command": "compile",
     "code": "source code text"
 }
 
