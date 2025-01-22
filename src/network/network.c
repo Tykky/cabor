@@ -30,6 +30,8 @@ struct cabor_tcp_client
     uv_tcp_t handle;
     cabor_tcp_timeout* timeout;
     cabor_vector data;
+    cabor_allocation response; // buffer that contains encoded json
+    size_t response_size;
 };
 
 static void on_close_timeout(uv_handle_t* timeout)
@@ -78,7 +80,9 @@ void on_write(uv_write_t* req, int status)
     cabor_allocation alloc =
     {
         .mem = req,
+#ifdef CABOR_ENABLE_ALLOCATOR_FAT_POINTERS
         .size = sizeof(uv_write_t)
+#endif
     };
 
     CABOR_FREE(&alloc);
@@ -95,6 +99,87 @@ static void alloc_buffer(uv_handle_t* client, size_t suggested_size, uv_buf_t* b
 
     buf->base = buffer_begin_addr;
     buf->len = suggested_size;
+}
+
+// Called from worker thread
+static void on_work(uv_work_t* work)
+{
+    cabor_tcp_client* cabor_client = work->data;
+    uv_tcp_t* client = &cabor_client->handle;
+
+    cabor_vector_push_uchar(&cabor_client->data, '\0');
+
+    double recieved_amount;
+    const char* prefix = cabor_convert_bytes_to_human_readable(cabor_client->data.size, &recieved_amount);
+    CABOR_LOG_F("data received %.3f %s", recieved_amount, prefix);
+
+    cabor_network_request request;
+    cabor_decode_network_request(cabor_client->data.vector_mem.mem, cabor_client->data.size, &request);
+
+    if (request.type == CABOR_COMPILE)
+    {
+        CABOR_LOG_F("Compile request: %.*s", request.source_size, request.source.mem);
+
+        // run compiler (TODO) ... respond with program
+        const char* program = "base64-encoded statically linked x86_64 program";
+
+        // to simulate compiling
+        int a = 1, b = 1, c = 1;
+        for (size_t i = 1; i < 100000000; i++)
+        {
+            a *= i;
+            b *= i;
+            c *= i;
+        }
+
+        cabor_network_response resp =
+        {
+            .program_text = program,
+            .size = strlen(program),
+            .error = false
+        };
+
+        cabor_encode_network_response(&resp, &cabor_client->response, &cabor_client->response_size);
+
+    }
+    else if (request.type == CABOR_PING)
+    {
+        cabor_client->response_size = 0;
+    }
+}
+
+// Called on main/loop thread after worker thread is done
+static void on_after_work(uv_work_t* work, int status)
+{
+    cabor_tcp_client* cabor_client = work->data;
+    uv_tcp_t* client = &cabor_client->handle;
+
+    cabor_tcp_timeout* cabor_timeout = cabor_client->timeout;
+    uv_timer_t* timeout = &cabor_timeout->handle;
+
+    cabor_allocation reqbuf = CABOR_MALLOC(sizeof(uv_write_t));
+    uv_write_t* req = (uv_write_t*)reqbuf.mem;
+
+    cabor_allocation alloc =
+    {
+        .mem = work,
+#ifdef CABOR_ENABLE_ALLOCATOR_FAT_POINTERS
+        .size = sizeof(uv_work_t)
+#endif
+    };
+
+    uv_buf_t wrbuf =
+    {
+        .base = cabor_client->response_size > 0 ? cabor_client->response.mem : NULL,
+        .len = cabor_client->response_size,
+    };
+
+    uv_write(req, client, &wrbuf, 1, on_write);
+
+    uv_close(timeout, on_close_timeout);
+    uv_close(client, on_close_tcp_client);
+
+    CABOR_FREE(&alloc);
 }
 
 static void on_read(uv_stream_t* client, ssize_t nread, const uv_buf_t* buf)
@@ -131,63 +216,12 @@ static void on_read(uv_stream_t* client, ssize_t nread, const uv_buf_t* buf)
             CABOR_LOG("Received: EMFILE");
         }
 
-        // Reading data is completed
-        cabor_vector_push_uchar(&cabor_client->data, '\0');
+        cabor_allocation work_alloc = CABOR_MALLOC(sizeof(uv_work_t));
+        uv_work_t* work = work_alloc.mem;
+        work->data = cabor_client;
 
-        double recieved_amount;
-        const char* prefix = cabor_convert_bytes_to_human_readable(cabor_client->data.size, &recieved_amount);
-        CABOR_LOG_F("data received %.3f %s", recieved_amount, prefix);
+        uv_queue_work(client->loop, work, on_work, on_after_work);
 
-        cabor_network_request request;
-        cabor_decode_network_request(cabor_client->data.vector_mem.mem, cabor_client->data.size, &request);
-
-        cabor_allocation reqbuf = CABOR_MALLOC(sizeof(uv_write_t));
-        uv_write_t* req = (uv_write_t*)reqbuf.mem;
-
-        if (request.type == CABOR_COMPILE)
-        {
-            CABOR_LOG_F("Compile request: %.*s", request.source_size, request.source.mem);
-            // run compiler (TODO) ... respond with program
-            const char* program = "base64-encoded statically linked x86_64 program";
-
-            cabor_network_response resp =
-            {
-                .program_text = program,
-                .size = strlen(program),
-                .error = false
-            };
-
-            cabor_allocation response_alloc;
-            size_t response_size;
-
-            cabor_encode_network_response(&resp, &response_alloc, &response_size);
-
-            uv_buf_t wrbuf =
-            {
-                .base = response_alloc.mem,
-                .len = response_alloc.size 
-            };
-
-            uv_write(req, client, &wrbuf, 1, on_write);
-
-        }
-        else if (request.type == CABOR_PING)
-        {
-            uv_buf_t wrbuf =
-            {
-                .base = NULL,
-                .len = 0
-            };
-
-            uv_write(req, client, &wrbuf, 1, on_write);
-        }
-        else
-        {
-            CABOR_FREE(&req);
-        }
-
-        uv_close(timeout, on_close_timeout);
-        uv_close(client, on_close_tcp_client);
     }
 }
 
@@ -319,6 +353,7 @@ void cabor_encode_network_response(const cabor_network_response* response, cabor
 
     *alloc = CABOR_MALLOC(jsonlen);
     memcpy(alloc->mem, json_str, jsonlen);
+    *buffer_size = jsonlen;
 
     json_decref(root);
     free(json_str);
