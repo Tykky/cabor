@@ -2,6 +2,7 @@
 #include "../logging/logging.h"
 #include "../core/vector.h"
 
+#include <string.h>
 #include <stddef.h>
 #include <uv.h>
 #include <jansson.h>
@@ -9,6 +10,19 @@
 #define CABOR_SERVER_PORT 4120
 #define CABOR_SERVER_BACKLOG 128
 #define CABOR_IDLE_TIMEOUT_MS 60000
+
+// The flow of the network requests go something like this:
+//   1. cabor_start_compile_server() creates the server and begins the server loop
+//   2. For each new concurrent tcp connection callback on_new_connection() is called
+//   3. Connection starts sending data and callback on_read() is called when data is ready
+//   4. On EOF we queue work to threadpool to handle the new request
+//   5. When a thread picks up the work on_work() callback gets called on a worker thread
+//      - Here we do the actual work, parse json, compile the program and prepare response buffer
+//   6. When work is done on_after_work callback gets called and finally responds to the request
+//
+// Remarks: Environment variable UV_THREADPOOL_SIZE controls the amount of worker threads in the
+// threadpool. It's recommend to set this to the amount of logical cpus on the machine for optimal perf
+
 
 // For each concurrent tcp connection we allocate
 // cabor_tcp_timeout and cabor_tcp_client
