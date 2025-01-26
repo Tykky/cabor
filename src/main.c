@@ -61,8 +61,8 @@ static unsigned int parse_cmd_args(int argc, char** argv, int* tokenize_arg, int
 
 static void run_tokenizer(const char* filename)
 {
-	cabor_file file = cabor_load_file(filename);
-	cabor_vector* tokens = cabor_tokenize(&file);
+	cabor_file* file = cabor_load_file(filename);
+	cabor_vector* tokens = cabor_tokenize(file);
 
 	size_t buffer_size = tokens->size * sizeof(cabor_token);
 	cabor_allocation buffer = CABOR_MALLOC(buffer_size);
@@ -116,7 +116,7 @@ int main(int argc, char **argv)
 
 	if (flags & CABOR_ARG_SERVER)
 	{
-		run_server();
+		//run_server();
 	}
 
 	CABOR_DUMP_LOG_TO_DISK();

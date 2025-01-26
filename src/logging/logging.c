@@ -25,7 +25,7 @@ void create_cabor_logger(cabor_logging_context* logging_context)
 
 void destroy_cabor_logger(cabor_logging_context* logging_context)
 {
-    cabor_destroy_vector(&logging_context->log_buffer);
+    cabor_destroy_vector(logging_context->log_buffer);
     cabor_destroy_mutex(logging_context->log_buffer_lock);
 }
 

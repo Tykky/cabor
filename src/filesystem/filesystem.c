@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-cabor_file cabor_load_file(const char* filename)
+cabor_file* cabor_load_file(const char* filename)
 {
     FILE* file_handle = fopen(filename, "rb");
     if (file_handle == NULL)
@@ -18,14 +18,16 @@ cabor_file cabor_load_file(const char* filename)
     size_t file_size = ftell(file_handle);
     rewind(file_handle);
 
-    cabor_file file =
+    CABOR_NEW(cabor_file, file);
+
+    *file = (cabor_file)
     {
         .filename = filename,
         .size = file_size * sizeof(char),
         .file_memory = CABOR_MALLOC(file_size * sizeof(char))
     };
 
-    size_t result = fread(file.file_memory.mem, sizeof(char), file_size, file_handle);
+    size_t result = fread(file->file_memory.mem, sizeof(char), file_size, file_handle);
 
     if (result != file_size)
     {
@@ -52,6 +54,7 @@ void cabor_destroy_file(cabor_file* file)
 #ifdef CABOR_ENABLE_ALLOCATOR_FAT_POINTERS
     file->file_memory.size = 0;
 #endif
+    CABOR_DELETE(cabor_file, file);
 }
 
 char cabor_read_byte_from_file(cabor_file* file, size_t idx)
