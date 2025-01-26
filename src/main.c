@@ -116,7 +116,7 @@ int main(int argc, char **argv)
 
 	if (flags & CABOR_ARG_SERVER)
 	{
-		//run_server();
+		run_server();
 	}
 
 	CABOR_DUMP_LOG_TO_DISK();

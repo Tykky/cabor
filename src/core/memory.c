@@ -14,6 +14,8 @@ void create_cabor_allocator_context(cabor_allocator_context* alloc_ctx)
 #endif
 #if CABOR_ENABLE_MEMORY_DEBUGGING
     alloc_ctx->debug_size = 0;
+    //alloc_ctx->alloc_lock = cabor_create_mutex();
+    //alloc_ctx->dealloc_lock = cabor_create_mutex();
 #endif
 }
 
@@ -24,6 +26,8 @@ void destroy_cabor_allocator_context(cabor_allocator_context* alloc_ctx)
 #endif
 #if CABOR_ENABLE_MEMORY_DEBUGGING
     alloc_ctx->debug_size = 0;
+    //cabor_destroy_mutex(alloc_ctx->dealloc_lock);
+    //cabor_destroy_mutex(alloc_ctx->dealloc_lock);
 #endif
 }
 
@@ -32,7 +36,7 @@ cabor_allocation cabor_malloc(cabor_allocator_context* alloc_ctx, size_t size, c
 #ifdef CABOR_ENABLE_ALLOCATOR_FAT_POINTERS
     alloc_ctx->allocated_mem += size;
 #endif
-#if ENABLE_CABOR_MEMORY_DEBUGGING
+#if CABOR_ENABLE_MEMORY_DEBUGGING 
     alloc_ctx->debug[alloc_ctx->debug_size++] = debug;
 #endif
 

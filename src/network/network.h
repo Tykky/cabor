@@ -13,7 +13,8 @@ typedef struct
 typedef enum
 {
     CABOR_PING,
-    CABOR_COMPILE
+    CABOR_COMPILE,
+    CABOR_SHUTDOWN
 } cabor_command_type;
 
 typedef struct

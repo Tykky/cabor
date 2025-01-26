@@ -46,31 +46,21 @@ struct cabor_tcp_client
     cabor_vector* data;
     cabor_allocation response; // buffer that contains encoded json
     size_t response_size;
+    bool shutdown_requested;
+    cabor_server_context* server_context;
 };
 
 static void on_close_timeout(uv_handle_t* timeout)
 {
     cabor_tcp_timeout* cabor_timeout = timeout->data;
-    cabor_allocation alloc = {
-        .mem = cabor_timeout,
-#ifdef CABOR_ENABLE_ALLOCATOR_FAT_POINTERS
-        .size = sizeof(cabor_tcp_timeout)
-#endif
-    };
-    CABOR_FREE(&alloc);
+    CABOR_DELETE(cabor_tcp_timeout, cabor_timeout);
 }
 
 static void on_close_tcp_client(uv_handle_t* client)
 {
     cabor_tcp_client* cabor_client = client->data;
-    cabor_destroy_vector(&cabor_client->data);
-    cabor_allocation alloc = {
-        .mem  = cabor_client,
-#ifdef CABOR_ENABLE_ALLOCATOR_FAT_POINTERS
-        .size = sizeof(cabor_tcp_client)
-#endif
-    };
-    CABOR_FREE(&alloc);
+    cabor_destroy_vector(cabor_client->data);
+    CABOR_DELETE(cabor_tcp_client, cabor_client);
 }
 
 static void on_timeout(uv_timer_t* timeout)
@@ -91,15 +81,7 @@ void on_write(uv_write_t* req, int status)
         CABOR_LOG_ERR_F("write error: %s", uv_strerror(status));
     }
 
-    cabor_allocation alloc =
-    {
-        .mem = req,
-#ifdef CABOR_ENABLE_ALLOCATOR_FAT_POINTERS
-        .size = sizeof(uv_write_t)
-#endif
-    };
-
-    CABOR_FREE(&alloc);
+    CABOR_DELETE(uv_write_t, req);
 }
 
 static void alloc_buffer(uv_handle_t* client, size_t suggested_size, uv_buf_t* buf)
@@ -108,8 +90,8 @@ static void alloc_buffer(uv_handle_t* client, size_t suggested_size, uv_buf_t* b
     size_t current_size = cabor_client->data->size;
 
     // Reserve enough space at the end of the vector for incoming data
-    cabor_vector_reserve(&cabor_client->data, current_size + suggested_size);
-    void* buffer_begin_addr = cabor_vector_peek_uchar(&cabor_client->data);
+    cabor_vector_reserve(cabor_client->data, current_size + suggested_size);
+    void* buffer_begin_addr = cabor_vector_peek_uchar(cabor_client->data);
 
     buf->base = buffer_begin_addr;
     buf->len = suggested_size;
@@ -121,7 +103,7 @@ static void on_work(uv_work_t* work)
     cabor_tcp_client* cabor_client = work->data;
     uv_tcp_t* client = &cabor_client->handle;
 
-    cabor_vector_push_uchar(&cabor_client->data, '\0');
+    cabor_vector_push_uchar(cabor_client->data, '\0');
 
     double recieved_amount;
     const char* prefix = cabor_convert_bytes_to_human_readable(cabor_client->data->size, &recieved_amount);
@@ -160,6 +142,23 @@ static void on_work(uv_work_t* work)
     {
         cabor_client->response_size = 0;
     }
+    else if (request.type == CABOR_SHUTDOWN)
+    {
+        cabor_client->response_size = 0;
+        cabor_client->shutdown_requested = true;
+    }
+
+    if (request.source_size > 0)
+    {
+        CABOR_FREE(&request.source);
+    }
+
+}
+
+void count_open_handles(uv_handle_t* handle, void* arg)
+{
+    int* open_handles = (int*)arg;
+    (*open_handles)++;
 }
 
 // Called on main/loop thread after worker thread is done
@@ -174,26 +173,28 @@ static void on_after_work(uv_work_t* work, int status)
     cabor_allocation reqbuf = CABOR_MALLOC(sizeof(uv_write_t));
     uv_write_t* req = (uv_write_t*)reqbuf.mem;
 
-    cabor_allocation alloc =
-    {
-        .mem = work,
-#ifdef CABOR_ENABLE_ALLOCATOR_FAT_POINTERS
-        .size = sizeof(uv_work_t)
-#endif
-    };
-
     uv_buf_t wrbuf =
     {
         .base = cabor_client->response_size > 0 ? cabor_client->response.mem : NULL,
         .len = cabor_client->response_size,
     };
 
+    bool shutdown = cabor_client->shutdown_requested;
+
     uv_write(req, client, &wrbuf, 1, on_write);
 
     uv_close(timeout, on_close_timeout);
     uv_close(client, on_close_tcp_client);
 
-    CABOR_FREE(&alloc);
+    if (shutdown)
+    {
+        CABOR_DELETE(uv_work_t, work);
+        uv_close(cabor_client->server_context->servermem.mem, NULL);
+        CABOR_LOG("SHUTDOWN received, shutting down the server")
+        return;
+    }
+
+    CABOR_DELETE(uv_work_t, work);
 }
 
 static void on_read(uv_stream_t* client, ssize_t nread, const uv_buf_t* buf)
@@ -235,7 +236,6 @@ static void on_read(uv_stream_t* client, ssize_t nread, const uv_buf_t* buf)
         work->data = cabor_client;
 
         uv_queue_work(client->loop, work, on_work, on_after_work);
-
     }
 }
 
@@ -249,9 +249,10 @@ static void on_new_connection(uv_stream_t* server, int status)
         return;
     }
 
-    cabor_allocation clientmem = CABOR_MALLOC(sizeof(cabor_tcp_client));
-    cabor_tcp_client* cabor_client = clientmem.mem;
+    CABOR_NEW(cabor_tcp_client, cabor_client);
     cabor_client->data = cabor_create_vector(2, CABOR_UCHAR, true);
+    cabor_client->shutdown_requested = false;
+    cabor_client->server_context = server->data;
 
     cabor_allocation timeoutmem = CABOR_MALLOC(sizeof(cabor_tcp_timeout));
     cabor_tcp_timeout* cabor_timeout = timeoutmem.mem;
@@ -309,6 +310,9 @@ int cabor_start_compile_server(cabor_server_context* ctx)
 
     uv_loop_close(loop);
 
+    CABOR_DELETE(uv_loop_t, loop);
+    CABOR_DELETE(uv_tcp_t, server);
+
     return 0;
 }
 
@@ -342,6 +346,14 @@ int cabor_decode_network_request(const void* buffer, const size_t buffer_size, c
     else if (strcmp(type, "ping") == 0)
     {
         request->type = CABOR_PING;
+        request->source_size = 0;
+        json_decref(root);
+        return 0;
+    }
+    else if (strcmp(type, "shutdown") == 0)
+    {
+        request->type = CABOR_SHUTDOWN;
+        request->source_size = 0;
         json_decref(root);
         return 0;
     }

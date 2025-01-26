@@ -25,9 +25,14 @@
 
 #define CABOR_MEMORY_DEBUG_ARRAY_SIZE 4096
 
+#ifdef NDEBUG
+#define CABOR_ENABLE_MEMORY_DEBUGGING 0
+#else
 #define CABOR_ENABLE_MEMORY_DEBUGGING 1
+#endif
 
 #if CABOR_ENABLE_MEMORY_DEBUGGING
+#include "../core/mutex.h"
 #define CABOR_ENABLE_ALLOCATOR_FAT_POINTERS
 #endif
 
@@ -41,12 +46,12 @@
 // These are not the nicest macros to use but behave similarly to C++ new and delete.
 // Would be nice to have decltype() so we could avoid passing the type
 #define CABOR_NEW(type, variable)\
-cabor_allocation variable_alloc = CABOR_MALLOC(sizeof(type));\
-type* variable = variable_alloc.mem
+cabor_allocation variable##_alloc = CABOR_MALLOC(sizeof(type));\
+type* variable = variable##_alloc.mem
 
 #define CABOR_DELETE(type, variable)\
-cabor_allocation variable_alloc = CABOR_DEALLOC(type, variable);\
-CABOR_FREE(&variable_alloc)
+cabor_allocation variable##_alloc = CABOR_DEALLOC(type, variable);\
+CABOR_FREE(&variable##_alloc)
 
 typedef struct
 {
@@ -64,10 +69,13 @@ typedef struct
     // Debug info for allocations
     char* debug[CABOR_MEMORY_DEBUG_ARRAY_SIZE];
     size_t debug_size;
+    cabor_mutex* alloc_lock;
 
     // Debug info for deallocation
     char* dealloc[CABOR_MEMORY_DEBUG_ARRAY_SIZE];
     size_t dealloc_size;
+    cabor_mutex* dealloc_lock;
+
 #endif
 
 } cabor_allocator_context;
