@@ -40,13 +40,13 @@
 
 // These are not the nicest macros to use but behave similarly to C++ new and delete.
 // Would be nice to have decltype() so we could avoid passing the type
-#define CABOR_NEW(type, variable, ...)\
+#define CABOR_NEW(type, variable)\
 cabor_allocation variable_alloc = CABOR_MALLOC(sizeof(type));\
 type* variable = variable_alloc.mem
 
 #define CABOR_DELETE(type, variable)\
 cabor_allocation variable_alloc = CABOR_DEALLOC(type, variable);\
-CABOR_FREE(variable_alloc.mem)
+CABOR_FREE(&variable_alloc)
 
 typedef struct
 {

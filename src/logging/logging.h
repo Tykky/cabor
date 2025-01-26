@@ -40,7 +40,7 @@ typedef enum
 
 typedef struct
 {
-    cabor_vector log_buffer;
+    cabor_vector* log_buffer;
     cabor_mutex* log_buffer_lock;
 } cabor_logging_context;
 

@@ -43,7 +43,7 @@ struct cabor_tcp_client
 {
     uv_tcp_t handle;
     cabor_tcp_timeout* timeout;
-    cabor_vector data;
+    cabor_vector* data;
     cabor_allocation response; // buffer that contains encoded json
     size_t response_size;
 };
@@ -105,7 +105,7 @@ void on_write(uv_write_t* req, int status)
 static void alloc_buffer(uv_handle_t* client, size_t suggested_size, uv_buf_t* buf)
 {
     cabor_tcp_client* cabor_client = client->data;
-    size_t current_size = cabor_client->data.size;
+    size_t current_size = cabor_client->data->size;
 
     // Reserve enough space at the end of the vector for incoming data
     cabor_vector_reserve(&cabor_client->data, current_size + suggested_size);
@@ -124,11 +124,11 @@ static void on_work(uv_work_t* work)
     cabor_vector_push_uchar(&cabor_client->data, '\0');
 
     double recieved_amount;
-    const char* prefix = cabor_convert_bytes_to_human_readable(cabor_client->data.size, &recieved_amount);
+    const char* prefix = cabor_convert_bytes_to_human_readable(cabor_client->data->size, &recieved_amount);
     CABOR_LOG_F("data received %.3f %s", recieved_amount, prefix);
 
     cabor_network_request request;
-    cabor_decode_network_request(cabor_client->data.vector_mem.mem, cabor_client->data.size, &request);
+    cabor_decode_network_request(cabor_client->data->vector_mem.mem, cabor_client->data->size, &request);
 
     if (request.type == CABOR_COMPILE)
     {
@@ -205,7 +205,7 @@ static void on_read(uv_stream_t* client, ssize_t nread, const uv_buf_t* buf)
 
     if (nread > 0)
     {
-        cabor_client->data.size += nread;
+        cabor_client->data->size += nread;
 
         // Reset timer
         uv_timer_stop(timeout);

@@ -267,9 +267,9 @@ bool is_match_comment(size_t old_cursor, size_t new_cursor)
     return new_cursor > old_cursor;
 }
 
-cabor_vector cabor_tokenize(cabor_file* file)
+cabor_vector* cabor_tokenize(cabor_file* file)
 {
-    cabor_vector vector = cabor_create_vector(CABOR_TOKENIZER_VECTOR_DEFAULT_CAPACITY, CABOR_TOKEN, true);
+    cabor_vector* vector = cabor_create_vector(CABOR_TOKENIZER_VECTOR_DEFAULT_CAPACITY, CABOR_TOKEN, true);
 
     char* buffer = file->file_memory.mem;
     size_t size = file->size;
@@ -306,28 +306,28 @@ cabor_vector cabor_tokenize(cabor_file* file)
         cursor = match_identifier(buffer, cursor, size, &token);
         if (is_match(&token))
         {
-            append_token(&vector, &token);
+            append_token(vector, &token);
             continue;
         }
 
         cursor = match_integer_literal(buffer, cursor, size, &token);
         if (is_match(&token))
         {
-            append_token(&vector, &token);
+            append_token(vector, &token);
             continue;
         }
 
         cursor = match_operator(buffer, cursor, size, &token);
         if (is_match(&token))
         {
-            append_token(&vector, &token);
+            append_token(vector, &token);
             continue;
         }
 
         cursor = match_punctuation(buffer, cursor, size, &token);
         if (is_match(&token))
         {
-            append_token(&vector, &token);
+            append_token(vector, &token);
             continue;
         }
 

@@ -42,7 +42,7 @@ void push_log(const char* message, cabor_log_type type)
         {
             const char* trace_prefix = "[TRACE] ";
             const char* trace_prefix_colored = CABOR_ANSI_COLOR_RESET "[TRACE] ";
-            cabor_vector_push_str(&g_logging_ctx.log_buffer, trace_prefix, false);
+            cabor_vector_push_str(g_logging_ctx.log_buffer, trace_prefix, false);
             fputs(trace_prefix_colored, stdout);
             break;
         }
@@ -50,7 +50,7 @@ void push_log(const char* message, cabor_log_type type)
         {
             const char* warning_prefix = "[WARNING] ";
             const char* warning_prefix_colored = CABOR_ANSI_COLOR_YELLOW "[WARNING] ";
-            cabor_vector_push_str(&g_logging_ctx.log_buffer, warning_prefix, false);
+            cabor_vector_push_str(g_logging_ctx.log_buffer, warning_prefix, false);
             fputs(warning_prefix_colored, stdout);
             break;
         }
@@ -58,7 +58,7 @@ void push_log(const char* message, cabor_log_type type)
         {
             const char* error_prefix = "[ERROR] ";
             const char* error_prefix_colored = CABOR_ANSI_COLOR_RED "[ERROR] ";
-            cabor_vector_push_str(&g_logging_ctx.log_buffer, error_prefix, false);
+            cabor_vector_push_str(g_logging_ctx.log_buffer, error_prefix, false);
             fputs(error_prefix_colored, stdout);
             break;
         }
@@ -66,7 +66,7 @@ void push_log(const char* message, cabor_log_type type)
         {
             const char* test_prefix = "[TEST] ";
             const char* test_prefix_colored = CABOR_ANSI_COLOR_MAGENTA "[TEST] ";
-            cabor_vector_push_str(&g_logging_ctx.log_buffer, test_prefix, false);
+            cabor_vector_push_str(g_logging_ctx.log_buffer, test_prefix, false);
             fputs(test_prefix_colored, stdout);
             break;
         }
@@ -76,8 +76,8 @@ void push_log(const char* message, cabor_log_type type)
         }
         }
 
-        cabor_vector_push_str(&g_logging_ctx.log_buffer, message, true);
-        cabor_vector_push_char(&g_logging_ctx.log_buffer, newline);
+        cabor_vector_push_str(g_logging_ctx.log_buffer, message, true);
+        cabor_vector_push_char(g_logging_ctx.log_buffer, newline);
         puts(message);
         fputs(CABOR_ANSI_COLOR_RESET, stdout);
     }
@@ -115,7 +115,7 @@ void dump_cabor_log_to_disk(cabor_logging_context* ctx, const char* filename)
     CABOR_SCOPED_LOCK(g_logging_ctx.log_buffer_lock)
     {
         FILE* fp = fopen(filename, "ab");
-        fwrite(ctx->log_buffer.vector_mem.mem, sizeof(char), ctx->log_buffer.size, fp);
+        fwrite(ctx->log_buffer->vector_mem.mem, sizeof(char), ctx->log_buffer->size, fp);
         fclose(fp);
     }
 }

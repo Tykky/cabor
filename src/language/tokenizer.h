@@ -23,6 +23,6 @@ typedef struct cabor_token_t
 
 size_t get_cabor_token_size();
 
-cabor_vector cabor_tokenize(cabor_file* file);
+cabor_vector* cabor_tokenize(cabor_file* file);
 
 void cabor_stringify_tokens(char* buffer, size_t size, cabor_vector* tokens);

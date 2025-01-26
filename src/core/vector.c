@@ -67,11 +67,12 @@ static void* peek_next(cabor_vector* v)
     return (char*) v->vector_mem.mem + stride * v->size;
 }
 
-cabor_vector cabor_create_vector(size_t initial_capacity, cabor_element_type type, bool zero_initialize)
+cabor_vector* cabor_create_vector(size_t initial_capacity, cabor_element_type type, bool zero_initialize)
 {
     size_t stride = get_element_type_size(type);
+    CABOR_NEW(cabor_vector, v);
 
-    cabor_vector v =
+    *v = (cabor_vector)
     {
         .type       = type,
         .capacity   = initial_capacity,
@@ -206,6 +207,7 @@ void cabor_destroy_vector(cabor_vector* v)
     v->type = 0;
     v->capacity = 0;
     v->size = 0;
+    CABOR_DELETE(cabor_vector, v);
 }
 
 float* cabor_vector_peek_float(cabor_vector* v)

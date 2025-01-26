@@ -239,41 +239,41 @@ static bool is_visited(cabor_vector* nodes, cabor_ast_node* node)
 
 // Get ast tree as list of nodes, note we store node pointers in the list,
 // the list does not own the memory for the tree.
-cabor_vector cabor_get_ast_node_list(cabor_ast_allocated_node* root)
+cabor_vector* cabor_get_ast_node_list(cabor_ast_allocated_node* root)
 {
     // Implement DFS, since we don't have stack implemented we'll be
     // using cabor_vector to implement/emulate stack
 
     size_t stack_capacity = 100;
-    cabor_vector stack = cabor_create_vector(stack_capacity, CABOR_PTR, true);
+    cabor_vector* stack = cabor_create_vector(stack_capacity, CABOR_PTR, true);
     size_t top_of_stack = 0; // index to top of stack
-    cabor_ast_node** stack_base = stack.vector_mem.mem;
+    cabor_ast_node** stack_base = stack->vector_mem.mem;
 
-    cabor_vector nodes = cabor_create_vector(100, CABOR_PTR, true);
+    cabor_vector* nodes = cabor_create_vector(100, CABOR_PTR, true);
     cabor_ast_node* root_node = cabor_access_ast_node(root);
 
-    stack_push(&stack, &stack_capacity, &top_of_stack, root_node);
+    stack_push(stack, &stack_capacity, &top_of_stack, root_node);
 
     while (true)
     {
         cabor_ast_node* node;
-        if (!stack_pop(&stack, &top_of_stack, &node))
+        if (!stack_pop(stack, &top_of_stack, &node))
             break; // stack is empty
 
-        if (!is_visited(&nodes, node))
+        if (!is_visited(nodes, node))
         {
-            cabor_vector_push_ptr(&nodes, node);
+            cabor_vector_push_ptr(nodes, node);
 
             // Add neighbours to stack
             for (size_t i = 0; i < node->num_edges; i++)
             {
                 cabor_ast_node* neighbour = cabor_access_ast_node(&node->edges[i]);
-                stack_push(&stack, &stack_capacity, &top_of_stack, neighbour);
+                stack_push(stack, &stack_capacity, &top_of_stack, neighbour);
             }
         }
     }
 
-    cabor_destroy_vector(&stack);
+    cabor_destroy_vector(stack);
 
     return nodes;
 }
@@ -310,11 +310,11 @@ void cabor_free_ast_node(cabor_ast_allocated_node* node)
 // Free the whole tree
 void cabor_free_ast(cabor_ast_allocated_node* root)
 {
-    cabor_vector nodes = cabor_get_ast_node_list(root);
+    cabor_vector* nodes = cabor_get_ast_node_list(root);
 
-    for (size_t i = 0; i < nodes.size; i++)
+    for (size_t i = 0; i < nodes->size; i++)
     {
-        cabor_ast_node* node = cabor_vector_get_ptr(&nodes, i);
+        cabor_ast_node* node = cabor_vector_get_ptr(nodes, i);
         cabor_allocation allocation =
         {
             .mem = node,
@@ -330,7 +330,7 @@ void cabor_free_ast(cabor_ast_allocated_node* root)
 
         cabor_free_ast_node(&allocated_node);
     }
-    cabor_destroy_vector(&nodes);
+    cabor_destroy_vector(nodes);
 }
 
 cabor_ast_node* cabor_access_ast_node(cabor_ast_allocated_node* node)

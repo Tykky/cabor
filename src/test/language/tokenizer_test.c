@@ -17,10 +17,10 @@ int cabor_test_tokenize_hello_world()
 
     const char* expected = "['if', '(', 'a', '<=', 'bee', ')', '{', 'print', '(', '420', '-', '123', ')', ';', '}', 'if', '(', 'c', '>=', 'men', ')', '{', 'print', '(', '2', '*', '2', ')', ';', '}']";
 
-    cabor_vector tokens = cabor_tokenize(&file);
+    cabor_vector* tokens = cabor_tokenize(&file);
     char token_string[CABOR_TOKEN_STRINGIFY_STR_SIZE] = { 0 };
 
-    cabor_stringify_tokens(token_string, CABOR_TOKEN_STRINGIFY_STR_SIZE, &tokens);
+    cabor_stringify_tokens(token_string, CABOR_TOKEN_STRINGIFY_STR_SIZE, tokens);
 
     int cmp_result = strcmp(token_string, expected);
     int res = 0;
@@ -33,7 +33,7 @@ int cabor_test_tokenize_hello_world()
 
     CABOR_CHECK_EQUALS(cmp_result, 0, res);
 
-    cabor_destroy_vector(&tokens);
+    cabor_destroy_vector(tokens);
     cabor_destroy_file(&file);
 
     return res;

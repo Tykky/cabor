@@ -62,15 +62,15 @@ static unsigned int parse_cmd_args(int argc, char** argv, int* tokenize_arg, int
 static void run_tokenizer(const char* filename)
 {
 	cabor_file file = cabor_load_file(filename);
-	cabor_vector tokens = cabor_tokenize(&file);
+	cabor_vector* tokens = cabor_tokenize(&file);
 
-	size_t buffer_size = tokens.size * sizeof(cabor_token);
+	size_t buffer_size = tokens->size * sizeof(cabor_token);
 	cabor_allocation buffer = CABOR_MALLOC(buffer_size);
-	cabor_stringify_tokens(buffer.mem, buffer_size, &tokens);
+	cabor_stringify_tokens(buffer.mem, buffer_size, tokens);
 	CABOR_LOG_F("%s", buffer);
 
 	cabor_destroy_file(&file);
-	cabor_destroy_vector(&tokens);
+	cabor_destroy_vector(tokens);
 
 	CABOR_FREE(&buffer);
 }
