@@ -33,7 +33,7 @@ int cabor_test_tokenize_hello_world()
 
     CABOR_CHECK_EQUALS(cmp_result, 0, res);
 
-    destroy_cabor_vector(&tokens);
+    cabor_destroy_vector(&tokens);
     cabor_destroy_file(&file);
 
     return res;

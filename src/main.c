@@ -70,7 +70,7 @@ static void run_tokenizer(const char* filename)
 	CABOR_LOG_F("%s", buffer);
 
 	cabor_destroy_file(&file);
-	destroy_cabor_vector(&tokens);
+	cabor_destroy_vector(&tokens);
 
 	CABOR_FREE(&buffer);
 }

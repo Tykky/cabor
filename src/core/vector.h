@@ -60,7 +60,7 @@ struct cabor_token_t*  cabor_vector_get_token  (cabor_vector* v, size_t idx);
 
 void cabor_vector_reserve(cabor_vector* v, size_t size);
 
-void destroy_cabor_vector(cabor_vector* v);
+void cabor_destroy_vector(cabor_vector* v);
 
 float*         cabor_vector_peek_float  (cabor_vector* v);
 double*        cabor_vector_peek_double (cabor_vector* v);

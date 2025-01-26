@@ -93,10 +93,10 @@ int cabor_test_parse_expression_abc()
     CABOR_CHECK_EQUALS(b_t->data[0], 'b', res);
     CABOR_CHECK_EQUALS(c_t->data[0], 'c', res);
 
-    destroy_cabor_vector(&ast_nodes);
+    cabor_destroy_vector(&ast_nodes);
     cabor_free_ast(&ast);
 
-    destroy_cabor_vector(&tokens);
+    cabor_destroy_vector(&tokens);
 
     return res;
 }
@@ -176,10 +176,10 @@ int cabor_test_parse_expression_cba()
     CABOR_CHECK_EQUALS(b_t->data[0], 'b', res);
     CABOR_CHECK_EQUALS(c_t->data[0], 'c', res);
 
-    destroy_cabor_vector(&ast_nodes);
+    cabor_destroy_vector(&ast_nodes);
     cabor_free_ast(&ast);
 
-    destroy_cabor_vector(&tokens);
+    cabor_destroy_vector(&tokens);
 
     return res;
 }
@@ -261,10 +261,10 @@ int cabor_test_parse_expression_abc_parenthesized()
     CABOR_CHECK_EQUALS(b_t->data[0], 'b', res);
     CABOR_CHECK_EQUALS(c_t->data[0], 'c', res);
 
-    destroy_cabor_vector(&ast_nodes);
+    cabor_destroy_vector(&ast_nodes);
     cabor_free_ast(&ast);
 
-    destroy_cabor_vector(&tokens);
+    cabor_destroy_vector(&tokens);
 
     return res;
 

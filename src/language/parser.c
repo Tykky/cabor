@@ -273,7 +273,7 @@ cabor_vector cabor_get_ast_node_list(cabor_ast_allocated_node* root)
         }
     }
 
-    destroy_cabor_vector(&stack);
+    cabor_destroy_vector(&stack);
 
     return nodes;
 }
@@ -330,7 +330,7 @@ void cabor_free_ast(cabor_ast_allocated_node* root)
 
         cabor_free_ast_node(&allocated_node);
     }
-    destroy_cabor_vector(&nodes);
+    cabor_destroy_vector(&nodes);
 }
 
 cabor_ast_node* cabor_access_ast_node(cabor_ast_allocated_node* node)

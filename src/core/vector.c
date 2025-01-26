@@ -199,7 +199,7 @@ void cabor_vector_reserve(cabor_vector* v, size_t size)
     vector_resize(v, size);
 }
 
-void destroy_cabor_vector(cabor_vector* v)
+void cabor_destroy_vector(cabor_vector* v)
 {
     CABOR_FREE(&v->vector_mem);
     v->vector_mem.mem = NULL;

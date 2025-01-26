@@ -5,6 +5,7 @@
 #ifdef CABOR_ENABLE_LOGGING
 
 #include "../core/vector.h"
+#include "../core/mutex.h"
 
 #define CABOR_LOGGER_INITIAL_BUFFER_SIZE 1024
 #define CABOR_LOGGER_FORMAT_STR_BUFFER_SIZE 1024
@@ -40,6 +41,7 @@ typedef enum
 typedef struct
 {
     cabor_vector log_buffer;
+    cabor_mutex* log_buffer_lock;
 } cabor_logging_context;
 
 void create_cabor_logger(cabor_logging_context* logging_context);

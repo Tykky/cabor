@@ -63,7 +63,7 @@ static void on_close_timeout(uv_handle_t* timeout)
 static void on_close_tcp_client(uv_handle_t* client)
 {
     cabor_tcp_client* cabor_client = client->data;
-    destroy_cabor_vector(&cabor_client->data);
+    cabor_destroy_vector(&cabor_client->data);
     cabor_allocation alloc = {
         .mem  = cabor_client,
 #ifdef CABOR_ENABLE_ALLOCATOR_FAT_POINTERS

@@ -25,11 +25,28 @@
 
 #define CABOR_MEMORY_DEBUG_ARRAY_SIZE 4096
 
-#define CABOR_ENABLE_MEMORY_DEBUGGING 0
+#define CABOR_ENABLE_MEMORY_DEBUGGING 1
 
 #if CABOR_ENABLE_MEMORY_DEBUGGING
 #define CABOR_ENABLE_ALLOCATOR_FAT_POINTERS
 #endif
+
+// quality of life macro to generate cabor_allocation struct when assigning value to variable
+#ifdef CABOR_ENABLE_ALLOCATOR_FAT_POINTERS
+#define CABOR_DEALLOC(type, memory) { .mem = memory, .size = sizeof(type) }
+#else
+#define CABOR_DEALLOC(type, memory) { .mem = memory }
+#endif
+
+// These are not the nicest macros to use but behave similarly to C++ new and delete.
+// Would be nice to have decltype() so we could avoid passing the type
+#define CABOR_NEW(type, variable, ...)\
+cabor_allocation variable_alloc = CABOR_MALLOC(sizeof(type));\
+type* variable = variable_alloc.mem
+
+#define CABOR_DELETE(type, variable)\
+cabor_allocation variable_alloc = CABOR_DEALLOC(type, variable);\
+CABOR_FREE(variable_alloc.mem)
 
 typedef struct
 {

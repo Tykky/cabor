@@ -14,7 +14,7 @@ int cabor_test_vector_push()
     int res = 0;
     CABOR_CHECK_EQUALS(vec.size, 10, res);
 
-    destroy_cabor_vector(&vec);
+    cabor_destroy_vector(&vec);
 
     return res;
 }
@@ -31,7 +31,7 @@ int cabor_test_vector_get()
     for (size_t i = 0; i < 9; i++)
         CABOR_CHECK_EQUALS(cabor_vector_get_int(&vec, i), i + 1, res);
 
-    destroy_cabor_vector(&vec);
+    cabor_destroy_vector(&vec);
 
     return 0;
 }
@@ -48,7 +48,7 @@ int cabor_test_vector_peek()
     int res = 0;
     CABOR_CHECK_EQUALS(((long)next - (long)vec.vector_mem.mem) / sizeof(int), vec.size, res);
 
-    destroy_cabor_vector(&vec);
+    cabor_destroy_vector(&vec);
 
     return res;
 }
@@ -63,7 +63,7 @@ int cabor_test_vector_resize()
     int res = 0;
     CABOR_CHECK_GREATER_EQ(vec.capacity, 10, res);
 
-    destroy_cabor_vector(&vec);
+    cabor_destroy_vector(&vec);
 
     return res;
 }
@@ -79,7 +79,7 @@ int cabor_test_zero_vector_initialized()
         CABOR_CHECK_EQUALS(vec.size, 0, res);
     }
 
-    destroy_cabor_vector(&vec);
+    cabor_destroy_vector(&vec);
 
     return res;
 }

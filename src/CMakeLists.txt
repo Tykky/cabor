@@ -4,6 +4,8 @@ set(SOURCES
     "core/vector.h"
     "core/memory.c"
     "core/memory.h"
+    "core/mutex.h"
+    "core/mutex.c"
     "logging/logging.c"
     "logging/logging.h"
     "filesystem/filesystem.h"
