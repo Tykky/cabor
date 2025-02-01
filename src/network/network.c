@@ -79,8 +79,8 @@ static void on_timeout(uv_timer_t* timeout)
     uv_tcp_t* client = &cabor_client->handle;
 
     CABOR_LOG("client timed out, closing connection.");
-    uv_close(client, on_close_tcp_client);
-    uv_close(timeout, on_close_timeout);
+    uv_close((uv_handle_t*)client, on_close_tcp_client);
+    uv_close((uv_handle_t*)timeout, on_close_timeout);
 }
 
 void on_write(uv_write_t* req, int status)
@@ -208,13 +208,13 @@ static void on_after_work(uv_work_t* work, int status)
 
     uv_write(req, client, &wrbuf, 1, on_write);
 
-    uv_close(timeout, on_close_timeout);
-    uv_close(client, on_close_tcp_client);
+    uv_close((uv_handle_t*)timeout, on_close_timeout);
+    uv_close((uv_handle_t*)client, on_close_tcp_client);
 
     if (shutdown)
     {
         CABOR_DELETE(uv_work_t, work);
-        uv_close(cabor_client->server_context->servermem.mem, NULL);
+        uv_close((uv_handle_t*)cabor_client->server_context->servermem.mem, NULL);
         CABOR_LOG("SHUTDOWN received, shutting down the server")
         return;
     }
@@ -303,7 +303,7 @@ static void on_new_connection(uv_stream_t* server, int status)
     }
     else 
     {
-        uv_close(client, on_close_tcp_client);
+        uv_close((uv_handle_t*)client, on_close_tcp_client);
         CABOR_DELETE(cabor_tcp_timeout, cabor_timeout);
     }
 }
