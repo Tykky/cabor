@@ -81,6 +81,20 @@ void on_write(uv_write_t* req, int status)
         CABOR_LOG_ERR_F("write error: %s", uv_strerror(status));
     }
 
+    cabor_tcp_client* client = req->data;
+
+    if (client->response_size > 0)
+    {
+        cabor_allocation alloc =
+        {
+            .mem = client->response.mem,
+#ifdef CABOR_ENABLE_ALLOCATOR_FAT_POINTERS
+            .size = client->response_size
+#endif
+        };
+        CABOR_FREE(&alloc);
+    }
+
     CABOR_DELETE(uv_write_t, req);
 }
 
@@ -135,6 +149,7 @@ static void on_work(uv_work_t* work)
             .error = false
         };
 
+        // Sending the data back happens in on_after_work
         cabor_encode_network_response(&resp, &cabor_client->response, &cabor_client->response_size);
 
     }
@@ -172,6 +187,7 @@ static void on_after_work(uv_work_t* work, int status)
 
     cabor_allocation reqbuf = CABOR_MALLOC(sizeof(uv_write_t));
     uv_write_t* req = (uv_write_t*)reqbuf.mem;
+    req->data = cabor_client;
 
     uv_buf_t wrbuf =
     {
@@ -279,6 +295,7 @@ static void on_new_connection(uv_stream_t* server, int status)
     else 
     {
         uv_close(client, on_close_tcp_client);
+        CABOR_DELETE(cabor_tcp_timeout, cabor_timeout);
     }
 }
 

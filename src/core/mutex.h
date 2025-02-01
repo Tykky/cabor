@@ -19,7 +19,9 @@
 struct cabor_mutex;
 typedef struct cabor_mutex cabor_mutex;
 
+cabor_mutex* cabor_create_mutex_default_malloc();
 cabor_mutex* cabor_create_mutex();
+void cabor_destroy_mutex_default_malloc(struct cabor_mutex* cabor_lock);
 void cabor_destroy_mutex(struct cabor_mutex* cabor_lock);
 void cabor_lock(struct cabor_mutex* cabor_lock);
 void cabor_unlock(struct cabor_mutex* cabor_lock);

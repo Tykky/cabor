@@ -1,5 +1,13 @@
 #include "cabor_defines.h"
 
+#ifdef _DEBUG && WIN32
+#include <stdlib.h>
+#include <crtdbg.h>k
+#define malloc(s)       _malloc_dbg(s, _NORMAL_BLOCK, __FILE__, __LINE__)
+#define calloc(c, s)    _calloc_dbg(c, s, _NORMAL_BLOCK, __FILE__, __LINE__)
+#define realloc(p, s)   _realloc_dbg(p, s, _NORMAL_BLOCK, __FILE__, __LINE__)
+#endif
+
 #include <stdio.h>
 #include <string.h>
 
@@ -15,6 +23,12 @@
 
 #include "test/test_framework.h"
 #include "test/registered_tests.h" 
+
+#ifdef _DEBUG 
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+#endif
 
 
 #define CABOR_ARG_ENABLE_TESTING (1 << 0)
@@ -88,6 +102,11 @@ static void run_server()
 
 int main(int argc, char **argv) 
 {
+#if _DEBUG && WIN32
+int CRTDBFLAGS = _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF;
+_CrtSetDbgFlag(CRTDBFLAGS);
+#endif
+
 	CABOR_CREATE_ALLOCATOR();
 	CABOR_INITIALIZE_TEST_FRAMEWORK();
 	CABOR_CREATE_LOGGER();

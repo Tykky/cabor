@@ -7,6 +7,15 @@
 
 static cabor_allocator_context g_allocator;
 
+#ifdef _DEBUG && WIN32
+#include <stdlib.h>
+#include <crtdbg.h>k
+#define malloc(s)       _malloc_dbg(s, _NORMAL_BLOCK, __FILE__, __LINE__)
+#define calloc(c, s)    _calloc_dbg(c, s, _NORMAL_BLOCK, __FILE__, __LINE__)
+#define realloc(p, s)   _realloc_dbg(p, s, _NORMAL_BLOCK, __FILE__, __LINE__)
+#endif
+
+
 void create_cabor_allocator_context(cabor_allocator_context* alloc_ctx)
 {
 #ifdef CABOR_ENABLE_ALLOCATOR_FAT_POINTERS
@@ -14,8 +23,8 @@ void create_cabor_allocator_context(cabor_allocator_context* alloc_ctx)
 #endif
 #if CABOR_ENABLE_MEMORY_DEBUGGING
     alloc_ctx->debug_size = 0;
-    //alloc_ctx->alloc_lock = cabor_create_mutex();
-    //alloc_ctx->dealloc_lock = cabor_create_mutex();
+    alloc_ctx->alloc_lock = cabor_create_mutex_default_malloc();
+    alloc_ctx->dealloc_lock = cabor_create_mutex_default_malloc();
 #endif
 }
 
@@ -26,8 +35,8 @@ void destroy_cabor_allocator_context(cabor_allocator_context* alloc_ctx)
 #endif
 #if CABOR_ENABLE_MEMORY_DEBUGGING
     alloc_ctx->debug_size = 0;
-    //cabor_destroy_mutex(alloc_ctx->dealloc_lock);
-    //cabor_destroy_mutex(alloc_ctx->dealloc_lock);
+    cabor_destroy_mutex_default_malloc(alloc_ctx->alloc_lock);
+    cabor_destroy_mutex_default_malloc(alloc_ctx->dealloc_lock);
 #endif
 }
 

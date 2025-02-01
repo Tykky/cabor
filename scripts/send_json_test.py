@@ -2,7 +2,7 @@ import socket
 import json
 
 sockets = []
-r = 10
+r = 1000
 
 for i in range(0, r):
     data = {}
@@ -14,7 +14,6 @@ for i in range(0, r):
     elif i == r - 1:
         data = {
             "command": "shutdown",
-            "code": "source code text" + str(i)
         }
 
 

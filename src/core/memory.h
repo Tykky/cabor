@@ -23,7 +23,7 @@
 #define CABOR_GET_ALLOCATED() cabor_get_current_allocated(cabor_get_global_allocator_context())
 #define CABOR_GET_ALLOCATOR() cabor_get_global_allocator_context()
 
-#define CABOR_MEMORY_DEBUG_ARRAY_SIZE 4096
+#define CABOR_MEMORY_DEBUG_ARRAY_SIZE 65536
 
 #ifdef NDEBUG
 #define CABOR_ENABLE_MEMORY_DEBUGGING 0
