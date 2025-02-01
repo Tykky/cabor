@@ -142,15 +142,6 @@ static void on_work(uv_work_t* work)
         // run compiler (TODO) ... respond with program
         const char* program = "base64-encoded statically linked x86_64 program";
 
-        // to simulate compiling
-        int a = 1, b = 1, c = 1;
-        for (size_t i = 1; i < 100000000; i++)
-        {
-            a *= i;
-            b *= i;
-            c *= i;
-        }
-
         cabor_network_response resp =
         {
             .program_text = program,

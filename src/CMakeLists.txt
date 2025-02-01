@@ -22,6 +22,8 @@ set(SOURCES
     "test/registered_tests.h"
     "test/core/vector_test.c"
     "test/core/vector_test.h"
+    "test/core/stack_test.h"
+    "test/core/stack_test.c"
     "test/filesystem/filesystem_tests.h"
     "test/filesystem/filesystem_tests.c"
     "test/language/tokenizer_test.c"

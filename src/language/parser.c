@@ -1,5 +1,6 @@
 #include "parser.h"
 #include "../core/memory.h"
+#include "../core/stack.h"
 #include "../debug/cabor_debug.h"
 #include "../language/tokenizer.h"
 
@@ -190,42 +191,6 @@ cabor_ast_allocated_node cabor_allocate_ast_node(size_t token_index, cabor_ast_a
     return allocated_node;
 }
 
-static void stack_push(cabor_vector* stack, size_t* stack_capacity, size_t* top_of_stack, cabor_ast_node* element)
-{
-    if (*top_of_stack >= *stack_capacity)
-    {
-        // A hack to grow the capacity of the vector,
-        // pushing stack_capacity number of elements effectively
-        // doubles the size
-        for (size_t i = 0; i < *stack_capacity; i++)
-        {
-            cabor_vector_push_ptr(stack, NULL);
-        }
-        *stack_capacity *= 2;
-    }
-
-#ifdef CABOR_ENABLE_ALLOCATOR_FAT_POINTERS
-    CABOR_ASSERT(stack->vector_mem.size >= *stack_capacity, "Failed to grow stack capacity!");
-#endif
-    cabor_ast_node** stack_base = stack->vector_mem.mem;
-
-    stack_base[(*top_of_stack)++] = element;
-}
-
-static bool stack_pop(cabor_vector* stack, size_t* top_of_stack, cabor_ast_node** element)
-{
-    cabor_ast_node** stack_base = stack->vector_mem.mem;
-    if (*top_of_stack > 0)
-    {
-        *element = stack_base[--(*top_of_stack)];
-        stack_base[*top_of_stack] = NULL;
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
 
 static bool is_visited(cabor_vector* nodes, cabor_ast_node* node)
 {
@@ -241,23 +206,20 @@ static bool is_visited(cabor_vector* nodes, cabor_ast_node* node)
 // the list does not own the memory for the tree.
 cabor_vector* cabor_get_ast_node_list(cabor_ast_allocated_node* root)
 {
-    // Implement DFS, since we don't have stack implemented we'll be
-    // using cabor_vector to implement/emulate stack
+    // Implement DFS
 
     size_t stack_capacity = 100;
-    cabor_vector* stack = cabor_create_vector(stack_capacity, CABOR_PTR, true);
-    size_t top_of_stack = 0; // index to top of stack
-    cabor_ast_node** stack_base = stack->vector_mem.mem;
+    cabor_stack* stack = cabor_create_stack(stack_capacity);
 
     cabor_vector* nodes = cabor_create_vector(100, CABOR_PTR, true);
     cabor_ast_node* root_node = cabor_access_ast_node(root);
 
-    stack_push(stack, &stack_capacity, &top_of_stack, root_node);
+    cabor_stack_push(stack, root_node);
 
     while (true)
     {
         cabor_ast_node* node;
-        if (!stack_pop(stack, &top_of_stack, &node))
+        if (!cabor_stack_pop(stack, &node))
             break; // stack is empty
 
         if (!is_visited(nodes, node))
@@ -268,12 +230,12 @@ cabor_vector* cabor_get_ast_node_list(cabor_ast_allocated_node* root)
             for (size_t i = 0; i < node->num_edges; i++)
             {
                 cabor_ast_node* neighbour = cabor_access_ast_node(&node->edges[i]);
-                stack_push(stack, &stack_capacity, &top_of_stack, neighbour);
+                cabor_stack_push(stack, neighbour);
             }
         }
     }
 
-    cabor_destroy_vector(stack);
+    cabor_destroy_stack(stack);
 
     return nodes;
 }
