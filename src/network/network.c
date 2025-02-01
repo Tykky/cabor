@@ -7,9 +7,18 @@
 #include <uv.h>
 #include <jansson.h>
 
+#ifdef _DEBUG && WIN32
+#include <stdlib.h>
+#include <crtdbg.h>k
+#define malloc(s)       _malloc_dbg(s, _NORMAL_BLOCK, __FILE__, __LINE__)
+#define calloc(c, s)    _calloc_dbg(c, s, _NORMAL_BLOCK, __FILE__, __LINE__)
+#define realloc(p, s)   _realloc_dbg(p, s, _NORMAL_BLOCK, __FILE__, __LINE__)
+#endif
+
+
 #define CABOR_SERVER_PORT 4120
 #define CABOR_SERVER_BACKLOG 128
-#define CABOR_IDLE_TIMEOUT_MS 60000
+#define CABOR_IDLE_TIMEOUT_MS 1000
 
 // The flow of the network requests go something like this:
 //   1. cabor_start_compile_server() creates the server and begins the server loop
@@ -333,8 +342,20 @@ int cabor_start_compile_server(cabor_server_context* ctx)
     return 0;
 }
 
+static void* json_malloc(size_t size)
+{
+    return malloc(size);
+}
+
+static void json_free(void* ptr)
+{
+    free(ptr);
+}
+
 int cabor_decode_network_request(const void* buffer, const size_t buffer_size, cabor_network_request* request)
 {
+    json_set_alloc_funcs(json_malloc, json_free);
+
     json_t* root;
     json_error_t error;
 
@@ -380,6 +401,8 @@ int cabor_decode_network_request(const void* buffer, const size_t buffer_size, c
 
 void cabor_encode_network_response(const cabor_network_response* response, cabor_allocation* alloc, size_t* buffer_size)
 {
+    json_set_alloc_funcs(json_malloc, json_free);
+
     json_t* root = json_object();
 
     if (!response->error)

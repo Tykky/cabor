@@ -1,5 +1,6 @@
 #include "mutex.h"
 
+#include <stdlib.h>
 #include "memory.h"
 #include <uv.h>
 

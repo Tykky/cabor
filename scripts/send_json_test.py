@@ -2,13 +2,13 @@ import socket
 import json
 
 sockets = []
-r = 1000
+r = 2
 
 for i in range(0, r):
     data = {}
     if (i < r - 1):
         data = {
-            "command": "compile",
+            "command": "ping",
             "code": "source code text" + str(i)
         }
     elif i == r - 1:
