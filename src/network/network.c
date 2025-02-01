@@ -298,7 +298,7 @@ static void on_new_connection(uv_stream_t* server, int status)
     if (uv_accept(server, (uv_stream_t*)client) == 0) 
     {
         CABOR_LOG("New client connected");
-        uv_read_start(client, alloc_buffer, on_read);
+        uv_read_start((uv_stream_t*)client, alloc_buffer, on_read);
         uv_timer_start(timeout, on_timeout, CABOR_IDLE_TIMEOUT_MS, 0);
     }
     else 
@@ -320,7 +320,7 @@ int cabor_start_compile_server(cabor_server_context* ctx)
     uv_tcp_init(loop, server);
     server->data = ctx;
 
-    struct sockaddr_in addr;
+    struct sockaddr addr;
     uv_ip4_addr("0.0.0.0", CABOR_SERVER_PORT, &addr);
     uv_tcp_bind((uv_tcp_t*)server, &addr, 0);
 
