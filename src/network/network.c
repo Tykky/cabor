@@ -320,9 +320,9 @@ int cabor_start_compile_server(cabor_server_context* ctx)
     uv_tcp_init(loop, server);
     server->data = ctx;
 
-    struct sockaddr addr;
+    struct sockaddr_in addr;
     uv_ip4_addr("0.0.0.0", CABOR_SERVER_PORT, &addr);
-    uv_tcp_bind((uv_tcp_t*)server, &addr, 0);
+    uv_tcp_bind((uv_tcp_t*)server, (const struct sockaddr*) & addr, 0);
 
     int r = uv_listen((uv_stream_t*)server, CABOR_SERVER_BACKLOG, on_new_connection);
     if (r)
