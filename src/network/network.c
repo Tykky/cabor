@@ -206,7 +206,7 @@ static void on_after_work(uv_work_t* work, int status)
 
     bool shutdown = cabor_client->shutdown_requested;
 
-    uv_write(req, client, &wrbuf, 1, on_write);
+    uv_write(req, (uv_stream_t*)client, &wrbuf, 1, on_write);
 
     uv_close((uv_handle_t*)timeout, on_close_timeout);
     uv_close((uv_handle_t*)client, on_close_tcp_client);
@@ -295,7 +295,7 @@ static void on_new_connection(uv_stream_t* server, int status)
     timeout->data = cabor_timeout;
     client->data = cabor_client;
 
-    if (uv_accept(server, client) == 0) 
+    if (uv_accept(server, (uv_stream_t*)client) == 0) 
     {
         CABOR_LOG("New client connected");
         uv_read_start(client, alloc_buffer, on_read);
@@ -322,9 +322,9 @@ int cabor_start_compile_server(cabor_server_context* ctx)
 
     struct sockaddr_in addr;
     uv_ip4_addr("0.0.0.0", CABOR_SERVER_PORT, &addr);
-    uv_tcp_bind(server, &addr, 0);
+    uv_tcp_bind((uv_tcp_t*)server, &addr, 0);
 
-    int r = uv_listen(server, CABOR_SERVER_BACKLOG, on_new_connection);
+    int r = uv_listen((uv_stream_t*)server, CABOR_SERVER_BACKLOG, on_new_connection);
     if (r)
     {
         CABOR_LOG_ERR_F("Listen error: %s", uv_strerror(r));
