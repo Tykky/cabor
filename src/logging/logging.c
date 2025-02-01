@@ -31,9 +31,8 @@ void destroy_cabor_logger(cabor_logging_context* logging_context)
 
 void push_log(const char* message, cabor_log_type type)
 {
-    //cabor_lock(g_logging_ctx.log_buffer_lock);
-    //CABOR_SCOPED_LOCK(g_logging_ctx.log_buffer_lock)
-    //{
+    CABOR_SCOPED_LOCK(g_logging_ctx.log_buffer_lock)
+    {
         size_t i = 0;
         char newline = '\n';
 
@@ -81,32 +80,26 @@ void push_log(const char* message, cabor_log_type type)
         cabor_vector_push_char(g_logging_ctx.log_buffer, newline);
         puts(message);
         fputs(CABOR_ANSI_COLOR_RESET, stdout);
-    //}
-    //cabor_unlock(g_logging_ctx.log_buffer_lock);
+    }
 }
 
 void push_log_f(const char* message, cabor_log_type type, ...)
 {
-    //cabor_lock(g_logging_ctx.log_buffer_lock);
-    //CABOR_SCOPED_LOCK(g_logging_ctx.log_buffer_lock)
-    //{
-        char buffer[CABOR_LOGGER_FORMAT_STR_BUFFER_SIZE] = { 0 };
-        size_t msg_len = strlen(message);
+    char buffer[CABOR_LOGGER_FORMAT_STR_BUFFER_SIZE] = { 0 };
+    size_t msg_len = strlen(message);
 
-        va_list args;
-        va_start(args, type);
-        int result = vsnprintf(buffer, CABOR_LOGGER_FORMAT_STR_BUFFER_SIZE, message, args);
-        va_end(args);
+    va_list args;
+    va_start(args, type);
+    int result = vsnprintf(buffer, CABOR_LOGGER_FORMAT_STR_BUFFER_SIZE, message, args);
+    va_end(args);
 
-        if (result <= 0)
-        {
-            fputs("Failed to push format string to the temp buffer! buffer is too small", stderr);
-            exit(1);
-        }
+    if (result <= 0)
+    {
+        fputs("Failed to push format string to the temp buffer! buffer is too small", stderr);
+        exit(1);
+    }
 
-        push_log(buffer, type);
-    //}
-    //cabor_unlock(g_logging_ctx.log_buffer_lock);
+    push_log(buffer, type);
 }
 
 cabor_logging_context* get_cabor_global_logging_context()
@@ -116,14 +109,12 @@ cabor_logging_context* get_cabor_global_logging_context()
 
 void dump_cabor_log_to_disk(cabor_logging_context* ctx, const char* filename)
 {
-    //cabor_lock(g_logging_ctx.log_buffer_lock);
-    //CABOR_SCOPED_LOCK(g_logging_ctx.log_buffer_lock)
-    //{
+    CABOR_SCOPED_LOCK(g_logging_ctx.log_buffer_lock)
+    {
         FILE* fp = fopen(filename, "ab");
         fwrite(ctx->log_buffer->vector_mem.mem, sizeof(char), ctx->log_buffer->size, fp);
         fclose(fp);
-    //}
-    //cabor_unlock(g_logging_ctx.log_buffer_lock);
+    }
 }
 
 #endif
