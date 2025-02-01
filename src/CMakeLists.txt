@@ -6,6 +6,8 @@ set(SOURCES
     "core/memory.h"
     "core/mutex.h"
     "core/mutex.c"
+    "core/stack.h"
+    "core/stack.c"
     "logging/logging.c"
     "logging/logging.h"
     "filesystem/filesystem.h"

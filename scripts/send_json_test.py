@@ -8,7 +8,7 @@ for i in range(0, r):
     data = {}
     if (i < r - 1):
         data = {
-            "command": "ping",
+            "command": "compile",
             "code": "source code text" + str(i)
         }
     elif i == r - 1:

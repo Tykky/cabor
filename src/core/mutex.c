@@ -38,7 +38,7 @@ void cabor_destroy_mutex(cabor_mutex* cabor_lock)
 
 void cabor_lock(cabor_mutex* cabor_lock)
 {
-    uv_mutex_lock(cabor_lock);
+    uv_mutex_lock(&cabor_lock->uv_lock);
 }
 
 void cabor_unlock(cabor_mutex* cabor_lock)
