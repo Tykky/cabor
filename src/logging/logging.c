@@ -31,8 +31,9 @@ void destroy_cabor_logger(cabor_logging_context* logging_context)
 
 void push_log(const char* message, cabor_log_type type)
 {
-    CABOR_SCOPED_LOCK(g_logging_ctx.log_buffer_lock)
-    {
+    cabor_lock(g_logging_ctx.log_buffer_lock);
+    //CABOR_SCOPED_LOCK(g_logging_ctx.log_buffer_lock)
+    //{
         size_t i = 0;
         char newline = '\n';
 
@@ -80,7 +81,8 @@ void push_log(const char* message, cabor_log_type type)
         cabor_vector_push_char(g_logging_ctx.log_buffer, newline);
         puts(message);
         fputs(CABOR_ANSI_COLOR_RESET, stdout);
-    }
+    //}
+    cabor_unlock(g_logging_ctx.log_buffer_lock);
 }
 
 void push_log_f(const char* message, cabor_log_type type, ...)
