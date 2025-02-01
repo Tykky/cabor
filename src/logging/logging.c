@@ -87,8 +87,9 @@ void push_log(const char* message, cabor_log_type type)
 
 void push_log_f(const char* message, cabor_log_type type, ...)
 {
-    CABOR_SCOPED_LOCK(g_logging_ctx.log_buffer_lock)
-    {
+    cabor_lock(g_logging_ctx.log_buffer_lock);
+    //CABOR_SCOPED_LOCK(g_logging_ctx.log_buffer_lock)
+    //{
         char buffer[CABOR_LOGGER_FORMAT_STR_BUFFER_SIZE] = { 0 };
         size_t msg_len = strlen(message);
 
@@ -104,7 +105,8 @@ void push_log_f(const char* message, cabor_log_type type, ...)
         }
 
         push_log(buffer, type);
-    }
+    //}
+    cabor_unlock(g_logging_ctx.log_buffer_lock);
 }
 
 cabor_logging_context* get_cabor_global_logging_context()
@@ -114,12 +116,14 @@ cabor_logging_context* get_cabor_global_logging_context()
 
 void dump_cabor_log_to_disk(cabor_logging_context* ctx, const char* filename)
 {
-    CABOR_SCOPED_LOCK(g_logging_ctx.log_buffer_lock)
-    {
+    cabor_lock(g_logging_ctx.log_buffer_lock);
+    //CABOR_SCOPED_LOCK(g_logging_ctx.log_buffer_lock)
+    //{
         FILE* fp = fopen(filename, "ab");
         fwrite(ctx->log_buffer->vector_mem.mem, sizeof(char), ctx->log_buffer->size, fp);
         fclose(fp);
-    }
+    //}
+    cabor_unlock(g_logging_ctx.log_buffer_lock);
 }
 
 #endif
