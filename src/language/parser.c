@@ -218,7 +218,7 @@ cabor_vector* cabor_get_ast_node_list(cabor_ast_allocated_node* root)
     while (true)
     {
         cabor_ast_node* node;
-        if (!cabor_stack_pop(stack, &node))
+        if (!cabor_stack_pop(stack, (void**)&node))
             break; // stack is empty
 
         if (!is_visited(nodes, node))
@@ -229,7 +229,7 @@ cabor_vector* cabor_get_ast_node_list(cabor_ast_allocated_node* root)
             for (size_t i = 0; i < node->num_edges; i++)
             {
                 cabor_ast_node* neighbour = cabor_access_ast_node(&node->edges[i]);
-                cabor_stack_push(stack, neighbour);
+                cabor_stack_push(stack, (void*) neighbour);
             }
         }
     }
