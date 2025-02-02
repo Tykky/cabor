@@ -37,7 +37,6 @@ set(SOURCES
 )
 
 if (MSVC)
-    # We prevent dependency to vcruntime.dll by staticly linking it
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 endif()
 

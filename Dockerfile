@@ -1,11 +1,7 @@
-FROM gcc:latest
-
-RUN apt-get update && apt-get install -y git cmake gcc
-
-WORKDIR /app
-
-RUN git clone https://github.com/Tykky/cabor /app
-RUN chmod +x build.sh && chmod +x cabor.sh && ./build.sh
-
-COPY docker.sh /docker.sh
-CMD ["bash", "/docker.sh"]
+FROM frolvlad/alpine-glibc
+WORKDIR /compiler
+COPY build/release/bin/cabor /compiler/cabor
+COPY build/release/lib/libuv.so.1.0.0 /compiler/libuv.so.1
+COPY cabor_source.tar.gz /compiler/cabor_source.tar.gz
+RUN chmod +x /compiler/cabor
+ENTRYPOINT ["sh", "-c", "LD_LIBRARY_PATH=/app exec /app/cabor --server"]

@@ -1,5 +1,7 @@
 #!/bin/bash
 
-git pull
+rm cabor_source.tar.gz
+./pack_source.sh
 ./build.sh
-./cabor.sh --test --server
+
+docker build -t cabor_compiler .
