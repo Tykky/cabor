@@ -12,7 +12,7 @@ int cabor_test_stack_push()
     for (size_t i = 0; i < 3; i++)
     {
         CABOR_CHECK_EQUALS(stack->top_of_stack, i, res);
-        cabor_stack_push(stack, &values[i]);
+        cabor_stack_push(stack, (void*) &values[i]);
     }
 
     char** stack_base = stack->memory->vector_mem.mem;
@@ -35,7 +35,7 @@ int cabor_test_stack_pop()
     const char values[] = { 'A', 'B', 'C' };
 
     for (size_t i = 0; i < 3; i++)
-        cabor_stack_push(stack, &values[i]);
+        cabor_stack_push(stack, (void*) & values[i]);
 
     int res = 0;
 
@@ -49,11 +49,11 @@ int cabor_test_stack_pop()
     char* c;
 
     CABOR_CHECK_EQUALS(stack->top_of_stack, 3, res);
-    cabor_stack_pop(stack, &c);
+    cabor_stack_pop(stack, (void*) &c);
     CABOR_CHECK_EQUALS(stack->top_of_stack, 2, res);
-    cabor_stack_pop(stack, &b);
+    cabor_stack_pop(stack, (void*) &b);
     CABOR_CHECK_EQUALS(stack->top_of_stack, 1, res);
-    cabor_stack_pop(stack, &a);
+    cabor_stack_pop(stack, (void*) &a);
     CABOR_CHECK_EQUALS(stack->top_of_stack, 0, res);
 
     CABOR_CHECK_EQUALS(*a, 'A', res);
@@ -73,11 +73,11 @@ int cabor_test_stack_peek()
     const char* values[] = { 'A', 'B', 'C' };
 
     for (size_t i = 0; i < 3; i++)
-        cabor_stack_push(stack, &values[i]);
+        cabor_stack_push(stack, (void*) &values[i]);
 
     int res = 0;
     char* peek;
-    cabor_stack_peek(stack, &peek);
+    cabor_stack_peek(stack, (void*) &peek);
 
     CABOR_CHECK_EQUALS(*peek, 'C', res);
 
