@@ -27,7 +27,7 @@ void cabor_stack_push(cabor_stack* stack, void* element)
         // doubles the size
         for (size_t i = 0; i < stack->capacity; i++)
         {
-            cabor_vector_push_ptr(stack, NULL);
+            cabor_vector_push_ptr(stack->memory, NULL);
         }
         stack->capacity *= 2;
     }
