@@ -5,7 +5,7 @@
 int cabor_test_stack_push()
 {
     cabor_stack* stack = cabor_create_stack(10);
-    const char* values[] = { 'A', 'B', 'C' };
+    const char values[] = { 'A', 'B', 'C' };
 
     int res = 0;
 
@@ -32,7 +32,7 @@ int cabor_test_stack_push()
 int cabor_test_stack_pop()
 {
     cabor_stack* stack = cabor_create_stack(10);
-    const char* values[] = { 'A', 'B', 'C' };
+    const char values[] = { 'A', 'B', 'C' };
 
     for (size_t i = 0; i < 3; i++)
         cabor_stack_push(stack, &values[i]);

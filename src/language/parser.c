@@ -191,7 +191,6 @@ cabor_ast_allocated_node cabor_allocate_ast_node(size_t token_index, cabor_ast_a
     return allocated_node;
 }
 
-
 static bool is_visited(cabor_vector* nodes, cabor_ast_node* node)
 {
     for (size_t i = 0; i < nodes->size; i++)
