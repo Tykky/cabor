@@ -4,3 +4,6 @@
 CMakeSettings.json
 CABOR_LOG.txt
 cabor_source.tar.gz
+dummy
+test-gadget.py
+.test-gadget
