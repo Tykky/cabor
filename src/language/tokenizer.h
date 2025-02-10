@@ -12,6 +12,7 @@ typedef enum
     CABOR_INTEGER_LITERAL,
     CABOR_OPERATOR,
     CABOR_PUNCTUATION,
+    CABOR_KEYWORD,
     CABOR_TOKEN_UNKNOWN,
 } cabor_token_type;
 

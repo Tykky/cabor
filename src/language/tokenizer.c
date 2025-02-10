@@ -7,6 +7,9 @@
 #include <stdbool.h>
 #include <string.h>
 
+static const char* cabor_keywords[] = { "if", "else", "while", "return", "for", "while"};
+static const size_t cabor_keyword_count = sizeof(cabor_keywords) / sizeof(cabor_keywords[0]);
+
 static bool check_for_ignored_characters(const char c)
 {
     return (c == '\n' || c == ' ' || c == '\r');
@@ -201,6 +204,21 @@ static size_t match_integer_literal(const char* buffer, size_t cursor, size_t si
     return cursor;
 }
 
+// Figure out if the identifier is keyword or just regular identifier. Keywords
+// are special non user defined identifiers such as if, else etc...
+static cabor_token_type get_token_type_identifier_or_keyword(const char* word)
+{
+    for (size_t i = 0; i < cabor_keyword_count; i++)
+    {
+        char* kword = cabor_keywords[i];
+        if (strcmp(kword, word) == 0)
+        {
+            return CABOR_KEYWORD;
+        }
+    }
+    return CABOR_IDENTIFIER;
+}
+
 // Return the new cursor position if it was a match otherwise return the original cursor.
 static size_t match_identifier(const char* buffer, size_t cursor, size_t size, cabor_token* out_token)
 {
@@ -241,7 +259,9 @@ static size_t match_identifier(const char* buffer, size_t cursor, size_t size, c
     if (token_cursor == 0)
         return cursor;
 
-    copy_to_out_token(cursor, size, token_cursor, token, out_token, CABOR_IDENTIFIER);
+    cabor_token_type token_type = get_token_type_identifier_or_keyword(token);
+
+    copy_to_out_token(cursor, size, token_cursor, token, out_token, token_type);
 
     return i;
 }

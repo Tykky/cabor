@@ -267,7 +267,56 @@ int cabor_test_parse_expression_abc_parenthesized()
     cabor_destroy_vector(tokens);
 
     return res;
+}
 
+// Try to parse expression if a then b + c else x * y
+int cabor_test_parse_expression_if_then_else()
+{
+    cabor_vector* tokens = cabor_create_vector(100, CABOR_TOKEN, true);
+
+    cabor_token tmp[10] = { 0 };
+    size_t i = 0;
+
+    tmp[i++] = create_token("if", CABOR_KEYWORD);
+    tmp[i++] = create_token("a", CABOR_IDENTIFIER);
+    tmp[i++] = create_token("then", CABOR_KEYWORD);
+    tmp[i++] = create_token("b", CABOR_IDENTIFIER);
+    tmp[i++] = create_token("+", CABOR_OPERATOR);
+    tmp[i++] = create_token("c", CABOR_IDENTIFIER);
+    tmp[i++] = create_token("else", CABOR_KEYWORD);
+    tmp[i++] = create_token("x", CABOR_IDENTIFIER);
+    tmp[i++] = create_token("*", CABOR_OPERATOR);
+    tmp[i++] = create_token("y", CABOR_IDENTIFIER);
+
+    char buffer[100] = { 0 };
+
+    for (size_t j = 0; j < 10; j++)
+        cabor_vector_push_token(tokens, &tmp[j]);
+
+    size_t cursor = 0;
+    cabor_ast_allocated_node ast = cabor_parse_if_then_else_expression(tokens, &cursor);
+    cabor_vector* ast_nodes = cabor_get_ast_node_list(&ast);
+
+    for (size_t i = 0; i < ast_nodes->size; i++)
+    {
+        cabor_ast_node* n = cabor_vector_get_ptr(ast_nodes, i);
+        cabor_ast_allocated_node an =
+        {
+            .node_mem.mem = n,
+#ifdef CABOR_ENABLE_ALLOCATOR_FAT_POINTERS
+            .node_mem.size = sizeof(cabor_ast_node),
+#endif
+        };
+        memset(buffer, 0, 100);
+        cabor_ast_node_to_string(tokens, &an, buffer, 100);
+        CABOR_LOG_TRACE_F("%s", buffer);
+    }
+
+
+    cabor_destroy_vector(ast_nodes);
+    cabor_free_ast(&ast);
+
+    return 0;
 }
 
 #endif // CABOR_ENABLE_TESTING

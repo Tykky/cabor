@@ -8,19 +8,49 @@
 #include <stdio.h>
 #include <string.h>
 
+#define IS_VALID_TOKEN(token) token != NULL
+
+static cabor_token* next(cabor_vector* tokens, size_t* cursor)
+{
+    size_t next_pos = *cursor;
+    if (next_pos < tokens->size)
+    {
+        return cabor_vector_get_token(tokens, ++(*cursor));
+    }
+    else
+    {
+        return NULL;
+    }
+}
+
 static bool token_is_term(cabor_token* token)
 {
-    return token->type == CABOR_IDENTIFIER || token->type == CABOR_INTEGER_LITERAL || token->type == CABOR_OPERATOR;
+    return IS_VALID_TOKEN(token) && token->type == CABOR_IDENTIFIER || token->type == CABOR_INTEGER_LITERAL || token->type == CABOR_OPERATOR;
+}
+
+static bool is_if_token(cabor_token* token)
+{
+    return IS_VALID_TOKEN(token) && token->type == CABOR_KEYWORD && strcmp(token->data, "if") == 0;
+}
+
+static bool is_then_token(cabor_token* token)
+{
+    return IS_VALID_TOKEN(token) && token->type == CABOR_KEYWORD && strcmp(token->data, "then") == 0;
+}
+
+static bool is_else_token(cabor_token* token)
+{
+    return IS_VALID_TOKEN(token) && token->type == CABOR_KEYWORD && strcmp(token->data, "else") == 0;
 }
 
 static bool is_plus_minus_operator(cabor_token* token)
 {
-    return token->type == CABOR_OPERATOR && (token->data[0] == '+' || token->data[0] == '-');
+    return IS_VALID_TOKEN(token) && token->type == CABOR_OPERATOR && (token->data[0] == '+' || token->data[0] == '-');
 }
 
 static bool is_multiply_divide_operator(cabor_token* token)
 {
-    return token->type == CABOR_OPERATOR && (token->data[0] == '*' || token->data[0] == '/');
+    return IS_VALID_TOKEN(token) && token->type == CABOR_OPERATOR && (token->data[0] == '*' || token->data[0] == '/');
 }
 
 cabor_ast_allocated_node cabor_parse_identifier(cabor_vector* tokens, size_t op_index)
@@ -77,25 +107,90 @@ cabor_ast_allocated_node cabor_parse_expression(cabor_vector* tokens, size_t* cu
         return left;
 
     // lookahead
-    cabor_token* next = cabor_vector_get_token(tokens, *cursor + 1);
+    cabor_token* next_t = cabor_vector_get_token(tokens, *cursor + 1);
 
-    while (is_plus_minus_operator(next))
+    while (is_plus_minus_operator(next_t))
     {
-        ++(*cursor);
-        cabor_token* op = cabor_vector_get_token(tokens, *cursor);
+        cabor_token* op = next(tokens, cursor);
         size_t opi = *cursor;
-        ++(*cursor);
+        next(tokens, cursor);
         cabor_ast_allocated_node right = cabor_parse_term(tokens, cursor);
 
         left = cabor_parse_operator(tokens, opi, left, right);
 
         if (*cursor + 1 < tokens->size)
-            next = cabor_vector_get_token(tokens, *cursor + 1);
+            next_t = cabor_vector_get_token(tokens, *cursor + 1);
         else
             break;
     }
 
     return left;
+}
+
+cabor_ast_allocated_node cabor_parse_if_then_else_expression(cabor_vector* tokens, size_t* cursor)
+{
+    cabor_token* token = cabor_vector_get_token(tokens, *cursor);
+    size_t edge_count = 2;
+
+    cabor_ast_allocated_node null_node;
+    null_node.node_mem.mem = NULL;
+
+    if (!is_if_token(token))
+    {
+        return null_node;
+    }
+
+    const size_t root_token_index = *cursor;
+
+    if (!next(tokens, cursor)) // Parse expression inside if expression
+    {
+        CABOR_LOG_ERR("Not enough tokens to parse if expression!");
+        return null_node;
+    }
+
+    cabor_ast_allocated_node if_exp = cabor_parse_expression(tokens, cursor);
+
+    token = cabor_vector_get_token(tokens, *cursor);
+
+    // Fast forward to 'then', parse expression doesn't leave the cursor at the last token but usually second last
+    while (!is_then_token(token))
+        token = next(tokens, cursor);
+
+    token = next(tokens, cursor); // token after then
+
+    if (!IS_VALID_TOKEN(token)) 
+    {
+        // No more tokens after then
+        CABOR_LOG_ERR("Not enough tokens to parse after then expression!");
+        return null_node;
+    }
+
+    cabor_ast_allocated_node then_exp = cabor_parse_expression(tokens, cursor);
+
+    // Fast forward to 'else'
+    while (!is_else_token(token))
+        token = next(tokens, cursor);
+
+    cabor_ast_allocated_node else_exp;
+
+    if (next(tokens, cursor))
+    {
+        // Looks like we have more tokens after else;
+        else_exp = cabor_parse_expression(tokens, cursor);
+        ++edge_count;
+    }
+
+    cabor_ast_allocated_node edges[3];
+    edges[0] = if_exp;
+    edges[1] = then_exp;
+
+    if (edge_count == 3)
+        edges[2] = else_exp;
+
+    cabor_ast_allocated_node root = cabor_allocate_ast_node(*cursor, edges, edge_count);
+    cabor_access_ast_node(&root)->token_index = root_token_index;
+
+    return root;
 }
 
 // Parse * / term
@@ -300,8 +395,8 @@ cabor_ast_node* cabor_access_ast_node(cabor_ast_allocated_node* node)
 }
 
 
-cabor_ast cabor_parse_tokens(cabor_vector* tokens)
+cabor_ast_allocated_node cabor_parse_tokens(cabor_vector* tokens)
 {
-    cabor_ast ast;
-    return ast;
+    size_t cursor = 0;
+    return cabor_parse_expression(tokens, &cursor);
 }

@@ -2,18 +2,17 @@ import socket
 import json
 
 sockets = []
-r = 2
+r = 1
 
 for i in range(0, r):
     data = {}
     if (i < r - 1):
         data = {
-            "command": "compile",
-            "code": "source code text" + str(i)
+            "command": "ping",
         }
     elif i == r - 1:
         data = {
-            "command": "shutdown",
+            "command": "ping",
         }
 
 

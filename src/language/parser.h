@@ -32,6 +32,7 @@ cabor_ast_allocated_node cabor_parse_integer_literal(cabor_vector* tokens, size_
 cabor_ast_allocated_node cabor_parse_parenthesized(cabor_vector* tokens, size_t* op_index);
 cabor_ast_allocated_node cabor_parse_operator(cabor_vector* tokens, size_t op_index, cabor_ast_allocated_node left, cabor_ast_allocated_node right);
 cabor_ast_allocated_node cabor_parse_expression(cabor_vector* tokens, size_t* cursor);
+cabor_ast_allocated_node cabor_parse_if_then_else_expression(cabor_vector* tokens, size_t* cursor);
 cabor_ast_allocated_node cabor_parse_term(cabor_vector* tokens, size_t* cursor);
 cabor_ast_allocated_node cabor_parse_factor(cabor_vector* tokens, size_t* op_index);
 cabor_ast_allocated_node cabor_allocate_ast_node(size_t token_index, cabor_ast_allocated_node* edges, size_t num_edges);
@@ -47,5 +48,5 @@ void cabor_free_ast(cabor_ast_allocated_node* root);
 // "unwraps" allocated node into cabor_ast_node
 cabor_ast_node* cabor_access_ast_node(cabor_ast_allocated_node* node);
 
-cabor_ast cabor_parse_tokens(cabor_vector* tokens);
+cabor_ast_allocated_node cabor_parse_tokens(cabor_vector* tokens);
 

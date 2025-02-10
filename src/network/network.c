@@ -1,6 +1,7 @@
 #include "network.h"
 #include "../logging/logging.h"
 #include "../core/vector.h"
+#include "dummy.h"
 
 #include <string.h>
 #include <stddef.h>
@@ -140,12 +141,11 @@ static void on_work(uv_work_t* work)
         CABOR_LOG_F("Compile request: %.*s", request.source_size, request.source.mem);
 
         // run compiler (TODO) ... respond with program
-        const char* program = "base64-encoded statically linked x86_64 program";
 
         cabor_network_response resp =
         {
-            .program_text = program,
-            .size = strlen(program),
+            .program_text = cabor_dummy_program,
+            .size = strlen(cabor_dummy_program),
             .error = false
         };
 
