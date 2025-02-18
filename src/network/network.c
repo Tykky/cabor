@@ -134,7 +134,11 @@ static void on_work(uv_work_t* work)
     CABOR_LOG_F("data received %.3f %s", recieved_amount, prefix);
 
     cabor_network_request request;
-    cabor_decode_network_request(cabor_client->data->vector_mem.mem, cabor_client->data->size, &request);
+    int result = cabor_decode_network_request(cabor_client->data->vector_mem.mem, cabor_client->data->size, &request);
+
+    if (result != 0)
+    {
+    }
 
     if (request.type == CABOR_COMPILE)
     {

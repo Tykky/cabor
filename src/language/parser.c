@@ -12,7 +12,7 @@
 
 static cabor_token* next(cabor_vector* tokens, size_t* cursor)
 {
-    size_t next_pos = *cursor;
+    size_t next_pos = *cursor + 1;
     if (next_pos < tokens->size)
     {
         return cabor_vector_get_token(tokens, ++(*cursor));
@@ -113,7 +113,9 @@ cabor_ast_allocated_node cabor_parse_expression(cabor_vector* tokens, size_t* cu
     {
         cabor_token* op = next(tokens, cursor);
         size_t opi = *cursor;
+
         next(tokens, cursor);
+
         cabor_ast_allocated_node right = cabor_parse_term(tokens, cursor);
 
         left = cabor_parse_operator(tokens, opi, left, right);
@@ -167,8 +169,8 @@ cabor_ast_allocated_node cabor_parse_if_then_else_expression(cabor_vector* token
 
     cabor_ast_allocated_node then_exp = cabor_parse_expression(tokens, cursor);
 
-    // Fast forward to 'else'
-    while (!is_else_token(token))
+    // Fast forward to 'else', it's fine if we don't find it since it's optional
+    while (IS_VALID_TOKEN(token) && !is_else_token(token))
         token = next(tokens, cursor);
 
     cabor_ast_allocated_node else_exp;

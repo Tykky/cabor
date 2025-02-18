@@ -31,6 +31,7 @@ void register_all_tests()
     CABOR_REGISTER_TEST("test_parse_expression_cba", cabor_test_parse_expression_cba);
     CABOR_REGISTER_TEST("test_parse_expression_abc_parenthesized", cabor_test_parse_expression_abc_parenthesized);
     CABOR_REGISTER_TEST("test_parse_expression_if_then_else", cabor_test_parse_expression_if_then_else);
+    CABOR_REGISTER_TEST("test_parse_expression_if_then", cabor_test_parse_expression_if_then);
 }
 
 #else
