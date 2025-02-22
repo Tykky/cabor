@@ -300,7 +300,7 @@ static bool is_visited(cabor_vector* nodes, cabor_ast_node* node)
 
 // Get ast tree as list of nodes, note we store node pointers in the list,
 // the list does not own the memory for the tree.
-cabor_vector* cabor_get_ast_node_list(cabor_ast_allocated_node* root)
+cabor_vector* cabor_get_ast_node_list_al(cabor_ast_allocated_node* root)
 {
     // Implement DFS
 
@@ -336,7 +336,19 @@ cabor_vector* cabor_get_ast_node_list(cabor_ast_allocated_node* root)
     return nodes;
 }
 
-void cabor_ast_node_to_string(cabor_vector* tokens, cabor_ast_allocated_node* allocated_node, char* buffer, size_t size)
+cabor_vector* cabor_get_ast_node_list(cabor_ast_node* root)
+{
+    cabor_ast_allocated_node an =
+    {
+        .node_mem.mem = root,
+#ifdef CABOR_ENABLE_ALLOCATOR_FAT_POINTERS
+        .node_mem.size = sizeof(cabor_ast_node),
+#endif
+    };
+    return cabor_get_ast_node_list_al(root);
+}
+
+void cabor_ast_node_to_string_al(cabor_vector* tokens, cabor_ast_allocated_node* allocated_node, char* buffer, size_t size)
 {
     cabor_ast_node* node = cabor_access_ast_node(allocated_node);
     cabor_token* token = cabor_vector_get_token(tokens, node->token_index);
@@ -353,10 +365,22 @@ void cabor_ast_node_to_string(cabor_vector* tokens, cabor_ast_allocated_node* al
             cursor += snprintf(buffer + cursor, size - cursor, "'%s'", neighbour_token->data);
     }
 
-    CABOR_ASSERT(cursor < size, "out of bounds!");
+    CABOR_ASSERT(cursor + 1 < size, "out of bounds!");
 
     buffer[cursor] = ']';
-    buffer[size - 1] = '\0';
+    buffer[cursor + 1] = '\0';
+}
+
+void cabor_ast_node_to_string(cabor_vector* tokens, cabor_ast_node* node, char* buffer, size_t size)
+{
+    cabor_ast_allocated_node an =
+    {
+        .node_mem.mem = node,
+#ifdef CABOR_ENABLE_ALLOCATOR_FAT_POINTERS
+        .node_mem.size = sizeof(cabor_ast_node),
+#endif
+    };
+    return cabor_ast_node_to_string_al(tokens, &an, buffer, size);
 }
 
 // Free only the current node and don't care about freeing any edges
@@ -368,7 +392,7 @@ void cabor_free_ast_node(cabor_ast_allocated_node* node)
 // Free the whole tree
 void cabor_free_ast(cabor_ast_allocated_node* root)
 {
-    cabor_vector* nodes = cabor_get_ast_node_list(root);
+    cabor_vector* nodes = cabor_get_ast_node_list_al(root);
 
     for (size_t i = 0; i < nodes->size; i++)
     {

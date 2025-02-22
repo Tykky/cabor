@@ -18,6 +18,9 @@ static cabor_token create_token(const char* data, cabor_token_type type)
     return t;
 }
 
+// Unit tests, these are a bit verbose so we don't have many of them.
+// The integration tests are way more compact and do the bulk of the work when it comes to testing
+
 // Try to parse expression: a + b * c
 int cabor_test_parse_expression_abc()
 {
@@ -56,7 +59,7 @@ int cabor_test_parse_expression_abc()
 
     size_t cursor = 0;
     cabor_ast_allocated_node ast = cabor_parse_expression(tokens, &cursor);
-    cabor_vector* ast_nodes = cabor_get_ast_node_list(&ast);
+    cabor_vector* ast_nodes = cabor_get_ast_node_list_al(&ast);
 
     char buffer[100] = { 0 };
 
@@ -71,7 +74,7 @@ int cabor_test_parse_expression_abc()
 #endif
         };
         memset(buffer, 0, 100);
-        cabor_ast_node_to_string(tokens, &an, buffer, 100);
+        cabor_ast_node_to_string_al(tokens, &an, buffer, 100);
         //CABOR_LOG_TRACE_F("%s", buffer);
     }
 
@@ -139,7 +142,7 @@ int cabor_test_parse_expression_cba()
 
     size_t cursor = 0;
     cabor_ast_allocated_node ast = cabor_parse_expression(tokens, &cursor);
-    cabor_vector* ast_nodes = cabor_get_ast_node_list(&ast);
+    cabor_vector* ast_nodes = cabor_get_ast_node_list_al(&ast);
 
     char buffer[100] = { 0 };
 
@@ -154,7 +157,7 @@ int cabor_test_parse_expression_cba()
 #endif
         };
         memset(buffer, 0, 100);
-        cabor_ast_node_to_string(tokens, &an, buffer, 100);
+        cabor_ast_node_to_string_al(tokens, &an, buffer, 100);
         //CABOR_LOG_TRACE_F("%s", buffer);
     }
 
@@ -224,7 +227,7 @@ int cabor_test_parse_expression_abc_parenthesized()
 
     size_t cursor = 0;
     cabor_ast_allocated_node ast = cabor_parse_expression(tokens, &cursor);
-    cabor_vector* ast_nodes = cabor_get_ast_node_list(&ast);
+    cabor_vector* ast_nodes = cabor_get_ast_node_list_al(&ast);
 
     char buffer[100] = { 0 };
 
@@ -239,7 +242,7 @@ int cabor_test_parse_expression_abc_parenthesized()
 #endif
         };
         memset(buffer, 0, 100);
-        cabor_ast_node_to_string(tokens, &an, buffer, 100);
+        cabor_ast_node_to_string_al(tokens, &an, buffer, 100);
         //CABOR_LOG_TRACE_F("%s", buffer);
     }
 
@@ -295,7 +298,7 @@ int cabor_test_parse_expression_if_then_else()
 
     size_t cursor = 0;
     cabor_ast_allocated_node ast = cabor_parse_if_then_else_expression(tokens, &cursor);
-    cabor_vector* ast_nodes = cabor_get_ast_node_list(&ast);
+    cabor_vector* ast_nodes = cabor_get_ast_node_list_al(&ast);
 
     for (size_t i = 0; i < ast_nodes->size; i++)
     {
@@ -308,7 +311,7 @@ int cabor_test_parse_expression_if_then_else()
 #endif
         };
         memset(buffer, 0, 100);
-        cabor_ast_node_to_string(tokens, &an, buffer, 100);
+        cabor_ast_node_to_string_al(tokens, &an, buffer, 100);
         //CABOR_LOG_TRACE_F("%s", buffer);
     }
 
@@ -374,7 +377,7 @@ int cabor_test_parse_expression_if_then()
 
     size_t cursor = 0;
     cabor_ast_allocated_node ast = cabor_parse_if_then_else_expression(tokens, &cursor);
-    cabor_vector* ast_nodes = cabor_get_ast_node_list(&ast);
+    cabor_vector* ast_nodes = cabor_get_ast_node_list_al(&ast);
 
     for (size_t i = 0; i < ast_nodes->size; i++)
     {
@@ -387,7 +390,7 @@ int cabor_test_parse_expression_if_then()
 #endif
         };
         memset(buffer, 0, 100);
-        cabor_ast_node_to_string(tokens, &an, buffer, 100);
+        cabor_ast_node_to_string_al(tokens, &an, buffer, 100);
        //CABOR_LOG_TRACE_F("%s", buffer);
     }
 
@@ -418,8 +421,116 @@ int cabor_test_parse_expression_if_then()
     cabor_destroy_vector(tokens);
 
     return res;
-
 }
 
+// Integration tests: tokenizer + parser
+
+int cabor_integration_test_parser_common(const char* code, const char** expected, size_t node_count, cabor_ast_allocated_node(top_level_parser)(cabor_vector* tokens, size_t cursor))
+{
+    int res = 0;
+    cabor_file* file = cabor_file_from_buffer(code, strlen(code));
+    cabor_vector* tokens = cabor_tokenize(file);
+    cabor_destroy_file(file);
+
+    size_t cursor = 0;
+    cabor_ast_allocated_node ast = top_level_parser(tokens, &cursor);
+    cabor_vector* nodes = cabor_get_ast_node_list(&ast);
+    CABOR_CHECK_EQUALS(nodes->size, node_count, res);
+    for (size_t i = 0; i < node_count; i++)
+    {
+        char buffer[128] = {0};
+        cabor_ast_node_to_string(tokens, cabor_vector_get_ptr(nodes, i), buffer, 128);
+        int comp = strcmp(buffer, expected[i]);
+        //CABOR_LOG(buffer);
+        if (comp != 0)
+        {
+            CABOR_LOG_ERR_F("EXPECTED: %s", expected[i]);
+            CABOR_LOG_ERR_F("RECEIVED: %s", buffer);
+        }
+        CABOR_CHECK_EQUALS(comp, 0, res);
+    }
+
+    cabor_destroy_vector(nodes);
+    cabor_destroy_vector(tokens);
+    cabor_free_ast(&ast);
+
+    return res;
+}
+
+// The order for these strings comes from DFS, it takes the right-most first
+
+int cabor_integration_test_parse_expression_abc()
+{
+    const char* code = "a + b * c";
+    const char* expected[] = 
+    {
+        "root: +, edges: ['a', '*']",
+        "root: *, edges: ['b', 'c']",
+        "root: c, edges: []",
+        "root: b, edges: []",
+        "root: a, edges: []"
+    };
+    return cabor_integration_test_parser_common(code, expected, 5, cabor_parse_expression);
+}
+
+int cabor_integration_test_parse_expression_cba()
+{
+    const char* code = "c * b + a";
+    const char* expected[] = 
+    {
+        "root: +, edges: ['*', 'a']",
+        "root: a, edges: []",
+        "root: *, edges: ['c', 'b']",
+        "root: b, edges: []",
+        "root: c, edges: []",
+    };
+    return cabor_integration_test_parser_common(code, expected, 5, cabor_parse_expression);
+}
+
+int cabor_integration_test_parse_expression_abc_parenthesized()
+{
+    const char* code = "(a + b) * c";
+    const char* expected[] =
+    {
+        "root: *, edges: ['+', 'c']",
+        "root: c, edges: []",
+        "root: +, edges: ['a', 'b']",
+        "root: b, edges: []",
+        "root: a, edges: []",
+    };
+    return cabor_integration_test_parser_common(code, expected, 5, cabor_parse_expression);
+}
+
+// Try to parse expression if a then b + c else x * y
+int cabor_integration_test_parse_expression_if_then_else()
+{
+    const char* code = "if a then b + c else x * y";
+    const char* expected[] =
+    {
+        "root: if, edges: ['a', '+', '*']",
+        "root: *, edges: ['x', 'y']",
+        "root: y, edges: []",
+        "root: x, edges: []",
+        "root: +, edges: ['b', 'c']",
+        "root: c, edges: []",
+        "root: b, edges: []",
+        "root: a, edges: []",
+    };
+    return cabor_integration_test_parser_common(code, expected, 8, cabor_parse_if_then_else_expression);
+}
+
+int cabor_integration_test_parse_expression_if_then()
+{
+    const char* code = "if a then b + c";
+    const char* expected[] =
+    {
+        "root: if, edges: ['a', '+']",
+        "root: +, edges: ['b', 'c']",
+        "root: c, edges: []",
+        "root: b, edges: []",
+        "root: a, edges: []",
+    };
+    return cabor_integration_test_parser_common(code, expected, 5, cabor_parse_if_then_else_expression);
+}
 
 #endif // CABOR_ENABLE_TESTING

@@ -7,7 +7,7 @@
 #include <stdbool.h>
 #include <string.h>
 
-static const char* cabor_keywords[] = { "if", "else", "while", "return", "for", "while"};
+static const char* cabor_keywords[] = { "if", "then", "else", "while", "return", "for"};
 static const size_t cabor_keyword_count = sizeof(cabor_keywords) / sizeof(cabor_keywords[0]);
 
 static bool check_for_ignored_characters(const char c)
@@ -17,13 +17,14 @@ static bool check_for_ignored_characters(const char c)
 
 static void copy_to_out_token(size_t cursor, size_t size, size_t token_cursor, char* temp_token, cabor_token* out_token, cabor_token_type type)
 {
+    // The token cursor that gets passed here is past the last character in the token so technically it is the size
     if (token_cursor < CABOR_TOKENIZER_MAX_TOKEN_LENGTH)
     {
         // Copy results to out_token and add null terminator
-        CABOR_ASSERT(size - cursor >= token_cursor + 2, "Not enough space to fit token and null terminator!");
-        memcpy(out_token->data, temp_token, token_cursor + 1);
+        CABOR_ASSERT(size - cursor >= token_cursor, "Not enough space to memcpy characters to out_token");
+        memcpy(out_token->data, temp_token, token_cursor);
         out_token->type = type;
-        out_token->data[token_cursor + 1] = '\0';
+        out_token->data[token_cursor] = '\0';
     }
     else
     {

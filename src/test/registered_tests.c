@@ -11,27 +11,33 @@
 void register_all_tests()
 {
     // Vector tests
-    CABOR_REGISTER_TEST("test_vector_push", cabor_test_vector_push);
-    CABOR_REGISTER_TEST("test_vector_get", cabor_test_vector_get);
-    CABOR_REGISTER_TEST("test_vector_peek", cabor_test_vector_peek);
-    CABOR_REGISTER_TEST("test_vector_resize", cabor_test_vector_resize);
-    CABOR_REGISTER_TEST("test_vector_zero_initialized", cabor_test_zero_vector_initialized);
+    CABOR_REGISTER_TEST("test vector push", cabor_test_vector_push);
+    CABOR_REGISTER_TEST("test vector get", cabor_test_vector_get);
+    CABOR_REGISTER_TEST("test vector peek", cabor_test_vector_peek);
+    CABOR_REGISTER_TEST("test vector resize", cabor_test_vector_resize);
+    CABOR_REGISTER_TEST("test vector zero initialized", cabor_test_zero_vector_initialized);
 
     // Stack tests
-    CABOR_REGISTER_TEST("test_stack_push", cabor_test_stack_push);
-    CABOR_REGISTER_TEST("test_stack_pop", cabor_test_stack_pop);
-    CABOR_REGISTER_TEST("test_stack_peek", cabor_test_stack_peek);
+    CABOR_REGISTER_TEST("test stack push", cabor_test_stack_push);
+    CABOR_REGISTER_TEST("test stack pop", cabor_test_stack_pop);
+    CABOR_REGISTER_TEST("test stack peek", cabor_test_stack_peek);
 
     // Filesystem tests
-    CABOR_REGISTER_TEST("test_load_file", cabor_test_load_file);
+    CABOR_REGISTER_TEST("test load file", cabor_test_load_file);
 
     // Language tests
-    CABOR_REGISTER_TEST("test_tokenize_hello_world", cabor_test_tokenize_hello_world);
-    CABOR_REGISTER_TEST("test_parse_expression_abc", cabor_test_parse_expression_abc);
-    CABOR_REGISTER_TEST("test_parse_expression_cba", cabor_test_parse_expression_cba);
-    CABOR_REGISTER_TEST("test_parse_expression_abc_parenthesized", cabor_test_parse_expression_abc_parenthesized);
-    CABOR_REGISTER_TEST("test_parse_expression_if_then_else", cabor_test_parse_expression_if_then_else);
-    CABOR_REGISTER_TEST("test_parse_expression_if_then", cabor_test_parse_expression_if_then);
+    CABOR_REGISTER_TEST("test tokenize hello world", cabor_test_tokenize_hello_world);
+    CABOR_REGISTER_TEST("test parse expression abc", cabor_test_parse_expression_abc);
+    CABOR_REGISTER_TEST("test parse expression cba", cabor_test_parse_expression_cba);
+    CABOR_REGISTER_TEST("test parse expression abc parenthesized", cabor_test_parse_expression_abc_parenthesized);
+    CABOR_REGISTER_TEST("test parse expression if then else", cabor_test_parse_expression_if_then_else);
+    CABOR_REGISTER_TEST("test_parse expression if then", cabor_test_parse_expression_if_then);
+
+    CABOR_REGISTER_TEST("integration test parse expression abc", cabor_integration_test_parse_expression_abc);
+    CABOR_REGISTER_TEST("integration test parse expression cba", cabor_integration_test_parse_expression_cba);
+    CABOR_REGISTER_TEST("integration test parse expression abc parenthesized", cabor_integration_test_parse_expression_abc_parenthesized);
+    CABOR_REGISTER_TEST("integration test parse expression if then else", cabor_integration_test_parse_expression_if_then_else);
+    CABOR_REGISTER_TEST("integration test parse expression if then", cabor_integration_test_parse_expression_if_then);
 }
 
 #else

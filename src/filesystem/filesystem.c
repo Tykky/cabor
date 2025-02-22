@@ -2,8 +2,23 @@
 #include "../logging/logging.h"
 #include "../debug/cabor_debug.h"
 
+#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+cabor_file* cabor_file_from_buffer(const char* buffer, size_t length)
+{
+    size_t size = length;
+    CABOR_NEW(cabor_file, file);
+    file->filename = "<internal_buffer>";
+    file->file_memory = CABOR_MALLOC(size);
+    file->size = size;
+    memcpy(file->file_memory.mem, buffer, length);
+#ifdef CABOR_ENABLE_ALLOCATOR_FAT_POINTERS
+    file->file_memory.size = size;
+#endif
+    return file;
+}
 
 cabor_file* cabor_load_file(const char* filename)
 {
