@@ -40,6 +40,7 @@ set(SOURCES
 
 if (MSVC)
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /0x")
 endif()
 
 set(CMAKE_C_STANDARD 99)
