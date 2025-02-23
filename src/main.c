@@ -24,6 +24,8 @@
 #include "test/test_framework.h"
 #include "test/registered_tests.h" 
 
+#include "core/cabortime.h"
+
 #ifdef _DEBUG 
 #define _CRTDBG_MAP_ALLOC
 #include <stdlib.h>
@@ -120,7 +122,11 @@ _CrtSetDbgFlag(CRTDBFLAGS);
 	if (flags & CABOR_ARG_ENABLE_TESTING)
 	{
 		register_all_tests();
+		double start = cabor_get_time();
 		test_results = CABOR_RUN_ALL_TESTS();
+		double end = cabor_get_time();
+		double diff_ms = (end - start) * 1000;
+		CABOR_LOG_TEST_F("Finished testing in %.3f ms", diff_ms);
 	}
 
 	if (flags & CABOR_ARG_TOKENIZE)

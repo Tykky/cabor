@@ -8,6 +8,8 @@ set(SOURCES
     "core/mutex.c"
     "core/stack.h"
     "core/stack.c"
+    "core/cabortime.h"
+    "core/cabortime.c"
     "logging/logging.c"
     "logging/logging.h"
     "filesystem/filesystem.h"

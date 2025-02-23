@@ -457,7 +457,7 @@ int cabor_integration_test_parser_common(const char* code, const char** expected
     return res;
 }
 
-// The order for these strings comes from DFS, it takes the right-most first
+// The order for these strings comes from DFS, it takes the right-most branch first
 
 int cabor_integration_test_parse_expression_abc()
 {
@@ -501,7 +501,6 @@ int cabor_integration_test_parse_expression_abc_parenthesized()
     return cabor_integration_test_parser_common(code, expected, 5, cabor_parse_expression);
 }
 
-// Try to parse expression if a then b + c else x * y
 int cabor_integration_test_parse_expression_if_then_else()
 {
     const char* code = "if a then b + c else x * y";
