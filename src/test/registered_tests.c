@@ -23,15 +23,16 @@ void register_all_tests()
     CABOR_REGISTER_TEST("UNIT stack peek", cabor_test_stack_peek);
 
     // Filesystem tests
-    CABOR_REGISTER_TEST("UNIT load file", cabor_test_load_file);
+    CABOR_REGISTER_TEST("INTEGRATION load file", cabor_test_load_file);
 
     // Language tests
-    CABOR_REGISTER_TEST("INTEGRATION tokenize hello world", cabor_test_tokenize_hello_world);
-    CABOR_REGISTER_TEST("INTEGRATION parse expression abc", cabor_test_parse_expression_abc);
-    CABOR_REGISTER_TEST("INTEGRATION parse expression cba", cabor_test_parse_expression_cba);
-    CABOR_REGISTER_TEST("INTEGRATION parse expression abc parenthesized", cabor_test_parse_expression_abc_parenthesized);
-    CABOR_REGISTER_TEST("INTEGRATION parse expression if then else", cabor_test_parse_expression_if_then_else);
-    CABOR_REGISTER_TEST("INTEGRATION parse expression if then", cabor_test_parse_expression_if_then);
+    CABOR_REGISTER_TEST("UNIT tokenize hello world", cabor_test_tokenize_hello_world);
+    CABOR_REGISTER_TEST("UNIT parse expression abc", cabor_test_parse_expression_abc);
+    CABOR_REGISTER_TEST("UNIT parse expression cba", cabor_test_parse_expression_cba);
+    CABOR_REGISTER_TEST("UNIT parse expression abc parenthesized", cabor_test_parse_expression_abc_parenthesized);
+    CABOR_REGISTER_TEST("UNIT parse expression if then else", cabor_test_parse_expression_if_then_else);
+    CABOR_REGISTER_TEST("UNIT parse expression if then", cabor_test_parse_expression_if_then);
+    CABOR_REGISTER_TEST("UNIT parse function hello()", cabor_test_parse_function_hello);
 
     CABOR_REGISTER_TEST("INTEGRATION parse expression abc", cabor_integration_test_parse_expression_abc);
     CABOR_REGISTER_TEST("INTEGRATION parse expression cba", cabor_integration_test_parse_expression_cba);

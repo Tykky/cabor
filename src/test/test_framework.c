@@ -24,7 +24,7 @@ int run_cabor_tests(cabor_test_framework_context* ctx)
 {
 	unsigned int passed = 0;
 	unsigned int failed = 0;
-	CABOR_LOG_TEST_F("%-60s | %-10s | %-8s | %-7s |", "Test description", "Status", "Time(ns)", "Count");
+	CABOR_LOG_TEST_F("%-60s | %-10s | %-8s | %-7s |", "Test description", "Status", "Time(mus)", "Count");
 	CABOR_LOG_TEST("------------------------------------------------------------------------------------------------");
 	for (size_t i = 0; i < ctx->current_size; i++)
 	{
@@ -45,7 +45,7 @@ int run_cabor_tests(cabor_test_framework_context* ctx)
 	}
 	CABOR_LOG_TEST("------------------------------------------------------------------------------------------------");
 	if (failed)
-		CABOR_LOG_TEST_F("Cabor failed %d/%d of tests!", failed, ctx->current_size);
+		CABOR_LOG_TEST_F("Failed %d/%d of tests!", failed, ctx->current_size);
 	else
 		CABOR_LOG_TEST_F("Succeeded in all of %d/%d tests!", passed, ctx->current_size);
 	return failed > 0 ? 1 : 0;

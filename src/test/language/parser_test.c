@@ -423,6 +423,11 @@ int cabor_test_parse_expression_if_then()
     return res;
 }
 
+// Parse hello()
+int cabor_test_parse_function_hello()
+{
+}
+
 // Integration tests: tokenizer + parser
 
 int cabor_integration_test_parser_common(const char* code, const char** expected, size_t node_count, cabor_ast_allocated_node(top_level_parser)(cabor_vector* tokens, size_t cursor))

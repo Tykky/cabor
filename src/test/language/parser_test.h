@@ -13,7 +13,7 @@ int cabor_test_parse_expression_cba();
 int cabor_test_parse_expression_abc_parenthesized();
 int cabor_test_parse_expression_if_then_else();
 int cabor_test_parse_expression_if_then();
-
+int cabor_test_parse_function_hello();
 
 // Integration tokenizer + parser
 int cabor_integration_test_parse_expression_abc();
