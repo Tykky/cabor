@@ -408,7 +408,7 @@ cabor_vector* cabor_get_ast_node_list(cabor_ast_node* root)
         .node_mem.size = sizeof(cabor_ast_node),
 #endif
     };
-    return cabor_get_ast_node_list_al(root);
+    return cabor_get_ast_node_list_al(&an);
 }
 
 void cabor_ast_node_to_string_al(cabor_vector* tokens, cabor_ast_allocated_node* allocated_node, char* buffer, size_t size)
