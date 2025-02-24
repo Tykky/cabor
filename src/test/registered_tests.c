@@ -39,6 +39,10 @@ void register_all_tests()
     CABOR_REGISTER_TEST("INTEGRATION parse expression abc parenthesized", cabor_integration_test_parse_expression_abc_parenthesized);
     CABOR_REGISTER_TEST("INTEGRATION parse expression if then else", cabor_integration_test_parse_expression_if_then_else);
     CABOR_REGISTER_TEST("INTEGRATION parse expression if then", cabor_integration_test_parse_expression_if_then);
+    CABOR_REGISTER_TEST("INTEGRATION parse function hello1()", cabor_integration_test_parse_function_hello1);
+    CABOR_REGISTER_TEST("INTEGRATION parse function hello2()", cabor_integration_test_parse_function_hello2);
+    CABOR_REGISTER_TEST("INTEGRATION parse function hello3()", cabor_integration_test_parse_function_hello3);
+    CABOR_REGISTER_TEST("INTEGRATION parse function hello4()", cabor_integration_test_parse_function_hello4);
 }
 
 #else

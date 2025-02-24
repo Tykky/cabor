@@ -139,7 +139,7 @@ static size_t match_operator(const char* buffer, size_t cursor, size_t size, cab
         }
 
         // We don't do - here as match_integer_literal() already handels it,
-        if (prev_c == '\0' && (c == '+' || c == '*' || c == '/' || c == '=' || c == '<' || c == '>' || c == '!'))
+        if (prev_c == '\0' && (c == '+' || c == '-' || c == '*' || c == '/' || c == '=' || c == '<' || c == '>' || c == '!'))
         {
             token[token_cursor++] = c;
             is_char_valid = true;
@@ -199,6 +199,12 @@ static size_t match_integer_literal(const char* buffer, size_t cursor, size_t si
 
     if (token_cursor == 0)
         return cursor;
+
+    // If this is just singular - sign then this is not integer literal but operator instead
+    if (token_cursor == 1 && token[0] == '-')
+    {
+        return --cursor;
+    }
 
     copy_to_out_token(cursor, size, token_cursor, token, out_token, CABOR_INTEGER_LITERAL);
 

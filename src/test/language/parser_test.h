@@ -21,6 +21,10 @@ int cabor_integration_test_parse_expression_cba();
 int cabor_integration_test_parse_expression_abc_parenthesized();
 int cabor_integration_test_parse_expression_if_then_else();
 int cabor_integration_test_parse_expression_if_then();
+int cabor_integration_test_parse_function_hello1();
+int cabor_integration_test_parse_function_hello2();
+int cabor_integration_test_parse_function_hello3();
+int cabor_integration_test_parse_function_hello4();
 
 
 #endif // CABOR_ENABLE_TESTING

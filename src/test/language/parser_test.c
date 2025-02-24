@@ -597,4 +597,57 @@ int cabor_integration_test_parse_expression_if_then()
     return cabor_integration_test_parser_common(code, expected, 5, cabor_parse_if_then_else_expression);
 }
 
+int cabor_integration_test_parse_function_hello1()
+{
+    const char* code = "hello()";
+    const char* expected[] =
+    {
+        "root: hello, edges: []",
+    };
+    return cabor_integration_test_parser_common(code, expected, 1, cabor_parse_function);
+}
+
+int cabor_integration_test_parse_function_hello2()
+{
+    const char* code = "hello(a)";
+    const char* expected[] =
+    {
+        "root: hello, edges: ['a']",
+        "root: a, edges: []",
+    };
+    return cabor_integration_test_parser_common(code, expected, 2, cabor_parse_function);
+}
+
+int cabor_integration_test_parse_function_hello3()
+{
+    const char* code = "hello(a, b, c)";
+    const char* expected[] =
+    {
+        "root: hello, edges: ['a', 'b', 'c']",
+        "root: c, edges: []",
+        "root: b, edges: []",
+        "root: a, edges: []",
+    };
+    return cabor_integration_test_parser_common(code, expected, 4, cabor_parse_function);
+}
+
+int cabor_integration_test_parse_function_hello4()
+{
+    const char* code = "hello(a + b, c * d, e - f)";
+    const char* expected[] =
+    {
+        "root: hello, edges: ['+', '*', '-']",
+        "root: -, edges: ['e', 'f']",
+        "root: f, edges: []",
+        "root: e, edges: []",
+        "root: *, edges: ['c', 'd']",
+        "root: d, edges: []",
+        "root: c, edges: []",
+        "root: +, edges: ['a', 'b']",
+        "root: b, edges: []",
+        "root: a, edges: []",
+    };
+    return cabor_integration_test_parser_common(code, expected, 10, cabor_parse_function);
+}
+
 #endif // CABOR_ENABLE_TESTING

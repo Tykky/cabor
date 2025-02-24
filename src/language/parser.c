@@ -233,27 +233,27 @@ cabor_ast_allocated_node cabor_parse_factor(cabor_vector* tokens, size_t* op_ind
 
     switch (token->type)
     {
-        case CABOR_IDENTIFIER:
+    case CABOR_IDENTIFIER:
+    {
+        return cabor_parse_identifier(tokens, *op_index);
+    }
+    case CABOR_INTEGER_LITERAL:
+    {
+        return cabor_parse_integer_literal(tokens, *op_index);
+    }
+    case CABOR_PUNCTUATION:
+    {
+        if (token->data[0] == '(' || token->data[0] == ')')
         {
-            return cabor_parse_identifier(tokens, *op_index);
+            return cabor_parse_parenthesized(tokens, op_index);
         }
-        case CABOR_INTEGER_LITERAL:
+        else
         {
-            return cabor_parse_integer_literal(tokens, *op_index);
+            CABOR_RUNTIME_ERROR("Failed to parse factor! punctuation was not ( or )");
         }
-        case CABOR_PUNCTUATION:
-        {
-            if (token->data[0] == '(' || token->data[0] == ')')
-            {
-                return cabor_parse_parenthesized(tokens, op_index);
-            }
-            else
-            {
-                CABOR_RUNTIME_ERROR("Failed to parse factor! punctuation was not ( or )");
-            }
-        }
-        default:
-            CABOR_RUNTIME_ERROR("Failed to parse factor!");
+    }
+    default:
+        CABOR_RUNTIME_ERROR("Failed to parse factor!");
     }
 }
 
@@ -284,22 +284,29 @@ cabor_ast_allocated_node cabor_parse_function(cabor_vector* tokens, size_t* curs
             break;
         }
 
-        args[argCount] = cabor_parse_expression(tokens, cursor);
+        args[argCount++] = cabor_parse_expression(tokens, cursor);
 
-        ++argCount;
-        token = next(tokens, cursor);
-
-        // If there is only 1 argument
-        if (token->data[0] == ')')
+        bool found_comma = false;
+        while (IS_VALID_TOKEN(token)) // we allow expressions inside arg list so each arg can be multiple tokens long
         {
-            valid = true;
-            break;
+            if (token->data[0] == ',')
+            {
+                found_comma = true;
+                break;
+            }
+
+            if (token->data[0] == ')')
+            {
+                valid = true;
+                break;
+            }
+
+            token = next(tokens, cursor);
         }
 
-        // If next is not , we have error
-        if (!token->type == CABOR_PUNCTUATION || token->data[0] != ',')
+        if (!valid && !found_comma)
         {
-            CABOR_LOG_ERR_F("Expected punctuation , after argument in function but got %s", token->data);
+            CABOR_LOG_ERR_F("Expected , in function parser but ran out of tokens");
             break;
         }
 
@@ -312,7 +319,8 @@ cabor_ast_allocated_node cabor_parse_function(cabor_vector* tokens, size_t* curs
         return cabor_allocate_ast_node(0, NULL, 0);
     }
 
-    cabor_ast_allocated_node function_root = cabor_allocate_ast_node(function_name_token_idx, args, argCount);
+    cabor_ast_allocated_node* edges = argCount > 0 ? args : NULL;
+    cabor_ast_allocated_node function_root = cabor_allocate_ast_node(function_name_token_idx, edges, argCount);
 
     return function_root;
 }
@@ -329,10 +337,8 @@ cabor_ast_allocated_node cabor_allocate_ast_node(size_t token_index, cabor_ast_a
 
     node->token_index = token_index;
     
-    if (edges != NULL)
+    if (edges != NULL && num_edges > 0)
     {
-        CABOR_ASSERT(num_edges > 0, "num_edges was zero when edges was not null!");
-
         // Copy edges to the freshly allocated node
         for (size_t i = 0; i < num_edges; i++)
         {
@@ -343,7 +349,6 @@ cabor_ast_allocated_node cabor_allocate_ast_node(size_t token_index, cabor_ast_a
     }
     else
     {
-        CABOR_ASSERT(num_edges == 0, "num_edges was greater than zero when edges was null!");
         node->num_edges = 0;
     }
 
