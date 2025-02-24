@@ -490,7 +490,7 @@ int cabor_test_parse_function_hello()
 
 // Integration tests: tokenizer + parser
 
-int cabor_integration_test_parser_common(const char* code, const char** expected, size_t node_count, cabor_ast_allocated_node(top_level_parser)(cabor_vector* tokens, size_t cursor))
+int cabor_integration_test_parser_common(const char* code, const char** expected, size_t node_count, cabor_ast_allocated_node(top_level_parser)(cabor_vector* tokens, size_t* cursor))
 {
     int res = 0;
     cabor_file* file = cabor_file_from_buffer(code, strlen(code));
@@ -499,7 +499,7 @@ int cabor_integration_test_parser_common(const char* code, const char** expected
 
     size_t cursor = 0;
     cabor_ast_allocated_node ast = top_level_parser(tokens, &cursor);
-    cabor_vector* nodes = cabor_get_ast_node_list(&ast);
+    cabor_vector* nodes = cabor_get_ast_node_list_al(&ast);
     CABOR_CHECK_EQUALS(nodes->size, node_count, res);
     for (size_t i = 0; i < node_count; i++)
     {
