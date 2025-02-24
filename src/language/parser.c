@@ -306,7 +306,7 @@ cabor_ast_allocated_node cabor_parse_function(cabor_vector* tokens, size_t* curs
 
         if (!valid && !found_comma)
         {
-            CABOR_LOG_ERR_F("Expected , in function parser but ran out of tokens");
+            CABOR_LOG_ERR("Expected , in function parser but ran out of tokens");
             break;
         }
 
