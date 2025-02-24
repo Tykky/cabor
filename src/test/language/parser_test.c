@@ -423,9 +423,69 @@ int cabor_test_parse_expression_if_then()
     return res;
 }
 
-// Parse hello()
+// Parse hello(a, b, c)
 int cabor_test_parse_function_hello()
 {
+    cabor_vector* tokens = cabor_create_vector(100, CABOR_TOKEN, true);
+
+    cabor_token tmp[10] = { 0 };
+    size_t i = 0;
+
+    tmp[i++] = create_token("hello", CABOR_IDENTIFIER);
+    tmp[i++] = create_token("(", CABOR_PUNCTUATION);
+    tmp[i++] = create_token("a", CABOR_IDENTIFIER);
+    tmp[i++] = create_token(",", CABOR_PUNCTUATION);
+    tmp[i++] = create_token("b", CABOR_IDENTIFIER);
+    tmp[i++] = create_token(",", CABOR_PUNCTUATION);
+    tmp[i++] = create_token("c", CABOR_IDENTIFIER);
+    tmp[i++] = create_token(")", CABOR_PUNCTUATION);
+    char buffer[100] = { 0 };
+
+    for (size_t j = 0; j < 8; j++)
+        cabor_vector_push_token(tokens, &tmp[j]);
+
+    size_t cursor = 0;
+    cabor_ast_allocated_node ast = cabor_parse_function(tokens, &cursor);
+    cabor_vector* ast_nodes = cabor_get_ast_node_list_al(&ast);
+
+    for (size_t i = 0; i < ast_nodes->size; i++)
+    {
+        cabor_ast_node* n = cabor_vector_get_ptr(ast_nodes, i);
+        cabor_ast_allocated_node an =
+        {
+            .node_mem.mem = n,
+#ifdef CABOR_ENABLE_ALLOCATOR_FAT_POINTERS
+            .node_mem.size = sizeof(cabor_ast_node),
+#endif
+        };
+        memset(buffer, 0, 100);
+        cabor_ast_node_to_string_al(tokens, &an, buffer, 100);
+       //CABOR_LOG_TRACE_F("%s", buffer);
+    }
+
+    cabor_ast_node* root = cabor_access_ast_node(&ast);
+    cabor_ast_node* a = cabor_access_ast_node(&root->edges[0]);
+    cabor_ast_node* b = cabor_access_ast_node(&root->edges[1]);
+    cabor_ast_node* c = cabor_access_ast_node(&root->edges[2]);
+
+    cabor_token* root_t = cabor_vector_get_token(tokens, root->token_index);
+    cabor_token* a_t = cabor_vector_get_token(tokens, a->token_index);
+    cabor_token* b_t = cabor_vector_get_token(tokens, b->token_index);
+    cabor_token* c_t = cabor_vector_get_token(tokens, c->token_index);
+
+    int res = 0;
+
+    CABOR_CHECK_EQUALS(strcmp(root_t->data, "hello"), 0, res);
+    CABOR_CHECK_EQUALS(a_t->data[0], 'a', res);
+    CABOR_CHECK_EQUALS(b_t->data[0], 'b', res);
+    CABOR_CHECK_EQUALS(c_t->data[0], 'c', res);
+
+
+    cabor_destroy_vector(ast_nodes);
+    cabor_free_ast(&ast);
+    cabor_destroy_vector(tokens);
+
+    return res;
 }
 
 // Integration tests: tokenizer + parser

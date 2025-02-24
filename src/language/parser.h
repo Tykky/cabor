@@ -35,6 +35,7 @@ cabor_ast_allocated_node cabor_parse_expression(cabor_vector* tokens, size_t* cu
 cabor_ast_allocated_node cabor_parse_if_then_else_expression(cabor_vector* tokens, size_t* cursor);
 cabor_ast_allocated_node cabor_parse_term(cabor_vector* tokens, size_t* cursor);
 cabor_ast_allocated_node cabor_parse_factor(cabor_vector* tokens, size_t* op_index);
+cabor_ast_allocated_node cabor_parse_function(cabor_vector* tokens, size_t* cursor);
 cabor_ast_allocated_node cabor_allocate_ast_node(size_t token_index, cabor_ast_allocated_node* edges, size_t num_edges);
 
 cabor_vector* cabor_get_ast_node_list_al(cabor_ast_allocated_node* root);

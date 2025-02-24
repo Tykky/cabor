@@ -8,6 +8,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#define CABOR_FUNCTION_PARSER_MAX_ARGS 100
+
 #define IS_VALID_TOKEN(token) token != NULL
 
 static cabor_token* next(cabor_vector* tokens, size_t* cursor)
@@ -255,6 +257,66 @@ cabor_ast_allocated_node cabor_parse_factor(cabor_vector* tokens, size_t* op_ind
     }
 }
 
+cabor_ast_allocated_node cabor_parse_function(cabor_vector* tokens, size_t* cursor)
+{
+    cabor_token* token = cabor_vector_get_token(tokens, *cursor);
+
+    // First token should be the function name
+    CABOR_ASSERT(token->type == CABOR_IDENTIFIER, "First token in function parser wasn't identifier");
+
+    size_t function_name_token_idx = *cursor;
+
+    token = next(tokens, cursor); // second token should be (
+    CABOR_ASSERT(token->type == CABOR_PUNCTUATION, "Second token in function parser wasn't punctuation");
+
+    // Now parse argument list, call expression parser for each arg
+    token = next(tokens, cursor);
+
+    cabor_ast_allocated_node args[CABOR_FUNCTION_PARSER_MAX_ARGS];
+    size_t argCount = 0;
+    bool valid = false;
+
+    while (IS_VALID_TOKEN(token))
+    {
+        if (token->data[0] == ')')
+        {
+            valid = true;
+            break;
+        }
+
+        args[argCount] = cabor_parse_expression(tokens, cursor);
+
+        ++argCount;
+        token = next(tokens, cursor);
+
+        // If there is only 1 argument
+        if (token->data[0] == ')')
+        {
+            valid = true;
+            break;
+        }
+
+        // If next is not , we have error
+        if (!token->type == CABOR_PUNCTUATION || token->data[0] != ',')
+        {
+            CABOR_LOG_ERR_F("Expected punctuation , after argument in function but got %s", token->data);
+            break;
+        }
+
+        token = next(tokens, cursor);
+    }
+
+    if (!valid)
+    {
+        CABOR_LOG_ERR("Failed to parse function");
+        return cabor_allocate_ast_node(0, NULL, 0);
+    }
+
+    cabor_ast_allocated_node function_root = cabor_allocate_ast_node(function_name_token_idx, args, argCount);
+
+    return function_root;
+}
+
 
 cabor_ast_allocated_node cabor_allocate_ast_node(size_t token_index, cabor_ast_allocated_node* edges, size_t num_edges)
 {
@@ -306,6 +368,7 @@ cabor_vector* cabor_get_ast_node_list_al(cabor_ast_allocated_node* root)
 
     size_t stack_capacity = 100;
     cabor_stack* stack = cabor_create_stack(stack_capacity);
+
 
     cabor_vector* nodes = cabor_create_vector(100, CABOR_PTR, true);
     cabor_ast_node* root_node = cabor_access_ast_node(root);
