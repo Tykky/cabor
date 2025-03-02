@@ -32,6 +32,7 @@ int cabor_integration_test_parse_expression_with_any4();
 int cabor_integration_test_parse_expression_with_any5();
 int cabor_integration_test_parse_expression_with_any6();
 int cabor_integration_test_parse_expression_with_any7();
+int cabor_integration_test_parse_any_nested_function_calls();
 
 
 #endif // CABOR_ENABLE_TESTING

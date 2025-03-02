@@ -93,31 +93,27 @@ cabor_ast_allocated_node cabor_parse_any(cabor_vector* tokens, size_t* cursor)
 {
     cabor_ast_allocated_node root;
 
-    while (*cursor < tokens->size)
-    {
-        cabor_token* token = cabor_vector_get_token(tokens, *cursor);
+    cabor_token* token = cabor_vector_get_token(tokens, *cursor);
 
-        if (is_if_token(token))
+    if (is_if_token(token))
+    {
+        root = cabor_parse_if_then_else_expression(tokens, cursor);
+    }
+    else if (token->type == CABOR_IDENTIFIER && *cursor + 1 < tokens->size)
+    {
+        cabor_token* next_token = cabor_vector_get_token(tokens, *cursor + 1);
+        if (IS_VALID_TOKEN(next_token) && next_token->type == CABOR_PUNCTUATION && strcmp(next_token->data, "(") == 0)
         {
-            root = cabor_parse_if_then_else_expression(tokens, cursor);
-        }
-        else if (token->type == CABOR_IDENTIFIER && *cursor + 1 < tokens->size)
-        {
-            cabor_token* next_token = cabor_vector_get_token(tokens, *cursor + 1);
-            if (IS_VALID_TOKEN(next_token) && next_token->type == CABOR_PUNCTUATION && strcmp(next_token->data, "(") == 0)
-            {
-                root = cabor_parse_function(tokens, cursor);
-            }
-            else
-            {
-                root = cabor_parse_expression(tokens, cursor);
-            }
+            root = cabor_parse_function(tokens, cursor);
         }
         else
         {
             root = cabor_parse_expression(tokens, cursor);
         }
-        ++(*cursor);
+    }
+    else
+    {
+        root = cabor_parse_expression(tokens, cursor);
     }
 
     return root;
@@ -371,7 +367,7 @@ cabor_ast_allocated_node cabor_parse_function(cabor_vector* tokens, size_t* curs
             break;
         }
 
-        args[argCount++] = cabor_parse_expression(tokens, cursor);
+        args[argCount++] = cabor_parse_any(tokens, cursor);
 
         bool found_comma = false;
         while (IS_VALID_TOKEN(token)) // we allow expressions inside arg list so each arg can be multiple tokens long
@@ -394,6 +390,11 @@ cabor_ast_allocated_node cabor_parse_function(cabor_vector* tokens, size_t* curs
         if (!valid && !found_comma)
         {
             CABOR_LOG_ERR("Expected , in function parser but ran out of tokens");
+            break;
+        }
+
+        if (token->data[0] == ')')
+        {
             break;
         }
 

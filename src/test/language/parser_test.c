@@ -753,5 +753,23 @@ int cabor_integration_test_parse_expression_with_any7()
     return cabor_integration_test_parser_common(code, expected, 6, cabor_parse_any);
 }
 
+int cabor_integration_test_parse_any_nested_function_calls()
+{
+    const char* code = "foo(bar(baz(1), qux(2 + 3)), corge(4))";
+    const char* expected[] =
+    {
+        "root: foo, edges: ['bar', 'corge']",
+        "root: corge, edges: ['4']",
+        "root: 4, edges: []",
+        "root: bar, edges: ['baz', 'qux']",
+        "root: qux, edges: ['+']",
+        "root: +, edges: ['2', '3']",
+        "root: 3, edges: []",
+        "root: 2, edges: []",
+        "root: baz, edges: ['1']",
+        "root: 1, edges: []",
+    };
+    return cabor_integration_test_parser_common(code, expected, 10, cabor_parse_any);
+}
 
 #endif // CABOR_ENABLE_TESTING

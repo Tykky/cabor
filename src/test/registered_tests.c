@@ -50,6 +50,7 @@ void register_all_tests()
     CABOR_REGISTER_TEST("INTEGRATION parse expression with any 5", cabor_integration_test_parse_expression_with_any5);
     CABOR_REGISTER_TEST("INTEGRATION parse expression with any 6", cabor_integration_test_parse_expression_with_any6);
     CABOR_REGISTER_TEST("INTEGRATION parse expression with any 7", cabor_integration_test_parse_expression_with_any7);
+    CABOR_REGISTER_TEST("INTEGRATION parse nested function calls", cabor_integration_test_parse_any_nested_function_calls);
 }
 #else
 void register_all_tests() {}
