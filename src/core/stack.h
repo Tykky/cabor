@@ -15,6 +15,3 @@ void cabor_destroy_stack(cabor_stack* stack);
 void cabor_stack_push(cabor_stack* stack, void* element);
 bool cabor_stack_pop(cabor_stack* stack, void** element);
 bool cabor_stack_peek(cabor_stack* stack, void** element);
-
-
-

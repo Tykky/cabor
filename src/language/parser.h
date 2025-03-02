@@ -31,6 +31,7 @@ cabor_ast_allocated_node cabor_parse_identifier(cabor_vector* tokens, size_t op_
 cabor_ast_allocated_node cabor_parse_integer_literal(cabor_vector* tokens, size_t op_index);
 cabor_ast_allocated_node cabor_parse_parenthesized(cabor_vector* tokens, size_t* op_index);
 cabor_ast_allocated_node cabor_parse_operator(cabor_vector* tokens, size_t op_index, cabor_ast_allocated_node left, cabor_ast_allocated_node right);
+cabor_ast_allocated_node cabor_parse_binary_expression(cabor_vector* tokens, size_t* cursor, size_t current_precedence_level);
 cabor_ast_allocated_node cabor_parse_expression(cabor_vector* tokens, size_t* cursor);
 cabor_ast_allocated_node cabor_parse_if_then_else_expression(cabor_vector* tokens, size_t* cursor);
 cabor_ast_allocated_node cabor_parse_term(cabor_vector* tokens, size_t* cursor);

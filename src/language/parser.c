@@ -9,8 +9,26 @@
 #include <string.h>
 
 #define CABOR_FUNCTION_PARSER_MAX_ARGS 100
+#define CABOR_MAX_BINARY_OPS_PER_PRECEDENCE_LEVEL 10
+#define CABOR_LAST_BINARY_PRECEDENCE_LEVEL 5
 
 #define IS_VALID_TOKEN(token) token != NULL
+
+typedef struct 
+{
+    size_t numOps;
+    const char* ops[CABOR_MAX_BINARY_OPS_PER_PRECEDENCE_LEVEL];
+} binary_precedence_level;
+
+static const binary_precedence_level binary_precedence_levels[] =
+{
+    {1, "or"},
+    {1, "and"},
+    {2, "==", "!="},
+    {4, "<", "<=", ">", ">="},
+    {2, "+", "-"},
+    {3, "*", "/", "%"},
+};
 
 static cabor_token* next(cabor_vector* tokens, size_t* cursor)
 {
@@ -55,6 +73,22 @@ static bool is_multiply_divide_operator(cabor_token* token)
     return IS_VALID_TOKEN(token) && token->type == CABOR_OPERATOR && (token->data[0] == '*' || token->data[0] == '/');
 }
 
+static bool is_binary_op_at_current_precedence_level(cabor_token* token, size_t current_level)
+{
+    CABOR_ASSERT(current_level <= CABOR_LAST_BINARY_PRECEDENCE_LEVEL, "Current level is greater than last precedence level");
+    if (IS_VALID_TOKEN(token) && token->type == CABOR_OPERATOR)
+    {
+        binary_precedence_level current = binary_precedence_levels[current_level];
+        for (size_t i = 0; i < current.numOps; i++)
+        {
+            char* op = current.ops[i];
+            if (strcmp(op, token->data) == 0)
+                return true;
+        }
+    }
+    return false;
+}
+
 cabor_ast_allocated_node cabor_parse_identifier(cabor_vector* tokens, size_t op_index)
 {
     CABOR_ASSERT(op_index < tokens->size, "op_index is out of bounds!");
@@ -74,9 +108,9 @@ cabor_ast_allocated_node cabor_parse_parenthesized(cabor_vector* tokens, size_t*
     cabor_token* begin = cabor_vector_get_token(tokens, *op_index);
     CABOR_ASSERT(begin->data[0] == '(', "Begin token not (");
 
-    ++(*op_index);
-    cabor_ast_allocated_node expr = cabor_parse_expression(tokens, op_index);
-    ++(*op_index);
+    next(tokens, op_index);
+    cabor_ast_allocated_node expr = cabor_parse_binary_expression(tokens, op_index, 0);
+    next(tokens, op_index);
 
     cabor_token* end = cabor_vector_get_token(tokens, *op_index);
     CABOR_ASSERT(end->data[0] == ')', "End token not )");
@@ -100,35 +134,59 @@ cabor_ast_allocated_node cabor_parse_operator(cabor_vector* tokens, size_t op_in
     return root_alloc;
 }
 
-// Parse + - expression
-cabor_ast_allocated_node cabor_parse_expression(cabor_vector* tokens, size_t* cursor)
+cabor_ast_allocated_node cabor_parse_binary_expression(cabor_vector* tokens, size_t* cursor, size_t current_precedence_level)
 {
-    cabor_ast_allocated_node left = cabor_parse_term(tokens, cursor);
+    cabor_ast_allocated_node left;
+    if (current_precedence_level == CABOR_LAST_BINARY_PRECEDENCE_LEVEL)
+    {
+        left = cabor_parse_factor(tokens, cursor);
+    }
+    else
+    {
+        left = cabor_parse_binary_expression(tokens, cursor, current_precedence_level + 1);
+    }
 
-    if (*cursor + 1>= tokens->size)
+    if (*cursor + 1 >= tokens->size)
         return left;
 
     // lookahead
     cabor_token* next_t = cabor_vector_get_token(tokens, *cursor + 1);
 
-    while (is_plus_minus_operator(next_t))
+    while (is_binary_op_at_current_precedence_level(next_t, current_precedence_level))
     {
         cabor_token* op = next(tokens, cursor);
         size_t opi = *cursor;
 
         next(tokens, cursor);
 
-        cabor_ast_allocated_node right = cabor_parse_term(tokens, cursor);
+        cabor_ast_allocated_node right;
+
+        if (current_precedence_level == CABOR_LAST_BINARY_PRECEDENCE_LEVEL)
+        {
+            right = cabor_parse_factor(tokens, cursor);
+        }
+        else
+        {
+            right = cabor_parse_binary_expression(tokens, cursor, current_precedence_level + 1);
+        }
 
         left = cabor_parse_operator(tokens, opi, left, right);
 
         if (*cursor + 1 < tokens->size)
+        {
             next_t = cabor_vector_get_token(tokens, *cursor + 1);
+        }
         else
             break;
     }
 
     return left;
+}
+
+// Parse + - expression
+cabor_ast_allocated_node cabor_parse_expression(cabor_vector* tokens, size_t* cursor)
+{
+    return cabor_parse_binary_expression(tokens, cursor, 4);
 }
 
 cabor_ast_allocated_node cabor_parse_if_then_else_expression(cabor_vector* tokens, size_t* cursor)
@@ -200,31 +258,7 @@ cabor_ast_allocated_node cabor_parse_if_then_else_expression(cabor_vector* token
 // Parse * / term
 cabor_ast_allocated_node cabor_parse_term(cabor_vector* tokens, size_t* cursor)
 {
-    cabor_ast_allocated_node left = cabor_parse_factor(tokens, cursor);
-
-    if (*cursor + 1 >= tokens->size)
-        return left;
-
-    // lookahead
-    cabor_token* next = cabor_vector_get_token(tokens, *cursor + 1);
-
-    while (is_multiply_divide_operator(next))
-    {
-        ++(*cursor);
-        cabor_token* op = cabor_vector_get_token(tokens, *cursor);
-        size_t opi = *cursor;
-        ++(*cursor);
-        cabor_ast_allocated_node right = cabor_parse_factor(tokens, cursor);
-
-        left = cabor_parse_operator(tokens, opi, left, right);
-
-        if (*cursor + 1 < tokens->size)
-            next = cabor_vector_get_token(tokens, *cursor + 1);
-        else
-            break;
-    }
-
-    return left;
+    return cabor_parse_binary_expression(tokens, cursor, 5);
 }
 
 cabor_ast_allocated_node cabor_parse_factor(cabor_vector* tokens, size_t* op_index)
