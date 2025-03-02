@@ -21,7 +21,7 @@ static void copy_to_out_token(size_t cursor, size_t size, size_t token_cursor, c
     if (token_cursor < CABOR_TOKENIZER_MAX_TOKEN_LENGTH)
     {
         // Copy results to out_token and add null terminator
-        CABOR_ASSERT(size - cursor >= token_cursor, "Not enough space to memcpy characters to out_token");
+        CABOR_ASSERT(token_cursor < CABOR_TOKENIZER_MAX_TOKEN_LENGTH, "Max token length exceeded!");
         memcpy(out_token->data, temp_token, token_cursor);
         out_token->type = type;
         out_token->data[token_cursor] = '\0';
@@ -106,6 +106,10 @@ static size_t match_operator(const char* buffer, size_t cursor, size_t size, cab
 
     size_t i = cursor;
 
+    bool or_matched = false;
+    bool and_mateched = false;
+    bool not_matched = false;
+
     while (cursor < size)
     {
         char c = buffer[cursor];
@@ -130,6 +134,52 @@ static size_t match_operator(const char* buffer, size_t cursor, size_t size, cab
             dc_matched = true;
         }
 
+        // Not the nicest way to handle this but since character 'o' and 'a' can be
+        // part of identifiers or operators we need to be extra careful when matching these.
+
+        if (c == 'o' && cursor + 1 < size)
+        {
+            char second = buffer[cursor + 1];
+            if (second == 'r')
+            {
+                token[token_cursor++] = c;
+                token[token_cursor++] = second;
+                or_matched = true;
+                is_char_valid = true;
+                ++cursor;
+            }
+        }
+
+        if (c == 'a' && cursor + 2 < size)
+        {
+            char second = buffer[cursor + 1];
+            char third = buffer[cursor + 2];
+            if (second == 'n' && third == 'd')
+            {
+                token[token_cursor++] = c;
+                token[token_cursor++] = second;
+                token[token_cursor++] = third;
+                and_mateched = true;
+                is_char_valid = true;
+                cursor += 2;
+            }
+        }
+
+        if (c == 'n' && cursor + 2 < size)
+        {
+            char second = buffer[cursor + 1];
+            char third = buffer[cursor + 2];
+            if (second == 'o' && third == 't')
+            {
+                token[token_cursor++] = c;
+                token[token_cursor++] = second;
+                token[token_cursor++] = third;
+                not_matched = true;
+                is_char_valid = true;
+                cursor += 2;
+            }
+        }
+
         if (dc_matched)
         {
             token[token_cursor++] = c;
@@ -138,8 +188,8 @@ static size_t match_operator(const char* buffer, size_t cursor, size_t size, cab
             break;
         }
 
-        // We don't do - here as match_integer_literal() already handels it,
-        if (prev_c == '\0' && (c == '+' || c == '-' || c == '*' || c == '/' || c == '=' || c == '<' || c == '>' || c == '!'))
+        // Match single character operators
+        if (prev_c == '\0' && (c == '+' || c == '-' || c == '*' || c == '/' || c == '=' || c == '<' || c == '>' || c == '!' || c == '%'))
         {
             token[token_cursor++] = c;
             is_char_valid = true;
@@ -150,6 +200,24 @@ static size_t match_operator(const char* buffer, size_t cursor, size_t size, cab
             break;
 
         cursor++;
+    }
+
+    // if these were or/and we need to make sure we got exactly 2 or 3 characters
+    // if not these are identifiers and not operators
+
+    if (or_matched && token_cursor != 2)
+    {
+        return cursor;
+    }
+
+    if (and_mateched && token_cursor != 3)
+    {
+        return cursor;
+    }
+
+    if (not_matched && token_cursor != 3)
+    {
+        return cursor;
     }
 
     if (token_cursor == 0)
@@ -330,6 +398,13 @@ cabor_vector* cabor_tokenize(cabor_file* file)
             continue;
         }
 
+        cursor = match_operator(buffer, cursor, size, &token);
+        if (is_match(&token))
+        {
+            append_token(vector, &token);
+            continue;
+        }
+
         cursor = match_identifier(buffer, cursor, size, &token);
         if (is_match(&token))
         {
@@ -338,13 +413,6 @@ cabor_vector* cabor_tokenize(cabor_file* file)
         }
 
         cursor = match_integer_literal(buffer, cursor, size, &token);
-        if (is_match(&token))
-        {
-            append_token(vector, &token);
-            continue;
-        }
-
-        cursor = match_operator(buffer, cursor, size, &token);
         if (is_match(&token))
         {
             append_token(vector, &token);

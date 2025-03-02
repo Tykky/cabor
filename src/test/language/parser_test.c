@@ -650,9 +650,108 @@ int cabor_integration_test_parse_function_hello4()
     return cabor_integration_test_parser_common(code, expected, 10, cabor_parse_function);
 }
 
-int cabor_integration_test_parse_expression_with_additional_tokens()
+int cabor_integration_test_parse_expression_with_any1()
 {
-    const char* code = "hello(a + b, c * d, e - f)";
+    const char* code = "a or b or c";
+    const char* expected[] =
+    {
+        "root: or, edges: ['or', 'c']",
+        "root: c, edges: []",
+        "root: or, edges: ['a', 'b']",
+        "root: b, edges: []",
+        "root: a, edges: []",
+    };
+    return cabor_integration_test_parser_common(code, expected, 5, cabor_parse_any);
 }
+
+int cabor_integration_test_parse_expression_with_any2()
+{
+    const char* code = "x * y + z";
+    const char* expected[] = {
+        "root: +, edges: ['*', 'z']",
+        "root: z, edges: []",
+        "root: *, edges: ['x', 'y']",
+        "root: y, edges: []",
+        "root: x, edges: []",
+    };
+    return cabor_integration_test_parser_common(code, expected, 5, cabor_parse_any);
+}
+
+int cabor_integration_test_parse_expression_with_any3()
+{
+    const char* code = "a + b * c - d";
+    const char* expected[] = {
+        "root: -, edges: ['+', 'd']",
+        "root: d, edges: []",
+        "root: +, edges: ['a', '*']",
+        "root: *, edges: ['b', 'c']",
+        "root: c, edges: []",
+        "root: b, edges: []",
+        "root: a, edges: []",
+    };
+    return cabor_integration_test_parser_common(code, expected, 7, cabor_parse_any);
+}
+
+int cabor_integration_test_parse_expression_with_any4()
+{
+    const char* code = "(a + b) * (c - d)";
+    const char* expected[] = {
+        "root: *, edges: ['+', '-']",
+        "root: -, edges: ['c', 'd']",
+        "root: d, edges: []",
+        "root: c, edges: []",
+        "root: +, edges: ['a', 'b']",
+        "root: b, edges: []",
+        "root: a, edges: []",
+    };
+    return cabor_integration_test_parser_common(code, expected, 7, cabor_parse_any);
+}
+
+int cabor_integration_test_parse_expression_with_any5()
+{
+    const char* code = "a < b and c > d or e == f";
+    const char* expected[] = {
+        "root: or, edges: ['and', '==']",
+        "root: ==, edges: ['e', 'f']",
+        "root: f, edges: []",
+        "root: e, edges: []",
+        "root: and, edges: ['<', '>']",
+        "root: >, edges: ['c', 'd']",
+        "root: d, edges: []",
+        "root: c, edges: []",
+        "root: <, edges: ['a', 'b']",
+        "root: b, edges: []",
+        "root: a, edges: []",
+    };
+    return cabor_integration_test_parser_common(code, expected, 11, cabor_parse_any);
+}
+
+int cabor_integration_test_parse_expression_with_any6()
+{
+    const char* code = "x % y * z";
+    const char* expected[] = {
+        "root: *, edges: ['%', 'z']",
+        "root: z, edges: []",
+        "root: %, edges: ['x', 'y']",
+        "root: y, edges: []",
+        "root: x, edges: []",
+    };
+    return cabor_integration_test_parser_common(code, expected, 5, cabor_parse_any);
+}
+
+int cabor_integration_test_parse_expression_with_any7()
+{
+    const char* code = "not a or b and c";
+    const char* expected[] = {
+        "root: or, edges: ['not', 'and']",
+        "root: and, edges: ['b', 'c']",
+        "root: c, edges: []",
+        "root: b, edges: []",
+        "root: not, edges: ['a']",
+        "root: a, edges: []",
+    };
+    return cabor_integration_test_parser_common(code, expected, 6, cabor_parse_any);
+}
+
 
 #endif // CABOR_ENABLE_TESTING

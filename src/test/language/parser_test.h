@@ -25,6 +25,13 @@ int cabor_integration_test_parse_function_hello1();
 int cabor_integration_test_parse_function_hello2();
 int cabor_integration_test_parse_function_hello3();
 int cabor_integration_test_parse_function_hello4();
+int cabor_integration_test_parse_expression_with_any1();
+int cabor_integration_test_parse_expression_with_any2();
+int cabor_integration_test_parse_expression_with_any3();
+int cabor_integration_test_parse_expression_with_any4();
+int cabor_integration_test_parse_expression_with_any5();
+int cabor_integration_test_parse_expression_with_any6();
+int cabor_integration_test_parse_expression_with_any7();
 
 
 #endif // CABOR_ENABLE_TESTING

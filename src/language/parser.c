@@ -89,6 +89,52 @@ static bool is_binary_op_at_current_precedence_level(cabor_token* token, size_t 
     return false;
 }
 
+cabor_ast_allocated_node cabor_parse_any(cabor_vector* tokens, size_t* cursor)
+{
+    cabor_ast_allocated_node root;
+
+    while (*cursor < tokens->size)
+    {
+        cabor_token* token = cabor_vector_get_token(tokens, *cursor);
+
+        if (is_if_token(token))
+        {
+            root = cabor_parse_if_then_else_expression(tokens, cursor);
+        }
+        else if (token->type == CABOR_IDENTIFIER && *cursor + 1 < tokens->size)
+        {
+            cabor_token* next_token = cabor_vector_get_token(tokens, *cursor + 1);
+            if (IS_VALID_TOKEN(next_token) && next_token->type == CABOR_PUNCTUATION && strcmp(next_token->data, "(") == 0)
+            {
+                root = cabor_parse_function(tokens, cursor);
+            }
+            else
+            {
+                root = cabor_parse_expression(tokens, cursor);
+            }
+        }
+        else
+        {
+            root = cabor_parse_expression(tokens, cursor);
+        }
+        ++(*cursor);
+    }
+
+    return root;
+}
+
+// Parse unary '-' and 'not'
+cabor_ast_allocated_node cabor_parse_unary(cabor_vector* tokens, size_t* cursor)
+{
+    size_t op = *cursor;
+    next(tokens, cursor);
+
+    cabor_ast_allocated_node operand = cabor_parse_factor(tokens, cursor);
+    cabor_ast_allocated_node edges[] = { operand };
+
+    return cabor_allocate_ast_node(op, edges, 1);
+}
+
 cabor_ast_allocated_node cabor_parse_identifier(cabor_vector* tokens, size_t op_index)
 {
     CABOR_ASSERT(op_index < tokens->size, "op_index is out of bounds!");
@@ -274,6 +320,13 @@ cabor_ast_allocated_node cabor_parse_factor(cabor_vector* tokens, size_t* op_ind
     case CABOR_INTEGER_LITERAL:
     {
         return cabor_parse_integer_literal(tokens, *op_index);
+    }
+    case CABOR_OPERATOR: // parse unary operators '-' and 'not' here
+    {
+        if (strcmp(token->data, "-") == 0 || strcmp(token->data, "not") == 0)
+        {
+            return cabor_parse_unary(tokens, op_index);
+        }
     }
     case CABOR_PUNCTUATION:
     {

@@ -43,8 +43,14 @@ void register_all_tests()
     CABOR_REGISTER_TEST("INTEGRATION parse function hello2()", cabor_integration_test_parse_function_hello2);
     CABOR_REGISTER_TEST("INTEGRATION parse function hello3()", cabor_integration_test_parse_function_hello3);
     CABOR_REGISTER_TEST("INTEGRATION parse function hello4()", cabor_integration_test_parse_function_hello4);
+    CABOR_REGISTER_TEST("INTEGRATION parse expression with any 1", cabor_integration_test_parse_expression_with_any1);
+    CABOR_REGISTER_TEST("INTEGRATION parse expression with any 2", cabor_integration_test_parse_expression_with_any2);
+    CABOR_REGISTER_TEST("INTEGRATION parse expression with any 3", cabor_integration_test_parse_expression_with_any3);
+    CABOR_REGISTER_TEST("INTEGRATION parse expression with any 4", cabor_integration_test_parse_expression_with_any4);
+    CABOR_REGISTER_TEST("INTEGRATION parse expression with any 5", cabor_integration_test_parse_expression_with_any5);
+    CABOR_REGISTER_TEST("INTEGRATION parse expression with any 6", cabor_integration_test_parse_expression_with_any6);
+    CABOR_REGISTER_TEST("INTEGRATION parse expression with any 7", cabor_integration_test_parse_expression_with_any7);
 }
-
 #else
 void register_all_tests() {}
 #endif
