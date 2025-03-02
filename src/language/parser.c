@@ -186,7 +186,7 @@ cabor_ast_allocated_node cabor_parse_binary_expression(cabor_vector* tokens, siz
 // Parse + - expression
 cabor_ast_allocated_node cabor_parse_expression(cabor_vector* tokens, size_t* cursor)
 {
-    return cabor_parse_binary_expression(tokens, cursor, 4);
+    return cabor_parse_binary_expression(tokens, cursor, 0);
 }
 
 cabor_ast_allocated_node cabor_parse_if_then_else_expression(cabor_vector* tokens, size_t* cursor)
@@ -258,7 +258,7 @@ cabor_ast_allocated_node cabor_parse_if_then_else_expression(cabor_vector* token
 // Parse * / term
 cabor_ast_allocated_node cabor_parse_term(cabor_vector* tokens, size_t* cursor)
 {
-    return cabor_parse_binary_expression(tokens, cursor, 5);
+    return cabor_parse_binary_expression(tokens, cursor, 0);
 }
 
 cabor_ast_allocated_node cabor_parse_factor(cabor_vector* tokens, size_t* op_index)

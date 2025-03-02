@@ -650,4 +650,9 @@ int cabor_integration_test_parse_function_hello4()
     return cabor_integration_test_parser_common(code, expected, 10, cabor_parse_function);
 }
 
+int cabor_integration_test_parse_expression_with_additional_tokens()
+{
+    const char* code = "hello(a + b, c * d, e - f)";
+}
+
 #endif // CABOR_ENABLE_TESTING
