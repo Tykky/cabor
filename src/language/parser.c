@@ -89,36 +89,6 @@ static bool is_binary_op_at_current_precedence_level(cabor_token* token, size_t 
     return false;
 }
 
-cabor_ast_allocated_node cabor_parse_any(cabor_vector* tokens, size_t* cursor)
-{
-    cabor_ast_allocated_node root;
-
-    cabor_token* token = cabor_vector_get_token(tokens, *cursor);
-
-    if (is_if_token(token))
-    {
-        root = cabor_parse_if_then_else_expression(tokens, cursor);
-    }
-    else if (token->type == CABOR_IDENTIFIER && *cursor + 1 < tokens->size)
-    {
-        cabor_token* next_token = cabor_vector_get_token(tokens, *cursor + 1);
-        if (IS_VALID_TOKEN(next_token) && next_token->type == CABOR_PUNCTUATION && strcmp(next_token->data, "(") == 0)
-        {
-            root = cabor_parse_function(tokens, cursor);
-        }
-        else
-        {
-            root = cabor_parse_expression(tokens, cursor);
-        }
-    }
-    else
-    {
-        root = cabor_parse_expression(tokens, cursor);
-    }
-
-    return root;
-}
-
 // Parse unary '-' and 'not'
 cabor_ast_allocated_node cabor_parse_unary(cabor_vector* tokens, size_t* cursor)
 {
@@ -297,6 +267,14 @@ cabor_ast_allocated_node cabor_parse_if_then_else_expression(cabor_vector* token
     return root;
 }
 
+cabor_ast_allocated_node cabor_parse_while_expression(cabor_vector* tokens, size_t* cursor)
+{
+}
+
+cabor_ast_allocated_node cabor_parse_var_expression(cabor_vector* tokens, size_t* cursor)
+{
+}
+
 // Parse * / term
 cabor_ast_allocated_node cabor_parse_term(cabor_vector* tokens, size_t* cursor)
 {
@@ -305,12 +283,22 @@ cabor_ast_allocated_node cabor_parse_term(cabor_vector* tokens, size_t* cursor)
 
 cabor_ast_allocated_node cabor_parse_factor(cabor_vector* tokens, size_t* op_index)
 {
+    CABOR_ASSERT(*op_index < tokens->size, "op_index is out of bounds!");
+
     cabor_token* token = cabor_vector_get_token(tokens, *op_index);
 
     switch (token->type)
     {
     case CABOR_IDENTIFIER:
     {
+        if (*op_index + 1 < tokens->size)
+        {
+            cabor_token* next_token = cabor_vector_get_token(tokens, *op_index + 1);
+            if (next_token->type == CABOR_PUNCTUATION && strcmp(next_token->data, "(") == 0)
+            {
+                return cabor_parse_function(tokens, op_index);
+            }
+        }
         return cabor_parse_identifier(tokens, *op_index);
     }
     case CABOR_INTEGER_LITERAL:
@@ -326,13 +314,28 @@ cabor_ast_allocated_node cabor_parse_factor(cabor_vector* tokens, size_t* op_ind
     }
     case CABOR_PUNCTUATION:
     {
-        if (token->data[0] == '(' || token->data[0] == ')')
+        if (token->data[0] == '(')
         {
             return cabor_parse_parenthesized(tokens, op_index);
         }
         else
         {
-            CABOR_RUNTIME_ERROR("Failed to parse factor! punctuation was not ( or )");
+            CABOR_RUNTIME_ERROR("Failed to parse factor! punctuation was not (");
+        }
+    }
+    case CABOR_KEYWORD:
+    {
+        if (strcmp(token->data, "if") == 0)
+        {
+            return cabor_parse_if_then_else_expression(tokens, op_index);
+        }
+        else if (strcmp(token->data, "while") == 0)
+        {
+            return cabor_parse_while_expression(tokens, op_index);
+        }
+        else if (strcmp(token->data, "var"))
+        {
+            return cabor_parse_var_expression(tokens, op_index);
         }
     }
     default:
@@ -343,6 +346,11 @@ cabor_ast_allocated_node cabor_parse_factor(cabor_vector* tokens, size_t* op_ind
 cabor_ast_allocated_node cabor_parse_function(cabor_vector* tokens, size_t* cursor)
 {
     cabor_token* token = cabor_vector_get_token(tokens, *cursor);
+
+    if (strcmp(token->data, "qux") == 0)
+    {
+        int asd = 3;
+    }
 
     // First token should be the function name
     CABOR_ASSERT(token->type == CABOR_IDENTIFIER, "First token in function parser wasn't identifier");
@@ -367,7 +375,7 @@ cabor_ast_allocated_node cabor_parse_function(cabor_vector* tokens, size_t* curs
             break;
         }
 
-        args[argCount++] = cabor_parse_any(tokens, cursor);
+        args[argCount++] = cabor_parse_expression(tokens, cursor);
 
         bool found_comma = false;
         while (IS_VALID_TOKEN(token)) // we allow expressions inside arg list so each arg can be multiple tokens long
@@ -575,7 +583,6 @@ cabor_ast_node* cabor_access_ast_node(cabor_ast_allocated_node* node)
 {
     return (cabor_ast_node*)node->node_mem.mem;
 }
-
 
 cabor_ast_allocated_node cabor_parse_tokens(cabor_vector* tokens)
 {

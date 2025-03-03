@@ -26,7 +26,6 @@ typedef struct cabor_ast
     cabor_vector* tokens;
 } cabor_ast;
 
-cabor_ast_allocated_node cabor_parse_any(cabor_vector* tokens, size_t* cursor);
 cabor_ast_allocated_node cabor_parse_unary(cabor_vector* tokens, size_t* cursor);
 cabor_ast_allocated_node cabor_parse_identifier(cabor_vector* tokens, size_t op_index);
 cabor_ast_allocated_node cabor_parse_integer_literal(cabor_vector* tokens, size_t op_index);
@@ -35,6 +34,8 @@ cabor_ast_allocated_node cabor_parse_operator(cabor_vector* tokens, size_t op_in
 cabor_ast_allocated_node cabor_parse_binary_expression(cabor_vector* tokens, size_t* cursor, size_t current_precedence_level);
 cabor_ast_allocated_node cabor_parse_expression(cabor_vector* tokens, size_t* cursor);
 cabor_ast_allocated_node cabor_parse_if_then_else_expression(cabor_vector* tokens, size_t* cursor);
+cabor_ast_allocated_node cabor_parse_while_expression(cabor_vector* tokens, size_t* cursor);
+cabor_ast_allocated_node cabor_parse_var_expression(cabor_vector* tokens, size_t* cursor);
 cabor_ast_allocated_node cabor_parse_term(cabor_vector* tokens, size_t* cursor);
 cabor_ast_allocated_node cabor_parse_factor(cabor_vector* tokens, size_t* op_index);
 cabor_ast_allocated_node cabor_parse_function(cabor_vector* tokens, size_t* cursor);

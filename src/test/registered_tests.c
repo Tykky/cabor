@@ -51,6 +51,11 @@ void register_all_tests()
     CABOR_REGISTER_TEST("INTEGRATION parse expression with any 6", cabor_integration_test_parse_expression_with_any6);
     CABOR_REGISTER_TEST("INTEGRATION parse expression with any 7", cabor_integration_test_parse_expression_with_any7);
     CABOR_REGISTER_TEST("INTEGRATION parse nested function calls", cabor_integration_test_parse_any_nested_function_calls);
+    CABOR_REGISTER_TEST("INTEGRATION parse unary inside function call", cabor_integration_test_parse_unary_inside_function_call);
+    CABOR_REGISTER_TEST("INTEGRATION parse nested if statements", cabor_integration_test_parse_nested_if_statements);
+    CABOR_REGISTER_TEST("INTEGRATION parse nested if with function calls", cabor_integration_test_parse_nested_if_with_function_calls);
+    CABOR_REGISTER_TEST("INTEGRATION parse binary op with function call operands", cabor_integration_test_parse_binary_op_with_function_call_operands);
+
 }
 #else
 void register_all_tests() {}

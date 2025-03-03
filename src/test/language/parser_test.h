@@ -33,6 +33,11 @@ int cabor_integration_test_parse_expression_with_any5();
 int cabor_integration_test_parse_expression_with_any6();
 int cabor_integration_test_parse_expression_with_any7();
 int cabor_integration_test_parse_any_nested_function_calls();
+int cabor_integration_test_parse_unary_inside_function_call();
+int cabor_integration_test_parse_nested_if_statements();
+int cabor_integration_test_parse_nested_if_with_function_calls();
+int cabor_integration_test_parse_binary_op_with_function_call_operands();
+
 
 
 #endif // CABOR_ENABLE_TESTING

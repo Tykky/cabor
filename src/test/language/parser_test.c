@@ -661,7 +661,7 @@ int cabor_integration_test_parse_expression_with_any1()
         "root: b, edges: []",
         "root: a, edges: []",
     };
-    return cabor_integration_test_parser_common(code, expected, 5, cabor_parse_any);
+    return cabor_integration_test_parser_common(code, expected, 5, cabor_parse_expression);
 }
 
 int cabor_integration_test_parse_expression_with_any2()
@@ -674,7 +674,7 @@ int cabor_integration_test_parse_expression_with_any2()
         "root: y, edges: []",
         "root: x, edges: []",
     };
-    return cabor_integration_test_parser_common(code, expected, 5, cabor_parse_any);
+    return cabor_integration_test_parser_common(code, expected, 5, cabor_parse_expression);
 }
 
 int cabor_integration_test_parse_expression_with_any3()
@@ -689,7 +689,7 @@ int cabor_integration_test_parse_expression_with_any3()
         "root: b, edges: []",
         "root: a, edges: []",
     };
-    return cabor_integration_test_parser_common(code, expected, 7, cabor_parse_any);
+    return cabor_integration_test_parser_common(code, expected, 7, cabor_parse_expression);
 }
 
 int cabor_integration_test_parse_expression_with_any4()
@@ -704,7 +704,7 @@ int cabor_integration_test_parse_expression_with_any4()
         "root: b, edges: []",
         "root: a, edges: []",
     };
-    return cabor_integration_test_parser_common(code, expected, 7, cabor_parse_any);
+    return cabor_integration_test_parser_common(code, expected, 7, cabor_parse_expression);
 }
 
 int cabor_integration_test_parse_expression_with_any5()
@@ -723,7 +723,7 @@ int cabor_integration_test_parse_expression_with_any5()
         "root: b, edges: []",
         "root: a, edges: []",
     };
-    return cabor_integration_test_parser_common(code, expected, 11, cabor_parse_any);
+    return cabor_integration_test_parser_common(code, expected, 11, cabor_parse_expression);
 }
 
 int cabor_integration_test_parse_expression_with_any6()
@@ -736,7 +736,7 @@ int cabor_integration_test_parse_expression_with_any6()
         "root: y, edges: []",
         "root: x, edges: []",
     };
-    return cabor_integration_test_parser_common(code, expected, 5, cabor_parse_any);
+    return cabor_integration_test_parser_common(code, expected, 5, cabor_parse_expression);
 }
 
 int cabor_integration_test_parse_expression_with_any7()
@@ -750,7 +750,7 @@ int cabor_integration_test_parse_expression_with_any7()
         "root: not, edges: ['a']",
         "root: a, edges: []",
     };
-    return cabor_integration_test_parser_common(code, expected, 6, cabor_parse_any);
+    return cabor_integration_test_parser_common(code, expected, 6, cabor_parse_expression);
 }
 
 int cabor_integration_test_parse_any_nested_function_calls()
@@ -769,7 +769,77 @@ int cabor_integration_test_parse_any_nested_function_calls()
         "root: baz, edges: ['1']",
         "root: 1, edges: []",
     };
-    return cabor_integration_test_parser_common(code, expected, 10, cabor_parse_any);
+    return cabor_integration_test_parser_common(code, expected, 10, cabor_parse_expression);
+}
+
+int cabor_integration_test_parse_unary_inside_function_call()
+{
+    const char* code = "foo(-1, not x)";
+    const char* expected[] =
+    {
+        "root: foo, edges: ['-', 'not']",
+        "root: not, edges: ['x']",
+        "root: x, edges: []",
+        "root: -, edges: ['1']",
+        "root: 1, edges: []",
+    };
+    return cabor_integration_test_parser_common(code, expected, 5, cabor_parse_expression);
+}
+
+int cabor_integration_test_parse_nested_if_statements()
+{
+   const char* code = "if x then if y then 1 else 2 else 3";
+   const char* expected[] =
+   {
+       "root: if, edges: ['x', 'if', '3']",
+       "root: 3, edges: []",
+       "root: if, edges: ['y', '1', '2']",
+       "root: 2, edges: []",
+       "root: 1, edges: []",
+       "root: y, edges: []",
+       "root: x, edges: []",
+   };
+   return cabor_integration_test_parser_common(code, expected, 7, cabor_parse_expression);
+}
+
+int cabor_integration_test_parse_nested_if_with_function_calls()
+{
+    const char* code = "if foo(x) then if bar(y) then baz(1) else qux(2 + corge(3)) else grault(4)";
+    const char* expected[] =
+    {
+        "root: if, edges: ['foo', 'if', 'grault']",
+        "root: grault, edges: ['4']",
+        "root: 4, edges: []",
+        "root: if, edges: ['bar', 'baz', 'qux']",
+        "root: qux, edges: ['+']",
+        "root: +, edges: ['2', 'corge']",
+        "root: corge, edges: ['3']",
+        "root: 3, edges: []",
+        "root: 2, edges: []",
+        "root: baz, edges: ['1']",
+        "root: 1, edges: []",
+        "root: bar, edges: ['y']",
+        "root: y, edges: []",
+        "root: foo, edges: ['x']",
+        "root: x, edges: []",
+    };
+   return cabor_integration_test_parser_common(code, expected, 15, cabor_parse_expression);
+}
+
+int cabor_integration_test_parse_binary_op_with_function_call_operands()
+{
+    const char* code = "a + foo(1) + bar(2)";
+    const char* expected[] =
+    {
+        "root: +, edges: ['+', 'bar']",
+        "root: bar, edges: ['2']",
+        "root: 2, edges: []",
+        "root: +, edges: ['a', 'foo']",
+        "root: foo, edges: ['1']",
+        "root: 1, edges: []",
+        "root: a, edges: []",
+    };
+    return cabor_integration_test_parser_common(code, expected, 7, cabor_parse_expression);
 }
 
 #endif // CABOR_ENABLE_TESTING
