@@ -7,7 +7,7 @@
 #include <stdbool.h>
 #include <string.h>
 
-static const char* cabor_keywords[] = { "if", "then", "else", "while", "return", "for"};
+static const char* cabor_keywords[] = { "if", "then", "else", "while", "return", "for", "do", "var"};
 static const size_t cabor_keyword_count = sizeof(cabor_keywords) / sizeof(cabor_keywords[0]);
 
 static bool check_for_ignored_characters(const char c)

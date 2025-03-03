@@ -842,4 +842,28 @@ int cabor_integration_test_parse_binary_op_with_function_call_operands()
     return cabor_integration_test_parser_common(code, expected, 7, cabor_parse_expression);
 }
 
+int cabor_integration_test_parse_while_foo_do_bar()
+{
+    const char* code = "while foo do bar";
+    const char* expected[] =
+    {
+        "root: while, edges: ['foo', 'bar']",
+        "root: bar, edges: []",
+        "root: foo, edges: []",
+    };
+    return cabor_integration_test_parser_common(code, expected, 3, cabor_parse_while_expression);
+}
+
+int cabor_integration_test_parse_variable_assignemnt()
+{
+    const char* code = "var foo = 123";
+    const char* expected[] =
+    {
+        "root: var, edges: ['foo', '123']",
+        "root: 123, edges: []",
+        "root: foo, edges: []"
+    };
+    return cabor_integration_test_parser_common(code, expected, 3, cabor_parse_var_expression);
+}
+
 #endif // CABOR_ENABLE_TESTING

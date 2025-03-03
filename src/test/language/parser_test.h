@@ -37,7 +37,8 @@ int cabor_integration_test_parse_unary_inside_function_call();
 int cabor_integration_test_parse_nested_if_statements();
 int cabor_integration_test_parse_nested_if_with_function_calls();
 int cabor_integration_test_parse_binary_op_with_function_call_operands();
-
+int cabor_integration_test_parse_while_foo_do_bar();
+int cabor_integration_test_parse_variable_assignemnt();
 
 
 #endif // CABOR_ENABLE_TESTING

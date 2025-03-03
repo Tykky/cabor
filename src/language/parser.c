@@ -14,6 +14,8 @@
 
 #define IS_VALID_TOKEN(token) token != NULL
 
+#define NULL_AST (cabor_ast_allocated_node) { .node_mem = NULL }
+
 typedef struct 
 {
     size_t numOps;
@@ -71,6 +73,21 @@ static bool is_plus_minus_operator(cabor_token* token)
 static bool is_multiply_divide_operator(cabor_token* token)
 {
     return IS_VALID_TOKEN(token) && token->type == CABOR_OPERATOR && (token->data[0] == '*' || token->data[0] == '/');
+}
+
+static bool is_while_token(cabor_token* token)
+{
+    return IS_VALID_TOKEN(token) && token->type == CABOR_KEYWORD && (strcmp(token->data, "while") == 0);
+}
+
+static bool is_do_token(cabor_token* token)
+{
+    return IS_VALID_TOKEN(token) && token->type == CABOR_KEYWORD && (strcmp(token->data, "do") == 0);
+}
+
+static bool is_var_token(cabor_token* token)
+{
+    return IS_VALID_TOKEN(token) && token->type == CABOR_KEYWORD && (strcmp(token->data, "var") == 0);
 }
 
 static bool is_binary_op_at_current_precedence_level(cabor_token* token, size_t current_level)
@@ -277,33 +294,40 @@ cabor_ast_allocated_node cabor_parse_while_expression(cabor_vector* tokens, size
     CABOR_ASSERT(*cursor < tokens->size, "cursor overflow");
     cabor_token* token = cabor_vector_get_token(tokens, *cursor);
 
-    if (IS_VALID_TOKEN(token) || token->type == CABOR_KEYWORD || strcmp(token->data, "while") == 0)
+    if (!is_while_token(token))
     {
-        CABOR_LOG_ERR("Expected 'while' token");
-        return (cabor_ast_allocated_node) { .node_mem = NULL };
+        CABOR_LOG_ERR_F("Expected 'while' token but got %s", token->data);
+        return NULL_AST;
     }
 
     size_t while_token_index = *cursor;
     token = next(tokens, cursor);
 
     // Parse condition expr
-    cabor_ast_allocated_node condition = cabor_parse_expression(tokens, cursor);
+    cabor_ast_allocated_node condition_expr = cabor_parse_expression(tokens, cursor);
     token = next(tokens, cursor);
 
-    if (!IS_VALID_TOKEN(token) || token->type == CABOR_KEYWORD || strcmp(token->data, "do") != 0)
+    if (!is_do_token(token))
     {
+        CABOR_LOG_ERR_F("Expected 'do' after 'while' but got %s", token->data);
+        return NULL_AST;
     }
+    token = next(tokens, cursor);
 
+    cabor_ast_allocated_node do_expr = cabor_parse_expression(tokens, cursor);
+
+    cabor_ast_allocated_node edges[] = { condition_expr, do_expr };
+    return cabor_allocate_ast_node(while_token_index, edges, 2);
 }
 
 cabor_ast_allocated_node cabor_parse_var_expression(cabor_vector* tokens, size_t* cursor)
 {
     CABOR_ASSERT(*cursor < tokens->size, "cursor overflow");
     cabor_token* token = cabor_vector_get_token(tokens, *cursor);
-    if (!IS_VALID_TOKEN(token) || token->type == CABOR_KEYWORD || strcmp(token->data, "var") != 0)
+    if (!is_var_token(token))
     {
         CABOR_LOG_ERR("Expected 'var' token");
-        return (cabor_ast_allocated_node) { .node_mem = NULL };
+        return NULL_AST;
     }
 
     size_t var_token_index = *cursor;
@@ -313,17 +337,17 @@ cabor_ast_allocated_node cabor_parse_var_expression(cabor_vector* tokens, size_t
     if (!IS_VALID_TOKEN(token) || token->type != CABOR_IDENTIFIER)
     {
         CABOR_LOG_ERR("Expected identifier after 'var'");
-        return (cabor_ast_allocated_node) { .node_mem.mem = NULL };
+        return NULL_AST;
     }
 
     size_t identifier_token_index = *cursor;
     token = next(tokens, cursor);
 
     // expect '=' operator
-    if (!IS_VALID_TOKEN(token) || token->type == CABOR_OPERATOR || strcmp(token->data, "=") != 0)
+    if (!IS_VALID_TOKEN(token) || token->type != CABOR_OPERATOR || strcmp(token->data, "=") != 0)
     {
         CABOR_LOG_ERR("Expected '=' after variable name");
-        return (cabor_ast_allocated_node) { .node_mem.mem = NULL };
+        return NULL_AST;
     }
 
     token = next(tokens, cursor);
@@ -540,10 +564,13 @@ cabor_vector* cabor_get_ast_node_list_al(cabor_ast_allocated_node* root)
             cabor_vector_push_ptr(nodes, node);
 
             // Add neighbours to stack
-            for (size_t i = 0; i < node->num_edges; i++)
+            if (node)
             {
-                cabor_ast_node* neighbour = cabor_access_ast_node(&node->edges[i]);
-                cabor_stack_push(stack, (void*) neighbour);
+                for (size_t i = 0; i < node->num_edges; i++)
+                {
+                    cabor_ast_node* neighbour = cabor_access_ast_node(&node->edges[i]);
+                    cabor_stack_push(stack, (void*)neighbour);
+                }
             }
         }
     }

@@ -55,6 +55,8 @@ void register_all_tests()
     CABOR_REGISTER_TEST("INTEGRATION parse nested if statements", cabor_integration_test_parse_nested_if_statements);
     CABOR_REGISTER_TEST("INTEGRATION parse nested if with function calls", cabor_integration_test_parse_nested_if_with_function_calls);
     CABOR_REGISTER_TEST("INTEGRATION parse binary op with function call operands", cabor_integration_test_parse_binary_op_with_function_call_operands);
+    CABOR_REGISTER_TEST("INTEGRATION parse while foo do bar", cabor_integration_test_parse_while_foo_do_bar);
+    CABOR_REGISTER_TEST("INTEGRATION parse variable assignment", cabor_integration_test_parse_variable_assignemnt);
 
 }
 #else
