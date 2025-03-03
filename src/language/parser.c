@@ -148,6 +148,7 @@ cabor_ast_allocated_node cabor_parse_operator(cabor_vector* tokens, size_t op_in
 
 cabor_ast_allocated_node cabor_parse_binary_expression(cabor_vector* tokens, size_t* cursor, size_t current_precedence_level)
 {
+    CABOR_ASSERT(*cursor < tokens->size, "cursor overflow");
     cabor_ast_allocated_node left;
     if (current_precedence_level == CABOR_LAST_BINARY_PRECEDENCE_LEVEL)
     {
@@ -198,11 +199,13 @@ cabor_ast_allocated_node cabor_parse_binary_expression(cabor_vector* tokens, siz
 // Parse + - expression
 cabor_ast_allocated_node cabor_parse_expression(cabor_vector* tokens, size_t* cursor)
 {
+    CABOR_ASSERT(*cursor < tokens->size, "cursor overflow");
     return cabor_parse_binary_expression(tokens, cursor, 0);
 }
 
 cabor_ast_allocated_node cabor_parse_if_then_else_expression(cabor_vector* tokens, size_t* cursor)
 {
+    CABOR_ASSERT(*cursor < tokens->size, "cursor overflow");
     cabor_token* token = cabor_vector_get_token(tokens, *cursor);
     size_t edge_count = 2;
 
@@ -224,11 +227,13 @@ cabor_ast_allocated_node cabor_parse_if_then_else_expression(cabor_vector* token
 
     cabor_ast_allocated_node if_exp = cabor_parse_expression(tokens, cursor);
 
-    token = cabor_vector_get_token(tokens, *cursor);
+    token = next(tokens, cursor);
 
-    // Fast forward to 'then', parse expression doesn't leave the cursor at the last token but usually second last
-    while (!is_then_token(token))
-        token = next(tokens, cursor);
+    if (!is_then_token(token))
+    {
+        CABOR_LOG_ERR("Expected 'then' after 'while' but got something else");
+        return null_node;
+    }
 
     token = next(tokens, cursor); // token after then
 
@@ -240,18 +245,18 @@ cabor_ast_allocated_node cabor_parse_if_then_else_expression(cabor_vector* token
     }
 
     cabor_ast_allocated_node then_exp = cabor_parse_expression(tokens, cursor);
+    token = next(tokens, cursor);
 
-    // Fast forward to 'else', it's fine if we don't find it since it's optional
-    while (IS_VALID_TOKEN(token) && !is_else_token(token))
-        token = next(tokens, cursor);
-
+    // Check for 'else', it's fine if we don't find it since it's optional
     cabor_ast_allocated_node else_exp;
-
-    if (next(tokens, cursor))
+    if (is_else_token(token))
     {
-        // Looks like we have more tokens after else;
-        else_exp = cabor_parse_expression(tokens, cursor);
-        ++edge_count;
+        if (next(tokens, cursor))
+        {
+            // Looks like we have more tokens after else;
+            else_exp = cabor_parse_expression(tokens, cursor);
+            ++edge_count;
+        }
     }
 
     cabor_ast_allocated_node edges[3];
@@ -269,10 +274,63 @@ cabor_ast_allocated_node cabor_parse_if_then_else_expression(cabor_vector* token
 
 cabor_ast_allocated_node cabor_parse_while_expression(cabor_vector* tokens, size_t* cursor)
 {
+    CABOR_ASSERT(*cursor < tokens->size, "cursor overflow");
+    cabor_token* token = cabor_vector_get_token(tokens, *cursor);
+
+    if (IS_VALID_TOKEN(token) || token->type == CABOR_KEYWORD || strcmp(token->data, "while") == 0)
+    {
+        CABOR_LOG_ERR("Expected 'while' token");
+        return (cabor_ast_allocated_node) { .node_mem = NULL };
+    }
+
+    size_t while_token_index = *cursor;
+    token = next(tokens, cursor);
+
+    // Parse condition expr
+    cabor_ast_allocated_node condition = cabor_parse_expression(tokens, cursor);
+    token = next(tokens, cursor);
+
+    if (!IS_VALID_TOKEN(token) || token->type == CABOR_KEYWORD || strcmp(token->data, "do") != 0)
+    {
+    }
+
 }
 
 cabor_ast_allocated_node cabor_parse_var_expression(cabor_vector* tokens, size_t* cursor)
 {
+    CABOR_ASSERT(*cursor < tokens->size, "cursor overflow");
+    cabor_token* token = cabor_vector_get_token(tokens, *cursor);
+    if (!IS_VALID_TOKEN(token) || token->type == CABOR_KEYWORD || strcmp(token->data, "var") != 0)
+    {
+        CABOR_LOG_ERR("Expected 'var' token");
+        return (cabor_ast_allocated_node) { .node_mem = NULL };
+    }
+
+    size_t var_token_index = *cursor;
+    token = next(tokens, cursor);
+
+    // Expect variable name
+    if (!IS_VALID_TOKEN(token) || token->type != CABOR_IDENTIFIER)
+    {
+        CABOR_LOG_ERR("Expected identifier after 'var'");
+        return (cabor_ast_allocated_node) { .node_mem.mem = NULL };
+    }
+
+    size_t identifier_token_index = *cursor;
+    token = next(tokens, cursor);
+
+    // expect '=' operator
+    if (!IS_VALID_TOKEN(token) || token->type == CABOR_OPERATOR || strcmp(token->data, "=") != 0)
+    {
+        CABOR_LOG_ERR("Expected '=' after variable name");
+        return (cabor_ast_allocated_node) { .node_mem.mem = NULL };
+    }
+
+    token = next(tokens, cursor);
+
+    cabor_ast_allocated_node assigned_expr = cabor_parse_expression(tokens, cursor);
+    cabor_ast_allocated_node edges[] = { cabor_parse_identifier(tokens, identifier_token_index), assigned_expr };
+    return cabor_allocate_ast_node(var_token_index, edges, 2);
 }
 
 // Parse * / term
@@ -346,11 +404,6 @@ cabor_ast_allocated_node cabor_parse_factor(cabor_vector* tokens, size_t* op_ind
 cabor_ast_allocated_node cabor_parse_function(cabor_vector* tokens, size_t* cursor)
 {
     cabor_token* token = cabor_vector_get_token(tokens, *cursor);
-
-    if (strcmp(token->data, "qux") == 0)
-    {
-        int asd = 3;
-    }
 
     // First token should be the function name
     CABOR_ASSERT(token->type == CABOR_IDENTIFIER, "First token in function parser wasn't identifier");
