@@ -650,7 +650,7 @@ int cabor_integration_test_parse_function_hello4()
     return cabor_integration_test_parser_common(code, expected, 10, cabor_parse_function);
 }
 
-int cabor_integration_test_parse_expression_with_any1()
+int cabor_integration_test_parse_expression_additional1()
 {
     const char* code = "a or b or c";
     const char* expected[] =
@@ -664,7 +664,7 @@ int cabor_integration_test_parse_expression_with_any1()
     return cabor_integration_test_parser_common(code, expected, 5, cabor_parse_expression);
 }
 
-int cabor_integration_test_parse_expression_with_any2()
+int cabor_integration_test_parse_expression_additional2()
 {
     const char* code = "x * y + z";
     const char* expected[] = {
@@ -677,7 +677,7 @@ int cabor_integration_test_parse_expression_with_any2()
     return cabor_integration_test_parser_common(code, expected, 5, cabor_parse_expression);
 }
 
-int cabor_integration_test_parse_expression_with_any3()
+int cabor_integration_test_parse_expression_additional3()
 {
     const char* code = "a + b * c - d";
     const char* expected[] = {
@@ -692,7 +692,7 @@ int cabor_integration_test_parse_expression_with_any3()
     return cabor_integration_test_parser_common(code, expected, 7, cabor_parse_expression);
 }
 
-int cabor_integration_test_parse_expression_with_any4()
+int cabor_integration_test_parse_expression_additional4()
 {
     const char* code = "(a + b) * (c - d)";
     const char* expected[] = {
@@ -707,7 +707,7 @@ int cabor_integration_test_parse_expression_with_any4()
     return cabor_integration_test_parser_common(code, expected, 7, cabor_parse_expression);
 }
 
-int cabor_integration_test_parse_expression_with_any5()
+int cabor_integration_test_parse_expression_additional5()
 {
     const char* code = "a < b and c > d or e == f";
     const char* expected[] = {
@@ -726,7 +726,7 @@ int cabor_integration_test_parse_expression_with_any5()
     return cabor_integration_test_parser_common(code, expected, 11, cabor_parse_expression);
 }
 
-int cabor_integration_test_parse_expression_with_any6()
+int cabor_integration_test_parse_expression_additional6()
 {
     const char* code = "x % y * z";
     const char* expected[] = {
@@ -739,7 +739,7 @@ int cabor_integration_test_parse_expression_with_any6()
     return cabor_integration_test_parser_common(code, expected, 5, cabor_parse_expression);
 }
 
-int cabor_integration_test_parse_expression_with_any7()
+int cabor_integration_test_parse_expression_additional7()
 {
     const char* code = "not a or b and c";
     const char* expected[] = {
