@@ -57,6 +57,8 @@ void register_all_tests()
     CABOR_REGISTER_TEST("INTEGRATION parse binary op with function call operands", cabor_integration_test_parse_binary_op_with_function_call_operands);
     CABOR_REGISTER_TEST("INTEGRATION parse while foo do bar", cabor_integration_test_parse_while_foo_do_bar);
     CABOR_REGISTER_TEST("INTEGRATION parse variable assignment", cabor_integration_test_parse_variable_assignemnt);
+    CABOR_REGISTER_TEST("INTEGRATION parse block expression", cabor_integration_test_parse_block_expression);
+    CABOR_REGISTER_TEST("INTEGRATION parse block expression ending none", cabor_integration_test_parse_block_expression_ending_none);
 
 }
 #else

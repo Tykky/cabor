@@ -252,7 +252,7 @@ void** cabor_vector_peek_ptr(cabor_vector* v)
     return (void**)peek_next(v);
 }
 
-struct cabor_token_t* cabor_vector_peek_token(cabor_vector* v, size_t idx)
+struct cabor_token_t* cabor_vector_peek_token(cabor_vector* v)
 {
     CABOR_ASSERT(v->type == CABOR_TOKEN, "Tried to peek_token non token vector!");
     return (struct cabor_token_t*)peek_next(v);

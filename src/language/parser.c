@@ -10,11 +10,13 @@
 
 #define CABOR_FUNCTION_PARSER_MAX_ARGS 100
 #define CABOR_MAX_BINARY_OPS_PER_PRECEDENCE_LEVEL 10
-#define CABOR_LAST_BINARY_PRECEDENCE_LEVEL 5
+#define CABOR_LAST_BINARY_PRECEDENCE_LEVEL 6
+#define CABOR_MAX_BLOCK_EDGES 1000 // This determines maximum number of lines of code ended by ; inside a block
 
 #define IS_VALID_TOKEN(token) token != NULL
+#define IS_VALID_NODE(node) node.node_mem.mem != NULL
 
-#define NULL_AST (cabor_ast_allocated_node) { .node_mem = NULL }
+#define NULL_AST (cabor_ast_allocated_node) { .node_mem.mem = NULL }
 
 typedef struct 
 {
@@ -24,6 +26,7 @@ typedef struct
 
 static const binary_precedence_level binary_precedence_levels[] =
 {
+    {1, "="},
     {1, "or"},
     {1, "and"},
     {2, "==", "!="},
@@ -90,6 +93,21 @@ static bool is_var_token(cabor_token* token)
     return IS_VALID_TOKEN(token) && token->type == CABOR_KEYWORD && (strcmp(token->data, "var") == 0);
 }
 
+static bool is_token_beginning_of_block(cabor_token* token)
+{
+    return IS_VALID_TOKEN(token) && token->type == CABOR_PUNCTUATION && (strcmp(token->data, "{") == 0);
+}
+
+static bool is_token_ending_of_block(cabor_token* token)
+{
+    return IS_VALID_TOKEN(token) && token->type == CABOR_PUNCTUATION && (strcmp(token->data, "}") == 0);
+}
+
+static bool is_token_semicolon(cabor_token* token)
+{
+    return IS_VALID_TOKEN(token) && token->type == CABOR_PUNCTUATION && (strcmp(token->data, ";") == 0);
+}
+
 static bool is_binary_op_at_current_precedence_level(cabor_token* token, size_t current_level)
 {
     CABOR_ASSERT(current_level <= CABOR_LAST_BINARY_PRECEDENCE_LEVEL, "Current level is greater than last precedence level");
@@ -104,6 +122,105 @@ static bool is_binary_op_at_current_precedence_level(cabor_token* token, size_t 
         }
     }
     return false;
+}
+
+cabor_ast_allocated_node cabor_parse_block(cabor_vector* tokens, size_t* cursor)
+{
+    cabor_token* token = cabor_vector_get_token(tokens, *cursor);
+    if (!is_token_beginning_of_block(token))
+    {
+        CABOR_LOG_ERR_F("Expected token { but got %s", token->data);
+        return NULL_AST;
+    }
+
+    size_t block_begin_index = *cursor;
+
+    bool error = false;
+
+    cabor_ast_allocated_node edges[CABOR_MAX_BLOCK_EDGES];
+    size_t edge_idx = 0;
+
+    while (IS_VALID_TOKEN(token))
+    {
+        token = next(tokens, cursor);
+
+        cabor_ast_allocated_node expr = cabor_parse_expression(tokens, cursor);
+        if (IS_VALID_NODE(expr))
+        {
+            edges[edge_idx++] = expr;
+        }
+        else
+        {
+            CABOR_LOG_ERR("Got null ast node when attempting to parse expression inside block");
+            error = true;
+            break;
+        }
+
+        token = next(tokens, cursor);
+        bool is_ending_of_block = is_token_ending_of_block(token);
+        bool is_semicolon = is_token_semicolon(token);
+
+        if (!is_ending_of_block && !is_semicolon)
+        {
+            CABOR_LOG_ERR_F("Expected '}' or ';' after expression in block but got %s", token->data);
+            error = true;
+            break;
+        }
+
+        if (is_semicolon && !(*cursor + 1 < tokens->size))
+        {
+            CABOR_LOG_ERR("Expected more tokens after ';' in block but got none!");
+            error = true;
+            break;
+        }
+
+        if (is_semicolon)
+        {
+            cabor_token* next_t = cabor_vector_get_token(tokens, *cursor + 1);
+
+            // When block is ended by ;} it means the block should evaluate to None
+            // When block is ended by only } it means the block should evaluate to value of the last expression
+            // To differentiate between the two easily we add unit token as the last edge if we encounter ;}
+            if (is_token_ending_of_block(next_t)) 
+            {
+                cabor_token unit_token = { .type = CABOR_UNIT, .data = "<UNIT>\0"};
+                cabor_vector_push_token(tokens, &unit_token);
+                size_t unit_token_idx = tokens->size - 1;
+                edges[edge_idx++] = cabor_allocate_ast_node(unit_token_idx, NULL, 0);
+                token = next(tokens, cursor);
+                break;
+            }
+        }
+
+        if (is_ending_of_block)
+            break;
+
+    }
+
+    // Expect }
+    if (!is_token_ending_of_block(token))
+    {
+        CABOR_LOG_ERR_F("Expected token } but got %s", token->data);
+        error = true;
+    }
+
+    cabor_ast_allocated_node block;
+
+    if (error)
+    {
+        block = NULL_AST;
+        for (size_t i = 0; i < edge_idx; i++)
+        {
+            cabor_ast_allocated_node edge = edges[i];
+            cabor_free_ast_node(&edge);
+        }
+    }
+    else
+    {
+        block = cabor_allocate_ast_node(block_begin_index, edges, edge_idx);
+    }
+
+    return block;
 }
 
 // Parse unary '-' and 'not'

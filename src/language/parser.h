@@ -26,6 +26,7 @@ typedef struct cabor_ast
     cabor_vector* tokens;
 } cabor_ast;
 
+cabor_ast_allocated_node cabor_parse_block(cabor_vector* tokens, size_t* cursor);
 cabor_ast_allocated_node cabor_parse_unary(cabor_vector* tokens, size_t* cursor);
 cabor_ast_allocated_node cabor_parse_identifier(cabor_vector* tokens, size_t op_index);
 cabor_ast_allocated_node cabor_parse_integer_literal(cabor_vector* tokens, size_t op_index);

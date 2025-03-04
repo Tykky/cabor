@@ -43,7 +43,7 @@ void cabor_vector_push_double (cabor_vector* v, double value);
 void cabor_vector_push_int    (cabor_vector* v, int value);
 void cabor_vector_push_uint   (cabor_vector* v, unsigned int value);
 void cabor_vector_push_char   (cabor_vector* v, char value);
-void cabor_vector_push_uchar  (cabor_vector*v, unsigned char value);
+void cabor_vector_push_uchar  (cabor_vector* v, unsigned char value);
 void cabor_vector_push_ptr    (cabor_vector* v, void* ptr);
 void cabor_vector_push_token  (cabor_vector* v, struct cabor_token_t* token);
 
@@ -69,4 +69,4 @@ unsigned int*  cabor_vector_peek_uint   (cabor_vector* v);
 char*          cabor_vector_peek_char   (cabor_vector* v);
 unsigned char* cabor_vector_peek_uchar  (cabor_vector* v);
 void**         cabor_vector_peek_ptr    (cabor_vector* v);
-struct cabor_token_t*   cabor_vector_peek_token  (cabor_vector* v, size_t idx);
+struct cabor_token_t*   cabor_vector_peek_token  (cabor_vector* v);

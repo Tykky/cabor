@@ -866,4 +866,37 @@ int cabor_integration_test_parse_variable_assignemnt()
     return cabor_integration_test_parser_common(code, expected, 3, cabor_parse_var_expression);
 }
 
+int cabor_integration_test_parse_block_expression()
+{
+    const char* code = "{ f(a); x = y; f(x) }";
+    const char* expected[] =
+    {
+        "root: {, edges: ['f', '=', 'f']",
+        "root: f, edges: ['x']",
+        "root: x, edges: []",
+        "root: =, edges: ['x', 'y']",
+        "root: y, edges: []",
+        "root: x, edges: []",
+        "root: f, edges: ['a']",
+        "root: a, edges: []",
+    };
+    return cabor_integration_test_parser_common(code, expected, 8, cabor_parse_block);
+}
+
+int cabor_integration_test_parse_block_expression_ending_none()
+{
+    const char* code = "{ f(a); x = y; }";
+    const char* expected[] =
+    {
+        "root: {, edges: ['f', '=', '<UNIT>']",
+        "root: <UNIT>, edges: []",
+        "root: =, edges: ['x', 'y']",
+        "root: y, edges: []",
+        "root: x, edges: []",
+        "root: f, edges: ['a']",
+        "root: a, edges: []"
+    };
+    return cabor_integration_test_parser_common(code, expected, 7, cabor_parse_block);
+}
+
 #endif // CABOR_ENABLE_TESTING
