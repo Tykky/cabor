@@ -41,6 +41,7 @@ int cabor_integration_test_parse_while_foo_do_bar();
 int cabor_integration_test_parse_variable_assignemnt();
 int cabor_integration_test_parse_block_expression();
 int cabor_integration_test_parse_block_expression_ending_none();
+int cabor_integration_test_parse_block_complex_expression();
 
 
 #endif // CABOR_ENABLE_TESTING

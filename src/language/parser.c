@@ -50,7 +50,7 @@ static cabor_token* next(cabor_vector* tokens, size_t* cursor)
 
 static bool token_is_term(cabor_token* token)
 {
-    return IS_VALID_TOKEN(token) && token->type == CABOR_IDENTIFIER || token->type == CABOR_INTEGER_LITERAL || token->type == CABOR_OPERATOR;
+    return IS_VALID_TOKEN(token) && token->type == CABOR_IDENTIFIER || token->type == CABOR_INTEGER_LITERAL || token->type == CABOR_OPERATOR || token->type == CABOR_KEYWORD;
 }
 
 static bool is_if_token(cabor_token* token)
@@ -510,6 +510,7 @@ cabor_ast_allocated_node cabor_parse_factor(cabor_vector* tokens, size_t* op_ind
         {
             return cabor_parse_unary(tokens, op_index);
         }
+        break;
     }
     case CABOR_PUNCTUATION:
     {
@@ -517,10 +518,15 @@ cabor_ast_allocated_node cabor_parse_factor(cabor_vector* tokens, size_t* op_ind
         {
             return cabor_parse_parenthesized(tokens, op_index);
         }
+        else if (token->data[0] == '{')
+        {
+            return cabor_parse_block(tokens, op_index);
+        }
         else
         {
             CABOR_RUNTIME_ERROR("Failed to parse factor! punctuation was not (");
         }
+        break;
     }
     case CABOR_KEYWORD:
     {
@@ -536,6 +542,7 @@ cabor_ast_allocated_node cabor_parse_factor(cabor_vector* tokens, size_t* op_ind
         {
             return cabor_parse_var_expression(tokens, op_index);
         }
+        break;
     }
     default:
         CABOR_RUNTIME_ERROR("Failed to parse factor!");

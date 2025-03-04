@@ -899,4 +899,54 @@ int cabor_integration_test_parse_block_expression_ending_none()
     return cabor_integration_test_parser_common(code, expected, 7, cabor_parse_block);
 }
 
+
+int cabor_integration_test_parse_block_complex_expression()
+{
+    const char* code = "{"
+        "while f() do {"
+        "x = 10;"
+        "y = if g(x) then {"
+        "x = x + 1;"
+        "x"
+        "}"
+        "else {"
+        "g(x)"
+        "};"
+        "g(y);"
+        "};"
+        "123"
+    "}";
+    const char* expected[] =
+    {
+        "root: {, edges: ['while', '123']",
+        "root: 123, edges: []",
+        "root: while, edges: ['f', '{']",
+        "root: {, edges: ['=', '=', 'g', '<UNIT>']",
+        "root: <UNIT>, edges: []",
+        "root: g, edges: ['y']",
+        "root: y, edges: []",
+        "root: =, edges: ['y', 'if']",
+        "root: if, edges: ['g', '{', '{']",
+        "root: {, edges: ['g']",
+        "root: g, edges: ['x']",
+        "root: x, edges: []",
+        "root: {, edges: ['=', 'x']",
+        "root: x, edges: []",
+        "root: =, edges: ['x', '+']",
+        "root: +, edges: ['x', '1']",
+        "root: 1, edges: []",
+        "root: x, edges: []",
+        "root: x, edges: []",
+        "root: g, edges: ['x']",
+        "root: x, edges: []",
+        "root: y, edges: []",
+        "root: =, edges: ['x', '10']",
+        "root: 10, edges: []",
+        "root: x, edges: []",
+        "root: f, edges: []",
+    };
+    return cabor_integration_test_parser_common(code, expected, 26, cabor_parse_block);
+
+}
+
 #endif // CABOR_ENABLE_TESTING
