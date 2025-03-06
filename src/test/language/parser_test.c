@@ -945,8 +945,7 @@ int cabor_integration_test_parse_block_complex_expression()
         "root: x, edges: []",
         "root: f, edges: []",
     };
-    return cabor_integration_test_parser_common(code, expected, 26, cabor_parse_block);
-
+    return cabor_integration_test_parser_common(code, expected, 26, cabor_parse_expression);
 }
 
 #endif // CABOR_ENABLE_TESTING

@@ -4,6 +4,7 @@
 
 #include "core/vector_test.h"
 #include "core/stack_test.h"
+#include "core/hashmap_test.h"
 #include "filesystem/filesystem_tests.h"
 #include "language/tokenizer_test.h"
 #include "language/parser_test.h"
@@ -16,6 +17,9 @@ void register_all_tests()
     CABOR_REGISTER_TEST("UNIT vector peek", cabor_test_vector_peek);
     CABOR_REGISTER_TEST("UNIT vector resize", cabor_test_vector_resize);
     CABOR_REGISTER_TEST("UNIT vector zero initialized", cabor_test_zero_vector_initialized);
+
+    // Hashmap tests
+    CABOR_REGISTER_TEST("UNIT hashmap insert and get", cabor_unit_test_hashmap_insert_and_get);
 
     // Stack tests
     CABOR_REGISTER_TEST("UNIT stack push", cabor_test_stack_push);
@@ -60,6 +64,8 @@ void register_all_tests()
     CABOR_REGISTER_TEST("INTEGRATION parse block expression", cabor_integration_test_parse_block_expression);
     CABOR_REGISTER_TEST("INTEGRATION parse block expression ending none", cabor_integration_test_parse_block_expression_ending_none);
     CABOR_REGISTER_TEST("INTEGRATION parse block complex expression", cabor_integration_test_parse_block_complex_expression);
+
+
 }
 #else
 void register_all_tests() {}

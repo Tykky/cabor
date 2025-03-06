@@ -92,3 +92,5 @@ cabor_allocator_context* cabor_get_global_allocator_context();
 
 size_t cabor_get_current_allocated(cabor_allocator_context* alloc_ctx);
 const char* cabor_convert_bytes_to_human_readable(size_t bytes, double* converted);
+
+char* cabor_strdup(const char* src);

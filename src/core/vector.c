@@ -9,6 +9,7 @@
 #include "../debug/cabor_debug.h"
 
 size_t get_cabor_token_size();
+size_t get_cabor_map_entry_size();
 
 static size_t get_element_type_size(cabor_element_type type)
 {
@@ -30,6 +31,8 @@ static size_t get_element_type_size(cabor_element_type type)
             return sizeof(void*);
         case CABOR_TOKEN:
             return get_cabor_token_size();
+        case CABOR_MAP_ENTRY:
+            return get_cabor_map_entry_size();
         case CABOR_UNKNOWN:
             return 0;
     }
@@ -131,6 +134,12 @@ void cabor_vector_push_token(cabor_vector* v, struct cabor_token_t* token)
     pushback_vector(v, (void*) token);
 }
 
+void cabor_vector_push_map_entry(cabor_vector* v, struct cabor_map_entry_t* entry)
+{
+    CABOR_ASSERT(v->type == CABOR_MAP_ENTRY, "pushing map entry to non map entry vector!");
+    pushback_vector(v, (void*) entry);
+}
+
 float cabor_vector_get_float(cabor_vector* v, size_t idx)
 {
     CABOR_ASSERT(v->type == CABOR_FLOAT, "getting float from non float vector!");
@@ -177,6 +186,12 @@ struct cabor_token_t* cabor_vector_get_token(cabor_vector* v, size_t idx)
 {
     CABOR_ASSERT(v->type == CABOR_TOKEN, "getting token from non token vector!");
     return (struct cabor_token_t*)vector_get(v, idx);
+}
+
+struct cabor_map_entry_t* cabor_vector_get_map_entry(cabor_vector* v, size_t idx)
+{
+    CABOR_ASSERT(v->type == CABOR_MAP_ENTRY, "getting map entry from non map entry vector!");
+    return (struct cabor_map_entry_t*)vector_get(v, idx);
 }
 
 void cabor_vector_push_str(cabor_vector* v, const char* str, bool push_null_character)
@@ -256,4 +271,10 @@ struct cabor_token_t* cabor_vector_peek_token(cabor_vector* v)
 {
     CABOR_ASSERT(v->type == CABOR_TOKEN, "Tried to peek_token non token vector!");
     return (struct cabor_token_t*)peek_next(v);
+}
+
+struct cabor_map_entry_t* cabor_vector_peek_map_entry(cabor_vector* v)
+{
+    CABOR_ASSERT(v->type == CABOR_MAP_ENTRY, "Tried to peek_map_entry non token vector!");
+    return (struct cabor_map_entry_t*)peek_next(v);
 }

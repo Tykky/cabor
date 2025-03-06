@@ -192,3 +192,18 @@ const char* cabor_convert_bytes_to_human_readable(size_t bytes, double* converte
 
     return suffixes[suffixIndex];
 }
+
+char* cabor_strdup(const char* src)
+{
+    if (!src)
+    {
+        CABOR_LOG_WARN("Got null src in cabor_strdup");
+        return NULL;
+    }
+
+    size_t len = strlen(src) + 1; // + 1 for null terminator
+    CABOR_NEW(char, dest);
+
+    memcpy(dest, src, len);
+    return dest;
+}

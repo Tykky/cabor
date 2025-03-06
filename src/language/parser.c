@@ -622,7 +622,6 @@ cabor_ast_allocated_node cabor_parse_function(cabor_vector* tokens, size_t* curs
     return function_root;
 }
 
-
 cabor_ast_allocated_node cabor_allocate_ast_node(size_t token_index, cabor_ast_allocated_node* edges, size_t num_edges)
 {
     cabor_ast_allocated_node allocated_node =
