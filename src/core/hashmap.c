@@ -12,7 +12,7 @@ cabor_hash_map* cabor_create_hash_map()
     return map;
 }
 
-static void free_key(const char* key)
+void cabor_free_key(const char* key)
 {
     cabor_allocation alloc =
     {
@@ -31,15 +31,15 @@ void cabor_destroy_hash_map(cabor_hash_map* map)
         cabor_map_entry* entry = cabor_vector_get_map_entry(map->table, i);
 
         if (entry->key)
-            free_key(entry->key);
+            cabor_free_key(entry->key);
 
         cabor_map_entry* next = entry->next;
         while (next)
         {
-            cabor_map_entry* temp = entry;
-            entry = entry->next;
+            cabor_map_entry* temp = next;
+            next = next->next;
             if (temp->key)
-                free_key(temp->key);
+                cabor_free_key(temp->key);
             CABOR_DELETE(cabor_map_entry, temp);
         }
     }
@@ -76,14 +76,18 @@ void cabor_map_insert(cabor_hash_map* map, const char* key, uint32_t value)
         return;
     }
 
-    while (entry->key) // Check for collisions
+    while (true) // Check for collisions
     {
         if (strcmp(entry->key, key) == 0) // No collision, just update the value
         {
             entry->value = value;
             return;
         }
-        entry = entry->next;
+
+        if (entry->next)
+            entry = entry->next;
+        else
+            break;
     }
 
     // collision, append the bucket with new value
@@ -100,7 +104,7 @@ uint32_t cabor_map_get(cabor_hash_map* map, const char* key, bool* found)
     uint32_t index = cabor_hash_string(key) % table_size;
     cabor_map_entry* entry = cabor_vector_get_map_entry(map->table, index);
 
-    while (entry->key)
+    while (entry)
     {
         if (strcmp(entry->key, key) == 0)
         {
