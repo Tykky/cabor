@@ -12,18 +12,34 @@ cabor_hash_map* cabor_create_hash_map()
     return map;
 }
 
+static void free_key(const char* key)
+{
+    cabor_allocation alloc =
+    {
+        .mem = key,
+#ifdef CABOR_ENABLE_ALLOCATOR_FAT_POINTERS
+        .size = strlen(key) + 1 // + null terminator
+#endif
+    };
+    CABOR_FREE(&alloc);
+}
+
 void cabor_destroy_hash_map(cabor_hash_map* map)
 {
     for (size_t i = 0; i < map->table->size; i++)
     {
         cabor_map_entry* entry = cabor_vector_get_map_entry(map->table, i);
+
+        if (entry->key)
+            free_key(entry->key);
+
         cabor_map_entry* next = entry->next;
         while (next)
         {
             cabor_map_entry* temp = entry;
             entry = entry->next;
             if (temp->key)
-                CABOR_FREE(temp->key);
+                free_key(temp->key);
             CABOR_DELETE(cabor_map_entry, temp);
         }
     }

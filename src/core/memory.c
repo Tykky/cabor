@@ -202,7 +202,8 @@ char* cabor_strdup(const char* src)
     }
 
     size_t len = strlen(src) + 1; // + 1 for null terminator
-    CABOR_NEW(char, dest);
+    cabor_allocation alloc = CABOR_MALLOC(len);
+    char* dest = (char*)alloc.mem;
 
     memcpy(dest, src, len);
     return dest;
