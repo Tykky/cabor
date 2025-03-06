@@ -4,8 +4,6 @@
 #include <stdint.h>
 #include "vector.h"
 
-#define CABOR_HASH_MAP_INITIAL_SIZE 1024 
-
 typedef struct cabor_map_entry_t
 {
     char* key;
@@ -18,7 +16,7 @@ typedef struct
     cabor_vector* table;
 } cabor_hash_map;
 
-cabor_hash_map* cabor_create_hash_map();
+cabor_hash_map* cabor_create_hash_map(size_t initial_size);
 void cabor_free_key(const char* key);
 void cabor_destroy_hash_map(cabor_hash_map* map);
 

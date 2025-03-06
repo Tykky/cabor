@@ -9,5 +9,6 @@
 
 int cabor_unit_test_hashmap_insert_and_get();
 int cabor_unit_test_hashmap_collison_test();
+int cabor_unit_test_hashmap_tiny_collisions();
 
 #endif

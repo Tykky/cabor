@@ -21,6 +21,7 @@ void register_all_tests()
     // Hashmap tests
     CABOR_REGISTER_TEST("UNIT hashmap insert and get", cabor_unit_test_hashmap_insert_and_get);
     CABOR_REGISTER_TEST("UNIT hashmap collisions", cabor_unit_test_hashmap_collison_test);
+    CABOR_REGISTER_TEST("UNIT hashmap tiny collisions", cabor_unit_test_hashmap_tiny_collisions);
 
     // Stack tests
     CABOR_REGISTER_TEST("UNIT stack push", cabor_test_stack_push);

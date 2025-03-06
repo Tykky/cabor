@@ -3,11 +3,11 @@
 
 #include "string.h"
 
-cabor_hash_map* cabor_create_hash_map()
+cabor_hash_map* cabor_create_hash_map(size_t initial_size)
 {
     CABOR_NEW(cabor_hash_map, map);
-    map->table = cabor_create_vector(CABOR_HASH_MAP_INITIAL_SIZE, CABOR_MAP_ENTRY, false);
-    map->table->size = CABOR_HASH_MAP_INITIAL_SIZE;
+    map->table = cabor_create_vector(initial_size, CABOR_MAP_ENTRY, false);
+    map->table->size = initial_size;
     memset(map->table->vector_mem.mem, 0, get_cabor_map_entry_size() * map->table->size);
     return map;
 }
