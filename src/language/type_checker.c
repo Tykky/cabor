@@ -22,6 +22,23 @@ void cabor_destroy_symbol_table(cabor_symbol_table* symbol_table)
     CABOR_DELETE(cabor_symbol_table, symbol_table);
 }
 
+cabor_type cabor_convert_type_declaration_to_type(cabor_token* type_decl)
+{
+    if (strcmp(type_decl->data, "Int"))
+    {
+        return CABOR_TYPE_INT;
+    }
+    else if (strcmp(type_decl->data, "Bool"))
+    {
+        return CABOR_TYPE_BOOL;
+    }
+    else 
+    {
+        CABOR_LOG_ERR_F("TYPE ERROR: failed to convert %s to cabor_type", type_decl->data);
+        return CABOR_TYPE_ERROR;
+    }
+}
+
 cabor_type cabor_typecheck_if_then_else(cabor_ast* ast, cabor_ast_node* node, cabor_symbol_table* sym_table)
 {
     CABOR_ASSERT(node->node_type == CABOR_NODE_TYPE_IF_THEN_ELSE || node->num_edges == 2 || node->num_edges == 3, "not a valid if-then-else node");
@@ -132,6 +149,16 @@ cabor_type cabor_typecheck_var_expr(cabor_ast* ast, cabor_ast_node* node, cabor_
     // Check for type declaration here
     //cabor_type declared_type = ...
     cabor_type initializer_type = cabor_typecheck(ast, EDGE(node, 1), sym_table);
+
+    if (node->num_edges == 3) // includes type declaration
+    {
+        cabor_type declaration = cabor_convert_type_declaration_to_type(ROOT(node));
+        if (initializer_type != declaration)
+        {
+            CABOR_LOG_ERR_F("TYPE ERROR: variable initializer type didn't match type declaration");
+            return CABOR_TYPE_ERROR;
+        }
+    }
 
     return initializer_type;
 }
