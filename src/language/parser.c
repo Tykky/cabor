@@ -103,6 +103,7 @@ static bool is_token_ending_of_block(cabor_token* token)
     return IS_VALID_TOKEN(token) && token->type == CABOR_PUNCTUATION && (strcmp(token->data, "}") == 0);
 }
 
+
 static bool is_token_semicolon(cabor_token* token)
 {
     return IS_VALID_TOKEN(token) && token->type == CABOR_PUNCTUATION && (strcmp(token->data, ";") == 0);
@@ -122,6 +123,35 @@ static bool is_binary_op_at_current_precedence_level(cabor_token* token, size_t 
         }
     }
     return false;
+}
+
+cabor_ast* cabor_parse(cabor_vector* tokens)
+{
+    CABOR_NEW(cabor_ast, ast);
+    size_t cursor = 0;
+    ast->tokens = tokens;
+    *ast->root = cabor_parse_expression(tokens, &cursor);
+    return ast;
+}
+
+void cabor_destroy_ast(cabor_ast* ast)
+{
+    cabor_free_ast(ast->root);
+    CABOR_DELETE(cabor_ast, ast);
+}
+
+cabor_token* cabor_access_ast_token(const cabor_ast* ast, const cabor_ast_node* node)
+{
+    return cabor_vector_get_token(ast->tokens, node->token_index);
+}
+
+cabor_token* cabor_access_ast_token_edge(const cabor_ast* ast, const cabor_ast_allocated_node* node, int edge_index)
+{
+    cabor_ast_node* n = cabor_access_ast_node(node);
+    cabor_ast_allocated_node edge_alloc = n->edges[edge_index];
+    cabor_ast_node* edge = cabor_access_ast_node(&edge_alloc);
+    CABOR_ASSERT(edge_index < n->num_edges, "ast node edge overflow");
+    return cabor_access_ast_token(ast, edge);
 }
 
 cabor_ast_allocated_node cabor_parse_block(cabor_vector* tokens, size_t* cursor)
@@ -186,7 +216,7 @@ cabor_ast_allocated_node cabor_parse_block(cabor_vector* tokens, size_t* cursor)
                 cabor_token unit_token = { .type = CABOR_UNIT, .data = "<UNIT>\0"};
                 cabor_vector_push_token(tokens, &unit_token);
                 size_t unit_token_idx = tokens->size - 1;
-                edges[edge_idx++] = cabor_allocate_ast_node(unit_token_idx, NULL, 0);
+                edges[edge_idx++] = cabor_allocate_ast_node(unit_token_idx, NULL, 0, CABOR_NODE_TYPE_UNIT);
                 token = next(tokens, cursor);
                 break;
             }
@@ -217,7 +247,7 @@ cabor_ast_allocated_node cabor_parse_block(cabor_vector* tokens, size_t* cursor)
     }
     else
     {
-        block = cabor_allocate_ast_node(block_begin_index, edges, edge_idx);
+        block = cabor_allocate_ast_node(block_begin_index, edges, edge_idx, CABOR_NODE_TYPE_BLOCK);
     }
 
     return block;
@@ -232,20 +262,20 @@ cabor_ast_allocated_node cabor_parse_unary(cabor_vector* tokens, size_t* cursor)
     cabor_ast_allocated_node operand = cabor_parse_factor(tokens, cursor);
     cabor_ast_allocated_node edges[] = { operand };
 
-    return cabor_allocate_ast_node(op, edges, 1);
+    return cabor_allocate_ast_node(op, edges, 1, CABOR_NODE_TYPE_UNARY_OP);
 }
 
 cabor_ast_allocated_node cabor_parse_identifier(cabor_vector* tokens, size_t op_index)
 {
     CABOR_ASSERT(op_index < tokens->size, "op_index is out of bounds!");
-    cabor_ast_allocated_node root_alloc = cabor_allocate_ast_node(op_index, NULL, 0);
+    cabor_ast_allocated_node root_alloc = cabor_allocate_ast_node(op_index, NULL, 0, CABOR_NODE_TYPE_IDENTIFIER);
     return root_alloc;
 }
 
 cabor_ast_allocated_node cabor_parse_integer_literal(cabor_vector* tokens, size_t op_index)
 {
     CABOR_ASSERT(op_index < tokens->size, "op_index is out of bounds!");
-    cabor_ast_allocated_node root_alloc = cabor_allocate_ast_node(op_index, NULL, 0);
+    cabor_ast_allocated_node root_alloc = cabor_allocate_ast_node(op_index, NULL, 0, CABOR_NODE_TYPE_LITERAL);
     return root_alloc;
 }
 
@@ -275,7 +305,7 @@ cabor_ast_allocated_node cabor_parse_operator(cabor_vector* tokens, size_t op_in
     CABOR_ASSERT(root_token->type == CABOR_OPERATOR, "root_token token not operator in expression!");
 
     cabor_ast_allocated_node edges[] = { left, right };
-    cabor_ast_allocated_node root_alloc = cabor_allocate_ast_node(op_index, edges, 2);
+    cabor_ast_allocated_node root_alloc = cabor_allocate_ast_node(op_index, edges, 2, CABOR_NODE_TYPE_BINARY_OP);
 
     return root_alloc;
 }
@@ -400,7 +430,7 @@ cabor_ast_allocated_node cabor_parse_if_then_else_expression(cabor_vector* token
     if (edge_count == 3)
         edges[2] = else_exp;
 
-    cabor_ast_allocated_node root = cabor_allocate_ast_node(*cursor, edges, edge_count);
+    cabor_ast_allocated_node root = cabor_allocate_ast_node(*cursor, edges, edge_count, CABOR_NODE_TYPE_IF_THEN_ELSE);
     cabor_access_ast_node(&root)->token_index = root_token_index;
 
     return root;
@@ -434,7 +464,7 @@ cabor_ast_allocated_node cabor_parse_while_expression(cabor_vector* tokens, size
     cabor_ast_allocated_node do_expr = cabor_parse_expression(tokens, cursor);
 
     cabor_ast_allocated_node edges[] = { condition_expr, do_expr };
-    return cabor_allocate_ast_node(while_token_index, edges, 2);
+    return cabor_allocate_ast_node(while_token_index, edges, 2, CABOR_NODE_TYPE_WHILE);
 }
 
 cabor_ast_allocated_node cabor_parse_var_expression(cabor_vector* tokens, size_t* cursor)
@@ -471,7 +501,7 @@ cabor_ast_allocated_node cabor_parse_var_expression(cabor_vector* tokens, size_t
 
     cabor_ast_allocated_node assigned_expr = cabor_parse_expression(tokens, cursor);
     cabor_ast_allocated_node edges[] = { cabor_parse_identifier(tokens, identifier_token_index), assigned_expr };
-    return cabor_allocate_ast_node(var_token_index, edges, 2);
+    return cabor_allocate_ast_node(var_token_index, edges, 2, CABOR_NODE_TYPE_VAR_EXPR);
 }
 
 // Parse * / term
@@ -613,16 +643,16 @@ cabor_ast_allocated_node cabor_parse_function(cabor_vector* tokens, size_t* curs
     if (!valid)
     {
         CABOR_LOG_ERR("Failed to parse function");
-        return cabor_allocate_ast_node(0, NULL, 0);
+        return cabor_allocate_ast_node(0, NULL, 0, CABOR_NODE_TYPE_UNKNOWN);
     }
 
     cabor_ast_allocated_node* edges = argCount > 0 ? args : NULL;
-    cabor_ast_allocated_node function_root = cabor_allocate_ast_node(function_name_token_idx, edges, argCount);
+    cabor_ast_allocated_node function_root = cabor_allocate_ast_node(function_name_token_idx, edges, argCount, CABOR_NODE_TYPE_FUNCTION_CALL);
 
     return function_root;
 }
 
-cabor_ast_allocated_node cabor_allocate_ast_node(size_t token_index, cabor_ast_allocated_node* edges, size_t num_edges)
+cabor_ast_allocated_node cabor_allocate_ast_node(size_t token_index, cabor_ast_allocated_node* edges, size_t num_edges, cabor_ast_node_type type)
 {
     cabor_ast_allocated_node allocated_node =
     {
@@ -631,6 +661,7 @@ cabor_ast_allocated_node cabor_allocate_ast_node(size_t token_index, cabor_ast_a
 
     cabor_ast_node* node = cabor_access_ast_node(&allocated_node);
 
+    node->node_type = type;
     node->token_index = token_index;
     
     if (edges != NULL && num_edges > 0)
@@ -785,10 +816,4 @@ void cabor_free_ast(cabor_ast_allocated_node* root)
 cabor_ast_node* cabor_access_ast_node(cabor_ast_allocated_node* node)
 {
     return (cabor_ast_node*)node->node_mem.mem;
-}
-
-cabor_ast_allocated_node cabor_parse_tokens(cabor_vector* tokens)
-{
-    size_t cursor = 0;
-    return cabor_parse_expression(tokens, &cursor);
 }

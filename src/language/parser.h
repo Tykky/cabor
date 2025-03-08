@@ -1,10 +1,26 @@
 #pragma once
 
+#include "../language/tokenizer.h"
 #include "../core/vector.h"
 #include "../cabor_defines.h"
 #include <stddef.h>
 
 #define CABOR_AST_NODE_MAX_EDGES 10
+
+typedef enum
+{
+    CABOR_NODE_TYPE_BINARY_OP,
+    CABOR_NODE_TYPE_UNARY_OP,
+    CABOR_NODE_TYPE_LITERAL,
+    CABOR_NODE_TYPE_IDENTIFIER,
+    CABOR_NODE_TYPE_FUNCTION_CALL,
+    CABOR_NODE_TYPE_UNIT,
+    CABOR_NODE_TYPE_BLOCK,
+    CABOR_NODE_TYPE_IF_THEN_ELSE,
+    CABOR_NODE_TYPE_WHILE,
+    CABOR_NODE_TYPE_VAR_EXPR,
+    CABOR_NODE_TYPE_UNKNOWN
+} cabor_ast_node_type;
 
 // same as cabor_ast_node but allocated from heap
 typedef struct cabor_ast_allocated_node
@@ -18,13 +34,22 @@ typedef struct cabor_ast_node
     size_t token_index; // index into tokens vector
     struct cabor_ast_allocated_node edges[CABOR_AST_NODE_MAX_EDGES];
     size_t num_edges;
+    cabor_ast_node_type node_type;
 } cabor_ast_node;
 
 typedef struct cabor_ast
 {
-    cabor_ast_node* root;
+    cabor_ast_allocated_node* root;
     cabor_vector* tokens;
 } cabor_ast;
+
+cabor_ast* cabor_parse(cabor_vector* tokens);
+void cabor_destroy_ast(cabor_ast* ast);
+
+// Access token stored inside ast node
+
+cabor_token* cabor_access_ast_token(const cabor_ast* ast, const cabor_ast_node* node);
+cabor_token* cabor_access_ast_token_edge(const cabor_ast* ast, const cabor_ast_allocated_node* node, int edge_index);
 
 cabor_ast_allocated_node cabor_parse_block(cabor_vector* tokens, size_t* cursor);
 cabor_ast_allocated_node cabor_parse_unary(cabor_vector* tokens, size_t* cursor);
@@ -40,7 +65,7 @@ cabor_ast_allocated_node cabor_parse_var_expression(cabor_vector* tokens, size_t
 cabor_ast_allocated_node cabor_parse_term(cabor_vector* tokens, size_t* cursor);
 cabor_ast_allocated_node cabor_parse_factor(cabor_vector* tokens, size_t* op_index);
 cabor_ast_allocated_node cabor_parse_function(cabor_vector* tokens, size_t* cursor);
-cabor_ast_allocated_node cabor_allocate_ast_node(size_t token_index, cabor_ast_allocated_node* edges, size_t num_edges);
+cabor_ast_allocated_node cabor_allocate_ast_node(size_t token_index, cabor_ast_allocated_node* edges, size_t num_edges, cabor_ast_node_type type);
 
 cabor_vector* cabor_get_ast_node_list_al(cabor_ast_allocated_node* root);
 cabor_vector* cabor_get_ast_node_list(cabor_ast_node* root);
@@ -55,5 +80,4 @@ void cabor_free_ast(cabor_ast_allocated_node* root);
 // "unwraps" allocated node into cabor_ast_node
 cabor_ast_node* cabor_access_ast_node(cabor_ast_allocated_node* node);
 
-cabor_ast_allocated_node cabor_parse_tokens(cabor_vector* tokens);
 

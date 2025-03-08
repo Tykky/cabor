@@ -16,7 +16,6 @@
 #define realloc(p, s)   _realloc_dbg(p, s, _NORMAL_BLOCK, __FILE__, __LINE__)
 #endif
 
-
 #define CABOR_SERVER_PORT 3000
 #define CABOR_SERVER_BACKLOG 128
 #define CABOR_IDLE_TIMEOUT_MS 1000

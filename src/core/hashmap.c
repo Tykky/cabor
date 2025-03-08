@@ -1,6 +1,8 @@
 #include "hashmap.h"
 
 #include "string.h"
+#include "../logging/logging.h"
+#include "../debug/cabor_debug.h"
 
 cabor_hash_map* cabor_create_hash_map(size_t initial_size)
 {
@@ -60,7 +62,7 @@ uint32_t cabor_hash_string(const char* str)
     return hash;
 }
 
-void cabor_map_insert(cabor_hash_map* map, const char* key, uint32_t value)
+void cabor_map_insert(cabor_hash_map* map, const char* key, int value)
 {
     const size_t table_size = map->table->size;
     uint32_t index = cabor_hash_string(key) % table_size;
@@ -77,9 +79,10 @@ void cabor_map_insert(cabor_hash_map* map, const char* key, uint32_t value)
 
     while (true) // Check for collisions
     {
-        if (strcmp(entry->key, key) == 0) // No collision, just update the value
+        if (strcmp(entry->key, key) == 0) // No collision, just error
         {
-            entry->value = value;
+            CABOR_LOG_ERR_F("Tried to insert %s into map but it already exists!", key);
+            CABOR_ASSERT(false, "Tried to insert into map when the value already exists");
             return;
         }
 
@@ -97,7 +100,7 @@ void cabor_map_insert(cabor_hash_map* map, const char* key, uint32_t value)
     entry->next = new_entry;
 }
 
-uint32_t cabor_map_get(cabor_hash_map* map, const char* key, bool* found)
+int cabor_map_get(cabor_hash_map* map, const char* key, bool* found)
 {
     const size_t table_size = map->table->size;
     uint32_t index = cabor_hash_string(key) % table_size;
