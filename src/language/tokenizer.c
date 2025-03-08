@@ -89,7 +89,7 @@ static size_t match_punctuation(const char* buffer, size_t cursor, size_t size, 
 {
     char c = buffer[cursor];
 
-    if (c == '(' || c == ')' || c == '{' || c == '}' || c == ',' || c == ';')
+    if (c == '(' || c == ')' || c == '{' || c == '}' || c == ',' || c == ';' || c == ':')
     {
         out_token->data[0] = c;
         out_token->type = CABOR_PUNCTUATION;

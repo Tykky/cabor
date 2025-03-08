@@ -488,7 +488,20 @@ cabor_ast_allocated_node cabor_parse_var_expression(cabor_vector* tokens, size_t
     }
 
     size_t identifier_token_index = *cursor;
+
     token = next(tokens, cursor);
+
+    bool has_type_declaration = false;
+    size_t type_declaration_token_index = 0;
+
+    // If there is : after the identifier it means we have the optional type declaration
+    if (strcmp(token->data, ":") == 0)
+    {
+        token = next(tokens, cursor); // this should be the type identifier
+        has_type_declaration = true;
+        type_declaration_token_index = *cursor;
+        token = next(tokens, cursor);
+    }
 
     // expect '=' operator
     if (!IS_VALID_TOKEN(token) || token->type != CABOR_OPERATOR || strcmp(token->data, "=") != 0)
@@ -499,9 +512,17 @@ cabor_ast_allocated_node cabor_parse_var_expression(cabor_vector* tokens, size_t
 
     token = next(tokens, cursor);
 
+    size_t num_edges = has_type_declaration ? 3 : 2;
+
     cabor_ast_allocated_node assigned_expr = cabor_parse_expression(tokens, cursor);
-    cabor_ast_allocated_node edges[] = { cabor_parse_identifier(tokens, identifier_token_index), assigned_expr };
-    return cabor_allocate_ast_node(var_token_index, edges, 2, CABOR_NODE_TYPE_VAR_EXPR);
+    cabor_ast_allocated_node edges[3] = { cabor_parse_identifier(tokens, identifier_token_index), assigned_expr };
+
+    if (has_type_declaration)
+    {
+        edges[2] = cabor_allocate_ast_node(type_declaration_token_index, NULL, 0, CABOR_NODE_TYPE_DECLARATION);
+    }
+
+    return cabor_allocate_ast_node(var_token_index, edges, num_edges, CABOR_NODE_TYPE_VAR_EXPR);
 }
 
 // Parse * / term
@@ -568,7 +589,7 @@ cabor_ast_allocated_node cabor_parse_factor(cabor_vector* tokens, size_t* op_ind
         {
             return cabor_parse_while_expression(tokens, op_index);
         }
-        else if (strcmp(token->data, "var"))
+        else if (strcmp(token->data, "var") == 0)
         {
             return cabor_parse_var_expression(tokens, op_index);
         }

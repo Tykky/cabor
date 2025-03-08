@@ -66,8 +66,7 @@ void register_all_tests()
     CABOR_REGISTER_TEST("INTEGRATION parse block expression", cabor_integration_test_parse_block_expression);
     CABOR_REGISTER_TEST("INTEGRATION parse block expression ending none", cabor_integration_test_parse_block_expression_ending_none);
     CABOR_REGISTER_TEST("INTEGRATION parse block complex expression", cabor_integration_test_parse_block_complex_expression);
-
-
+    CABOR_REGISTER_TEST("INTEGRATION parse variable assignment with type decl", cabor_integration_test_parse_variable_assignment_with_type_declaration);
 }
 #else
 void register_all_tests() {}

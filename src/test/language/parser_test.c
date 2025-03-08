@@ -948,4 +948,19 @@ int cabor_integration_test_parse_block_complex_expression()
     return cabor_integration_test_parser_common(code, expected, 26, cabor_parse_expression);
 }
 
+int cabor_integration_test_parse_variable_assignment_with_type_declaration()
+{
+    const char* code = "var x: Int = 1 + 1";
+    const char* expected[] =
+    {
+        "root: var, edges: ['x', '+', 'Int']",
+        "root: Int, edges: []",
+        "root: +, edges: ['1', '1']",
+        "root: 1, edges: []",
+        "root: 1, edges: []",
+        "root: x, edges: []",
+    };
+    return cabor_integration_test_parser_common(code, expected, 6, cabor_parse_expression);
+}
+
 #endif // CABOR_ENABLE_TESTING

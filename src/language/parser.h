@@ -19,8 +19,19 @@ typedef enum
     CABOR_NODE_TYPE_IF_THEN_ELSE,
     CABOR_NODE_TYPE_WHILE,
     CABOR_NODE_TYPE_VAR_EXPR,
+    CABOR_NODE_TYPE_DECLARATION,
     CABOR_NODE_TYPE_UNKNOWN
 } cabor_ast_node_type;
+
+typedef enum 
+{
+    CABOR_TYPE_INT,
+    CABOR_TYPE_BOOL,
+    CABOR_TYPE_UNIT,
+    CABOR_TYPE_FUNCTION,
+    CABOR_TYPE_ERROR,
+    CABOR_NUM_TYPES
+} cabor_type;
 
 // same as cabor_ast_node but allocated from heap
 typedef struct cabor_ast_allocated_node
@@ -35,6 +46,7 @@ typedef struct cabor_ast_node
     struct cabor_ast_allocated_node edges[CABOR_AST_NODE_MAX_EDGES];
     size_t num_edges;
     cabor_ast_node_type node_type;
+    cabor_type type;
 } cabor_ast_node;
 
 typedef struct cabor_ast
