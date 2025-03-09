@@ -20,8 +20,8 @@ void cabor_destroy_symbol_table(cabor_symbol_table* symbol_table);
 cabor_symbol_table* cabor_create_new_symbol_scope(cabor_symbol_table* symbol_table);
 
 cabor_type cabor_convert_type_declaration_to_type(cabor_token* type_decl);
-cabor_type cabor_typecheck_if_then_else(cabor_ast* ast, cabor_ast_allocated_node* node, cabor_symbol_table* sym_table);
-cabor_type cabor_typecheck_binary_op(cabor_ast* ast, cabor_ast_allocated_node* node, cabor_symbol_table* sym_table);
+cabor_type cabor_typecheck_if_then_else(cabor_ast* ast, cabor_ast_node* node, cabor_symbol_table* sym_table);
+cabor_type cabor_typecheck_binary_op(cabor_ast* ast, cabor_ast_node* node, cabor_symbol_table* sym_table);
 cabor_type cabor_typecheck(cabor_ast* ast, cabor_ast_node* node, cabor_symbol_table* sym_table);
 cabor_type cabor_typecheck_unary_op(cabor_ast* ast, cabor_ast_node* node, cabor_symbol_table* sym_table);
 cabor_type cabor_typecheck_function(cabor_ast* ast, cabor_ast_node* node, cabor_symbol_table* sym_table);
