@@ -200,7 +200,7 @@ cabor_type cabor_typecheck_var_expr(cabor_ast* ast, cabor_ast_node* node, cabor_
 
         if (initializer_type != variable_typedecl_type)
         {
-            CABOR_LOG_ERR_F("TYPE ERROR: variable initializer type didn't match type declaration");
+            CABOR_LOG_ERR("TYPE ERROR: variable initializer type didn't match type declaration");
             return CABOR_TYPE_ERROR;
         }
         variable_typedecl_node->type = CABOR_TYPE_UNIT;
