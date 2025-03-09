@@ -2,6 +2,7 @@
 
 #ifdef CABOR_ENABLE_TESTING
 
+#include <string.h>
 #include "../../language/type_checker.h"
 
 static int test_typecheck_common(const char* code, size_t node_count, const char** expected)
