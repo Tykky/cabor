@@ -55,6 +55,11 @@ typedef struct cabor_ast
     cabor_vector* tokens;
 } cabor_ast;
 
+const char* cabor_type_to_str(cabor_type type);
+
+// Main entrypoint to the parser
+// remarks: Ast doesn't store tokens in the tree but references tokens instead so
+// tokens array must be kept alive for whole lifetime of the ast
 cabor_ast* cabor_parse(cabor_vector* tokens);
 void cabor_destroy_ast(cabor_ast* ast);
 
@@ -83,8 +88,8 @@ cabor_vector* cabor_get_ast_node_list_al(cabor_ast_allocated_node* root);
 cabor_vector* cabor_get_ast_node_list(cabor_ast_node* root);
 
 // Prints the root token and neighbors
-void cabor_ast_node_to_string_al(cabor_vector* tokens, cabor_ast_allocated_node* allocated_node, char* buffer, size_t size);
-void cabor_ast_node_to_string(cabor_vector* tokens, cabor_ast_node* node, char* buffer, size_t size);
+void cabor_ast_node_to_string_al(cabor_vector* tokens, cabor_ast_allocated_node* allocated_node, char* buffer, size_t size, bool typecheck);
+void cabor_ast_node_to_string(cabor_vector* tokens, cabor_ast_node* node, char* buffer, size_t size, bool typecheck);
 
 void cabor_free_ast_node(cabor_ast_allocated_node* node);
 void cabor_free_ast(cabor_ast_allocated_node* root);

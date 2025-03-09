@@ -106,7 +106,7 @@ int cabor_map_get(cabor_hash_map* map, const char* key, bool* found)
     uint32_t index = cabor_hash_string(key) % table_size;
     cabor_map_entry* entry = cabor_vector_get_map_entry(map->table, index);
 
-    while (entry)
+    while (entry->key)
     {
         if (strcmp(entry->key, key) == 0)
         {
@@ -116,7 +116,7 @@ int cabor_map_get(cabor_hash_map* map, const char* key, bool* found)
         entry = entry->next;
     }
     *found = false;
-    return 0;
+    return -1;
 }
 
 size_t get_cabor_map_entry_size()

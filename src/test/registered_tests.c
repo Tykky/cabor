@@ -8,6 +8,7 @@
 #include "filesystem/filesystem_tests.h"
 #include "language/tokenizer_test.h"
 #include "language/parser_test.h"
+#include "language/type_checker_test.h"
 
 void register_all_tests()
 {
@@ -67,6 +68,9 @@ void register_all_tests()
     CABOR_REGISTER_TEST("INTEGRATION parse block expression ending none", cabor_integration_test_parse_block_expression_ending_none);
     CABOR_REGISTER_TEST("INTEGRATION parse block complex expression", cabor_integration_test_parse_block_complex_expression);
     CABOR_REGISTER_TEST("INTEGRATION parse variable assignment with type decl", cabor_integration_test_parse_variable_assignment_with_type_declaration);
+   
+    // Typechecker tests
+    CABOR_REGISTER_TEST("INTEGRATION typecheck var declaration", cabor_integration_test_typecheck_var_declaration);
 }
 #else
 void register_all_tests() {}

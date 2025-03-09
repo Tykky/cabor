@@ -74,7 +74,7 @@ int cabor_test_parse_expression_abc()
 #endif
         };
         memset(buffer, 0, 100);
-        cabor_ast_node_to_string_al(tokens, &an, buffer, 100);
+        cabor_ast_node_to_string_al(tokens, &an, buffer, 100, false);
         //CABOR_LOG_TRACE_F("%s", buffer);
     }
 
@@ -157,7 +157,7 @@ int cabor_test_parse_expression_cba()
 #endif
         };
         memset(buffer, 0, 100);
-        cabor_ast_node_to_string_al(tokens, &an, buffer, 100);
+        cabor_ast_node_to_string_al(tokens, &an, buffer, 100, false);
         //CABOR_LOG_TRACE_F("%s", buffer);
     }
 
@@ -242,7 +242,7 @@ int cabor_test_parse_expression_abc_parenthesized()
 #endif
         };
         memset(buffer, 0, 100);
-        cabor_ast_node_to_string_al(tokens, &an, buffer, 100);
+        cabor_ast_node_to_string_al(tokens, &an, buffer, 100, false);
         //CABOR_LOG_TRACE_F("%s", buffer);
     }
 
@@ -311,7 +311,7 @@ int cabor_test_parse_expression_if_then_else()
 #endif
         };
         memset(buffer, 0, 100);
-        cabor_ast_node_to_string_al(tokens, &an, buffer, 100);
+        cabor_ast_node_to_string_al(tokens, &an, buffer, 100, false);
         //CABOR_LOG_TRACE_F("%s", buffer);
     }
 
@@ -390,7 +390,7 @@ int cabor_test_parse_expression_if_then()
 #endif
         };
         memset(buffer, 0, 100);
-        cabor_ast_node_to_string_al(tokens, &an, buffer, 100);
+        cabor_ast_node_to_string_al(tokens, &an, buffer, 100, false);
        //CABOR_LOG_TRACE_F("%s", buffer);
     }
 
@@ -459,7 +459,7 @@ int cabor_test_parse_function_hello()
 #endif
         };
         memset(buffer, 0, 100);
-        cabor_ast_node_to_string_al(tokens, &an, buffer, 100);
+        cabor_ast_node_to_string_al(tokens, &an, buffer, 100, false);
        //CABOR_LOG_TRACE_F("%s", buffer);
     }
 
@@ -504,7 +504,7 @@ int cabor_integration_test_parser_common(const char* code, const char** expected
     for (size_t i = 0; i < node_count; i++)
     {
         char buffer[128] = {0};
-        cabor_ast_node_to_string(tokens, cabor_vector_get_ptr(nodes, i), buffer, 128);
+        cabor_ast_node_to_string(tokens, cabor_vector_get_ptr(nodes, i), buffer, 128, false);
         int comp = strcmp(buffer, expected[i]);
         //CABOR_LOG(buffer);
         if (comp != 0)

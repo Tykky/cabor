@@ -125,18 +125,41 @@ static bool is_binary_op_at_current_precedence_level(cabor_token* token, size_t 
     return false;
 }
 
+const char* cabor_type_to_str(cabor_type type)
+{
+    switch (type)
+    {
+        case CABOR_TYPE_INT:
+            return "Int";
+        case CABOR_TYPE_BOOL:
+            return "Bool";
+        case CABOR_TYPE_UNIT:
+            return "Unit";
+        case CABOR_TYPE_FUNCTION:
+            return "Function";
+        case CABOR_TYPE_ERROR:
+            return "Error";
+        default:
+            return "Default";
+    }
+}
+
 cabor_ast* cabor_parse(cabor_vector* tokens)
 {
     CABOR_NEW(cabor_ast, ast);
     size_t cursor = 0;
     ast->tokens = tokens;
-    *ast->root = cabor_parse_expression(tokens, &cursor);
+    CABOR_NEW(cabor_ast_allocated_node, root);
+    *root = cabor_parse_expression(tokens, &cursor);
+    ast->root = root;
     return ast;
 }
 
 void cabor_destroy_ast(cabor_ast* ast)
 {
     cabor_free_ast(ast->root);
+    cabor_ast_allocated_node* root_node = ast->root;
+    CABOR_DELETE(cabor_ast_allocated_node, root_node);
     CABOR_DELETE(cabor_ast, ast);
 }
 
@@ -700,6 +723,7 @@ cabor_ast_allocated_node cabor_allocate_ast_node(size_t token_index, cabor_ast_a
         node->num_edges = 0;
     }
 
+    node->type = CABOR_TYPE_ERROR;
     return allocated_node;
 }
 
@@ -721,7 +745,6 @@ cabor_vector* cabor_get_ast_node_list_al(cabor_ast_allocated_node* root)
 
     size_t stack_capacity = 100;
     cabor_stack* stack = cabor_create_stack(stack_capacity);
-
 
     cabor_vector* nodes = cabor_create_vector(100, CABOR_PTR, true);
     cabor_ast_node* root_node = cabor_access_ast_node(root);
@@ -767,7 +790,7 @@ cabor_vector* cabor_get_ast_node_list(cabor_ast_node* root)
     return cabor_get_ast_node_list_al(&an);
 }
 
-void cabor_ast_node_to_string_al(cabor_vector* tokens, cabor_ast_allocated_node* allocated_node, char* buffer, size_t size)
+void cabor_ast_node_to_string_al(cabor_vector* tokens, cabor_ast_allocated_node* allocated_node, char* buffer, size_t size, bool typecheck)
 {
     cabor_ast_node* node = cabor_access_ast_node(allocated_node);
     cabor_token* token = cabor_vector_get_token(tokens, node->token_index);
@@ -787,10 +810,20 @@ void cabor_ast_node_to_string_al(cabor_vector* tokens, cabor_ast_allocated_node*
     CABOR_ASSERT(cursor + 1 < size, "out of bounds!");
 
     buffer[cursor] = ']';
+
+    if (typecheck)
+    {
+        ++cursor;
+        buffer[cursor++] = ',';
+        const char* type_string = cabor_type_to_str(node->type);
+        cursor += snprintf(buffer + cursor, size - cursor, " type: '%s'", type_string);
+        CABOR_ASSERT(cursor + 1 < size, "out of bounds!");
+    }
+
     buffer[cursor + 1] = '\0';
 }
 
-void cabor_ast_node_to_string(cabor_vector* tokens, cabor_ast_node* node, char* buffer, size_t size)
+void cabor_ast_node_to_string(cabor_vector* tokens, cabor_ast_node* node, char* buffer, size_t size, bool typecheck)
 {
     cabor_ast_allocated_node an =
     {
@@ -799,7 +832,7 @@ void cabor_ast_node_to_string(cabor_vector* tokens, cabor_ast_node* node, char* 
         .node_mem.size = sizeof(cabor_ast_node),
 #endif
     };
-    return cabor_ast_node_to_string_al(tokens, &an, buffer, size);
+    return cabor_ast_node_to_string_al(tokens, &an, buffer, size, typecheck);
 }
 
 // Free only the current node and don't care about freeing any edges
