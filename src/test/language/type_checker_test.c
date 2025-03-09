@@ -40,6 +40,29 @@ static int test_typecheck_common(const char* code, size_t node_count, const char
     return res;
 }
 
+static int test_typecheck_common_expect_fail(const char* code)
+{
+    int res = 0;
+    cabor_file* file = cabor_file_from_buffer(code, strlen(code));
+    cabor_vector* tokens = cabor_tokenize(file);
+    cabor_destroy_file(file);
+
+    cabor_ast* ast = cabor_parse(tokens);
+
+    cabor_symbol_table* root_sym_table = cabor_create_symbol_table();
+    cabor_ast_node* root = cabor_access_ast_node(ast->root);
+    cabor_type type = cabor_typecheck(ast, root, root_sym_table);
+
+    CABOR_CHECK_EQUALS(type, CABOR_TYPE_ERROR, res);
+
+    cabor_destroy_symbol_table(root_sym_table);
+    cabor_destroy_ast(ast);
+    cabor_destroy_vector(tokens);
+
+    return res;
+}
+
+
 int cabor_integration_test_typecheck_var_declaration()
 {
     const char* code = "var x: Int = 1 + 1";
@@ -120,5 +143,48 @@ int cabor_integration_test_typecheck_while_loop()
     };
     return test_typecheck_common(code, 3, expected);
 }
+
+int cabor_integration_test_typecheck_undeclared_identifier()
+{
+    const char* code = "x + 1";
+    return test_typecheck_common_expect_fail(code);
+}
+
+int cabor_integration_test_typecheck_mismatched_binary_op()
+{
+    const char* code = "1 + True";
+    return test_typecheck_common_expect_fail(code);
+}
+
+int cabor_integration_test_typecheck_mismatched_variable_decl()
+{
+    const char* code = "var x: Bool = 123";
+    return test_typecheck_common_expect_fail(code);
+}
+
+int cabor_integration_test_typecheck_duplicate_decl_same_scope()
+{
+    const char* code = "{ var x: Int = 1; var x: Int = 2 }";
+    return test_typecheck_common_expect_fail(code);
+}
+
+int cabor_integration_test_typecheck_mismatched_branch_types()
+{
+    const char* code = "if True then 1 else False";
+    return test_typecheck_common_expect_fail(code);
+}
+
+int cabor_integration_test_typecheck_not_bool_if()
+{
+    const char* code = "if 42 then 1 else 2";
+    return test_typecheck_common_expect_fail(code);
+}
+
+int cabor_integration_test_typecheck_not_bool_while()
+{
+    const char* code = "while 3 do 1";
+    return test_typecheck_common_expect_fail(code);
+}
+
 
 #endif

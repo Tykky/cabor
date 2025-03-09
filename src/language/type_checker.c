@@ -75,6 +75,8 @@ cabor_type cabor_typecheck_if_then_else(cabor_ast* ast, cabor_ast_node* node, ca
         if (then_expr_type != else_expr_type)
         {
             CABOR_LOG_ERR("TYPE ERROR: if-then-else branches must have the same type");
+            node->type = CABOR_TYPE_ERROR;
+            return CABOR_TYPE_ERROR;
         }
 
         node->type = then_expr_type;
@@ -206,8 +208,13 @@ cabor_type cabor_typecheck_var_expr(cabor_ast* ast, cabor_ast_node* node, cabor_
 
     // Should we allow shadowing? for now assume we don't do that, let's check if the the identifier already exist
 
+
+    cabor_ast_node* variable_name_node = EDGE(node, 0);
+    cabor_token* variable_name_token = TOKEN(variable_name_node);
+    const char* variable_name_str = variable_name_token->data;
+
     bool found = false;
-    int value = cabor_map_get(sym_table->map, TOKEN(node)->data, &found);
+    int value = cabor_map_get(sym_table->map, variable_name_str, &found);
 
     if (found)
     {
@@ -215,9 +222,6 @@ cabor_type cabor_typecheck_var_expr(cabor_ast* ast, cabor_ast_node* node, cabor_
         return CABOR_TYPE_ERROR;
     }
 
-    cabor_ast_node* variable_name_node = EDGE(node, 0);
-    cabor_token* variable_name_token = TOKEN(variable_name_node);
-    const char* variable_name_str = variable_name_token->data;
     variable_name_node->type = initializer_type;
 
     // initializer type and declared type should be the same

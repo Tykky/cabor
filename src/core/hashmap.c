@@ -49,7 +49,7 @@ void cabor_destroy_hash_map(cabor_hash_map* map)
     CABOR_DELETE(cabor_hash_map, map);
 }
 
-uint32_t cabor_hash_string(const char* str)
+int cabor_hash_string(const char* str)
 {
     // FNV-1a hashing
     uint32_t hash = 2166136261u;

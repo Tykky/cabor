@@ -76,7 +76,13 @@ void register_all_tests()
     CABOR_REGISTER_TEST("INTEGRATION typecheck unary op not", cabor_integration_test_typecheck_unary_op_not);
     CABOR_REGISTER_TEST("INTEGRATION typecheck unary op minus", cabor_integration_test_typecheck_unary_op_minus);
     CABOR_REGISTER_TEST("INTEGRATION typecheck while loop", cabor_integration_test_typecheck_while_loop);
-
+    CABOR_REGISTER_TEST("INTEGRATION typecheck undeclared identifier", cabor_integration_test_typecheck_undeclared_identifier);
+    CABOR_REGISTER_TEST("INTEGRATION typecheck mismatched binary op", cabor_integration_test_typecheck_mismatched_binary_op);
+    CABOR_REGISTER_TEST("INTEGRATION typecheck mismatched variable declaration", cabor_integration_test_typecheck_mismatched_variable_decl);
+    CABOR_REGISTER_TEST("INTEGRATION typecheck duplicate declaration same scope", cabor_integration_test_typecheck_duplicate_decl_same_scope);
+    CABOR_REGISTER_TEST("INTEGRATION typecheck mismatched branch types", cabor_integration_test_typecheck_mismatched_branch_types);
+    CABOR_REGISTER_TEST("INTEGRATION typecheck not bool if", cabor_integration_test_typecheck_not_bool_if);
+    CABOR_REGISTER_TEST("INTEGRATION typecheck not bool while", cabor_integration_test_typecheck_not_bool_while);
 }
 #else
 void register_all_tests() {}
