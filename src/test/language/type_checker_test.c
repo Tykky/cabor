@@ -72,7 +72,53 @@ int cabor_integration_test_typecheck_var_declaration2()
         "root: x, edges: [], type: 'Int'",
     };
     return test_typecheck_common(code, 10, expected);
+}
 
+int cabor_integration_test_typecheck_if_then_else()
+{
+    const char* code = "if True then 1 else 2";
+    const char* expected[] =
+    {
+        "root: if, edges: ['True', '1', '2'], type: 'Int'",
+        "root: 2, edges: [], type: 'Int'",
+        "root: 1, edges: [], type: 'Int'",
+        "root: True, edges: [], type: 'Bool'",
+    };
+    return test_typecheck_common(code, 4, expected);
+}
+
+int cabor_integration_test_typecheck_unary_op_not()
+{
+    const char* code = "not True";
+    const char* expected[] =
+    {
+        "root: not, edges: ['True'], type: 'Bool'",
+        "root: True, edges: [], type: 'Bool'",
+    };
+    return test_typecheck_common(code, 2, expected);
+}
+
+int cabor_integration_test_typecheck_unary_op_minus()
+{
+    const char* code = "-1";
+    const char* expected[] =
+    {
+        "root: -, edges: ['1'], type: 'Int'",
+        "root: 1, edges: [], type: 'Int'",
+    };
+    return test_typecheck_common(code, 2, expected);
+}
+
+int cabor_integration_test_typecheck_while_loop()
+{
+    const char* code = "while True do 1";
+    const char* expected[] =
+    {
+        "root: while, edges: ['True', '1'], type: 'Unit'",
+        "root: 1, edges: [], type: 'Int'",
+        "root: True, edges: [], type: 'Bool'",
+    };
+    return test_typecheck_common(code, 3, expected);
 }
 
 #endif

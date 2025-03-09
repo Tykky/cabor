@@ -58,7 +58,7 @@ cabor_type cabor_convert_type_declaration_to_type(cabor_token* type_decl)
 cabor_type cabor_typecheck_if_then_else(cabor_ast* ast, cabor_ast_node* node, cabor_symbol_table* sym_table)
 {
     CABOR_ASSERT(node->node_type == CABOR_NODE_TYPE_IF_THEN_ELSE || node->num_edges == 2 || node->num_edges == 3, "not a valid if-then-else node");
-    cabor_type if_expr_type = cabor_typecheck(ast, node, sym_table);
+    cabor_type if_expr_type = cabor_typecheck(ast, EDGE(node, 0), sym_table);
 
     if (if_expr_type != CABOR_TYPE_BOOL)
     {
@@ -74,7 +74,7 @@ cabor_type cabor_typecheck_if_then_else(cabor_ast* ast, cabor_ast_node* node, ca
 
         if (then_expr_type != else_expr_type)
         {
-            CABOR_LOG_ERR(" TYPE ERROR: if-then-else branches must have the same type");
+            CABOR_LOG_ERR("TYPE ERROR: if-then-else branches must have the same type");
         }
 
         node->type = then_expr_type;
@@ -108,9 +108,9 @@ cabor_type cabor_typecheck_unary_op(cabor_ast* ast, cabor_ast_node* node, cabor_
 
     cabor_type expr_type = cabor_typecheck(ast, EDGE(node, 0), sym_table);
 
-    if (strcmp(TOKEN(node)->data, "-"))
+    if (strcmp(TOKEN(node)->data, "-") == 0)
     {
-        if (expr_type != CABOR_TYPE_INT && CABOR_TYPE_UNIT)
+        if (expr_type != CABOR_TYPE_INT)
         {
             CABOR_LOG_ERR("TYPE ERROR: unary op '-' cannot be used with non number types");
             return CABOR_TYPE_ERROR;
@@ -118,7 +118,7 @@ cabor_type cabor_typecheck_unary_op(cabor_ast* ast, cabor_ast_node* node, cabor_
         node->type = expr_type;
         return expr_type;
     }
-    else if (strcmp(TOKEN(node)->data, "not"))
+    else if (strcmp(TOKEN(node)->data, "not") == 0)
     {
         if (expr_type != CABOR_TYPE_BOOL)
         {
@@ -139,14 +139,31 @@ cabor_type cabor_typecheck_function(cabor_ast* ast, cabor_ast_node* node, cabor_
 {
     CABOR_ASSERT(node->node_type == CABOR_NODE_TYPE_FUNCTION_CALL, "not a valid function call");
 
-    // TODO check arguments etc..
+    for (size_t i = 0; i < node->num_edges; i++)
+    {
+        cabor_ast_node* arg = ROOT(&node->edges[i]);
+        cabor_type arg_type = cabor_typecheck(ast, arg, sym_table);
+    }
 
     return CABOR_NODE_TYPE_FUNCTION_CALL;
 }
 
 cabor_type cabor_typecheck_while(cabor_ast* ast, cabor_ast_node* node, cabor_symbol_table* sym_table)
 {
-    return 0;
+    CABOR_ASSERT(node->node_type == CABOR_NODE_TYPE_WHILE && node->num_edges == 2, "not a valid while expression");
+
+    cabor_type cond_type = cabor_typecheck(ast, EDGE(node, 0), sym_table);
+
+    if (cond_type != CABOR_TYPE_BOOL)
+    {
+        CABOR_LOG_ERR("TYPE ERROR: while condition must be of type bool");
+        return CABOR_TYPE_ERROR;
+    }
+
+    cabor_type body_type = cabor_typecheck(ast, EDGE(node, 1), sym_table);
+
+    node->type = CABOR_TYPE_UNIT;
+    return CABOR_TYPE_UNIT;
 }
 
 cabor_type cabor_typecheck_block(cabor_ast* ast, cabor_ast_node* node, cabor_symbol_table* sym_table)
@@ -218,7 +235,7 @@ cabor_type cabor_typecheck_literal(cabor_ast* ast, cabor_ast_node* node, cabor_s
     if (strcmp(TOKEN(node)->data, "True") == 0 || strcmp(TOKEN(node)->data, "False") == 0)
     {
         node->type = CABOR_TYPE_BOOL;
-        return CABOR_TYPE_INT;
+        return CABOR_TYPE_BOOL;
     }
     else // Check for valid int literal
     {

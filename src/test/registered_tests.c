@@ -72,6 +72,11 @@ void register_all_tests()
     // Typechecker tests
     CABOR_REGISTER_TEST("INTEGRATION typecheck var declaration", cabor_integration_test_typecheck_var_declaration);
     CABOR_REGISTER_TEST("INTEGRATION typecheck var declaration 2", cabor_integration_test_typecheck_var_declaration2);
+    CABOR_REGISTER_TEST("INTEGRATION typecheck if then else", cabor_integration_test_typecheck_if_then_else);
+    CABOR_REGISTER_TEST("INTEGRATION typecheck unary op not", cabor_integration_test_typecheck_unary_op_not);
+    CABOR_REGISTER_TEST("INTEGRATION typecheck unary op minus", cabor_integration_test_typecheck_unary_op_minus);
+    CABOR_REGISTER_TEST("INTEGRATION typecheck while loop", cabor_integration_test_typecheck_while_loop);
+
 }
 #else
 void register_all_tests() {}

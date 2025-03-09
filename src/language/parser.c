@@ -291,7 +291,20 @@ cabor_ast_allocated_node cabor_parse_unary(cabor_vector* tokens, size_t* cursor)
 cabor_ast_allocated_node cabor_parse_identifier(cabor_vector* tokens, size_t op_index)
 {
     CABOR_ASSERT(op_index < tokens->size, "op_index is out of bounds!");
-    cabor_ast_allocated_node root_alloc = cabor_allocate_ast_node(op_index, NULL, 0, CABOR_NODE_TYPE_IDENTIFIER);
+
+    cabor_token* token = cabor_vector_get_token(tokens, op_index);
+
+    // This is bit of a hack. The tokenizer identifies 'True' and 'False' as identifiers which is fine
+    // for the purposes of parsing but when it comes to type checking this is bad. Proper solution would be to
+    // make the tokenizer recognize these as literals but that's tricky due to how the code works. As a hack we
+    // instead switch the type here to literal;
+    cabor_type type = CABOR_NODE_TYPE_IDENTIFIER;
+    if (strcmp(token->data, "True") == 0 || strcmp(token->data, "False") == 0)
+    {
+        type = CABOR_NODE_TYPE_LITERAL;
+    }
+
+    cabor_ast_allocated_node root_alloc = cabor_allocate_ast_node(op_index, NULL, 0, type);
     return root_alloc;
 }
 
