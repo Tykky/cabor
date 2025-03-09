@@ -8,6 +8,7 @@
 #include "../../language/parser.h"
 
 int cabor_integration_test_typecheck_var_declaration();
+int cabor_integration_test_typecheck_var_declaration2();
 
 #endif
 

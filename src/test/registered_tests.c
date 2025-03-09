@@ -71,6 +71,7 @@ void register_all_tests()
    
     // Typechecker tests
     CABOR_REGISTER_TEST("INTEGRATION typecheck var declaration", cabor_integration_test_typecheck_var_declaration);
+    CABOR_REGISTER_TEST("INTEGRATION typecheck var declaration 2", cabor_integration_test_typecheck_var_declaration2);
 }
 #else
 void register_all_tests() {}

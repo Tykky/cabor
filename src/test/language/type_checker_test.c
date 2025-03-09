@@ -55,5 +55,24 @@ int cabor_integration_test_typecheck_var_declaration()
     return test_typecheck_common(code, 6, expected);
 }
 
+int cabor_integration_test_typecheck_var_declaration2()
+{
+    const char* code = "{ var x: Int = 1 + 1; x = 3}";
+    const char* expected[] =
+    {
+        "root: {, edges: ['var', '='], type: 'Int'",
+        "root: =, edges: ['x', '3'], type: 'Int'",
+        "root: 3, edges: [], type: 'Int'",
+        "root: x, edges: [], type: 'Int'",
+        "root: var, edges: ['x', '+', 'Int'], type: 'Int'",
+        "root: Int, edges: [], type: 'Unit'",
+        "root: +, edges: ['1', '1'], type: 'Int'",
+        "root: 1, edges: [], type: 'Int'",
+        "root: 1, edges: [], type: 'Int'",
+        "root: x, edges: [], type: 'Int'",
+    };
+    return test_typecheck_common(code, 10, expected);
+
+}
 
 #endif

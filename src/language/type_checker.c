@@ -25,7 +25,7 @@ void cabor_destroy_symbol_table(cabor_symbol_table* symbol_table)
     {
         cabor_symbol_table* tmp = next;
         next = next->child_scope;
-        CABOR_DELETE(cabor_symbol_table, tmp);
+        cabor_destroy_symbol_table(tmp);
     }
     CABOR_DELETE(cabor_symbol_table, symbol_table);
 }
@@ -245,7 +245,8 @@ cabor_type cabor_typecheck_identifier(cabor_ast* ast, cabor_ast_node* node, cabo
 
     // All identifiers should be in sym_table for this scope
     bool found = false;
-    cabor_type identifier_type = cabor_map_get(symb_table->map, TOKEN(node)->data, &found);
+    cabor_token* identifier_token = TOKEN(node);
+    cabor_type identifier_type = cabor_map_get(symb_table->map, identifier_token->data, &found);
 
     if (!found)
     {
