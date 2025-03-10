@@ -20,6 +20,7 @@ int cabor_integration_test_typecheck_duplicate_decl_same_scope();
 int cabor_integration_test_typecheck_mismatched_branch_types();
 int cabor_integration_test_typecheck_not_bool_if();
 int cabor_integration_test_typecheck_not_bool_while();
+int cabor_integration_test_typecheck_scoping_rules();
 
 
 #endif

@@ -83,6 +83,7 @@ void register_all_tests()
     CABOR_REGISTER_TEST("INTEGRATION typecheck mismatched branch types", cabor_integration_test_typecheck_mismatched_branch_types);
     CABOR_REGISTER_TEST("INTEGRATION typecheck not bool if", cabor_integration_test_typecheck_not_bool_if);
     CABOR_REGISTER_TEST("INTEGRATION typecheck not bool while", cabor_integration_test_typecheck_not_bool_while);
+    CABOR_REGISTER_TEST("INTEGRATION typecheck scoping rules", cabor_integration_test_typecheck_scoping_rules);
 }
 #else
 void register_all_tests() {}

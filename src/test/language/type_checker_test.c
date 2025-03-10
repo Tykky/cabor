@@ -187,5 +187,10 @@ int cabor_integration_test_typecheck_not_bool_while()
     return test_typecheck_common_expect_fail(code);
 }
 
+int cabor_integration_test_typecheck_scoping_rules()
+{
+    const char* code = "{ var x: Int = 1; { var y: Int = x + 1 } }";
+    return test_typecheck_common_expect_fail(code);
+}
 
 #endif

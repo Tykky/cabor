@@ -25,7 +25,8 @@ void cabor_destroy_symbol_table(cabor_symbol_table* symbol_table)
     {
         cabor_symbol_table* tmp = next;
         next = next->child_scope;
-        cabor_destroy_symbol_table(tmp);
+        cabor_destroy_hash_map(tmp->map);
+        CABOR_DELETE(cabor_symbol_table, tmp);
     }
     CABOR_DELETE(cabor_symbol_table, symbol_table);
 }
