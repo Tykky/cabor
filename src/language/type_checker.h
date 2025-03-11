@@ -11,7 +11,7 @@ typedef struct cabor_symbol_table_t
 {
     cabor_hash_map* map; // maps c string -> int (i.e cabor_type)
     struct cabor_symbol_table_t* parent_scope;
-    struct cabor_symb_table_t* child_scope;
+    struct cabor_symbol_table_t* child_scope;
 } cabor_symbol_table;
 
 cabor_symbol_table* cabor_create_symbol_table();

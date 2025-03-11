@@ -4,7 +4,7 @@
 #include "../filesystem/filesystem.h"
 
 #define CABOR_TOKENIZER_VECTOR_DEFAULT_CAPACITY 1024
-#define CABOR_TOKENIZER_MAX_TOKEN_LENGTH 100
+#define CABOR_TOKENIZER_MAX_TOKEN_LENGTH 64
 
 typedef enum
 {

@@ -49,7 +49,7 @@ void cabor_destroy_hash_map(cabor_hash_map* map)
     CABOR_DELETE(cabor_hash_map, map);
 }
 
-int cabor_hash_string(const char* str)
+uint32_t cabor_hash_string(const char* str)
 {
     // FNV-1a hashing
     uint32_t hash = 2166136261u;
@@ -79,10 +79,9 @@ void cabor_map_insert(cabor_hash_map* map, const char* key, int value)
 
     while (true) // Check for collisions
     {
-        if (strcmp(entry->key, key) == 0) // No collision, just error
+        if (strcmp(entry->key, key) == 0) // No collision, allow shadowing
         {
-            CABOR_LOG_ERR_F("Tried to insert %s into map but it already exists!", key);
-            CABOR_ASSERT(false, "Tried to insert into map when the value already exists");
+            entry->value = value;
             return;
         }
 

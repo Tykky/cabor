@@ -140,6 +140,24 @@ void cabor_vector_push_map_entry(cabor_vector* v, struct cabor_map_entry_t* entr
     pushback_vector(v, (void*) entry);
 }
 
+void cabor_vector_push_ir_instruction(cabor_vector* v, struct cabor_ir_instruction_t* instruction)
+{
+    CABOR_ASSERT(v->type == CABOR_IR_INSTRUCTION, "pushing ir instruction to non ir instruction vector!");
+    pushback_vector(v, (void*)instruction);
+}
+
+void cabor_vector_push_ir_label(cabor_vector* v, struct cabor_ir_label_t* ir_label)
+{
+    CABOR_ASSERT(v->type == CABOR_IR_LABEL, "pushing ir label to non ir label vector!");
+    pushback_vector(v, (void*)ir_label);
+}
+
+void cabor_vector_push_ir_var(cabor_vector* v, struct cabor_ir_var* ir_var)
+{
+    CABOR_ASSERT(v->type == CABOR_IR_VAR, "pushing ir var to non ir var vector!");
+    pushback_vector(v, (void*)ir_var);
+}
+
 float cabor_vector_get_float(cabor_vector* v, size_t idx)
 {
     CABOR_ASSERT(v->type == CABOR_FLOAT, "getting float from non float vector!");
@@ -192,6 +210,24 @@ struct cabor_map_entry_t* cabor_vector_get_map_entry(cabor_vector* v, size_t idx
 {
     CABOR_ASSERT(v->type == CABOR_MAP_ENTRY, "getting map entry from non map entry vector!");
     return (struct cabor_map_entry_t*)vector_get(v, idx);
+}
+
+struct cabor_instruction_t* cabor_vector_get_ir_instruction(cabor_vector* v, size_t idx)
+{
+    CABOR_ASSERT(v->type == CABOR_IR_INSTRUCTION, "getting ir instruction from non ir instruction vector!");
+    return (struct cabor_ir_instruction_t*)vector_get(v, idx);
+}
+
+struct cabor_ir_var_t* cabor_vector_get_ir_var(cabor_vector* v, size_t idx)
+{
+    CABOR_ASSERT(v->type == CABOR_IR_INSTRUCTION, "pushing ir var from non ir var vector!");
+    return (struct cabor_ir_var_t*)vector_get(v, idx);
+}
+
+struct cabor_ir_label_t* cabor_vector_get_ir_label(cabor_vector* v, size_t idx)
+{
+    CABOR_ASSERT(v->type == CABOR_IR_LABEL, "pushing ir label from non ir label vector!");
+    return (struct cabor_ir_label_t*)vector_get(v, idx);
 }
 
 void cabor_vector_push_str(cabor_vector* v, const char* str, bool push_null_character)
@@ -278,3 +314,22 @@ struct cabor_map_entry_t* cabor_vector_peek_map_entry(cabor_vector* v)
     CABOR_ASSERT(v->type == CABOR_MAP_ENTRY, "Tried to peek_map_entry non token vector!");
     return (struct cabor_map_entry_t*)peek_next(v);
 }
+
+struct cabor_instruction_t* cabor_peek_ir_instruction(cabor_vector* v)
+{
+    CABOR_ASSERT(v->type == CABOR_IR_INSTRUCTION, "getting ir instruction from non ir instruction vector!");
+    return (struct cabor_ir_instruction_t*)peek_next(v);
+}
+
+struct cabor_ir_var_t* cabor_peek_ir_var(cabor_vector* v)
+{
+    CABOR_ASSERT(v->type == CABOR_IR_VAR, "getting ir var from non ir var vector!");
+    return (struct cabor_ir_var_t*)peek_next(v);
+}
+
+struct cabor_ir_label_t* cabor_peek_ir_label(cabor_vector* v)
+{
+    CABOR_ASSERT(v->type == CABOR_IR_LABEL, "getting ir label from non ir label vector!");
+    return (struct cabor_ir_lavel*)peek_next(v);
+}
+
