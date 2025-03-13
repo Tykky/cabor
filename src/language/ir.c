@@ -1,6 +1,8 @@
 #include "ir.h"
 #include <string.h>
 #include <stdio.h>
+#include <stdbool.h>
+#include <stdlib.h>
 #include "../logging/logging.h"
 #include "../debug/cabor_debug.h"
 
@@ -207,7 +209,52 @@ cabor_ir_var_idx cabor_visit_ir_unaryop(cabor_ir_data* ir_data, cabor_ast* ast, 
 
 cabor_ir_var_idx cabor_visit_ir_literal(cabor_ir_data* ir_data, cabor_ast* ast, cabor_ast_node* root_expr, cabor_symbol_table* root_tab)
 {
-    return 0;
+    cabor_token* token = TOKEN(root_expr);
+    cabor_type type = root_expr->type;
+
+    cabor_ir_var_idx var = cabor_create_unique_ir_var(ir_data, type);;
+
+    switch (type)
+    {
+        case CABOR_TYPE_BOOL:
+        {
+            bool value;
+            if (strcmp(token->data, "True") == 0)
+            {
+                value = true;
+            }
+            else if (strcmp(token->data, "False") == 0)
+            {
+                value = false;
+            }
+            else
+            {
+                CABOR_LOG_ERR_F("IR error: bool wasn't 'True' or 'False' it was %s", token->data);
+                return CABOR_IR_VAR_INVALID;
+            }
+            cabor_create_ir_load_bool_const(ir_data, value, var);
+            return var;
+        }
+        case CABOR_TYPE_INT:
+        {
+            char* endptr;
+            long num = strtol(token->data, &endptr, 10);
+            if (*endptr != '\0')
+            {
+                CABOR_LOG_ERR_F("IR error: %s wasn't convertible to int", token->data);
+            }
+            return var;
+        }
+        case CABOR_TYPE_UNIT:
+        {
+            return CABOR_TYPE_UNIT;
+        }
+        default:
+        {
+            CABOR_LOG_ERR("IR error: literal didn't match to BOO, INT, or UNIT");
+            return CABOR_IR_VAR_INVALID;
+        }
+    }
 }
 
 cabor_ir_var_idx cabor_visit_ir_identifier(cabor_ir_data* ir_data, cabor_ast* ast, cabor_ast_node* root_expr, cabor_symbol_table* root_tab)
