@@ -9,6 +9,7 @@
 #include "language/tokenizer_test.h"
 #include "language/parser_test.h"
 #include "language/type_checker_test.h"
+#include "language/ir_test.h"
 
 void register_all_tests()
 {
@@ -84,6 +85,10 @@ void register_all_tests()
     CABOR_REGISTER_TEST("INTEGRATION typecheck not bool if", cabor_integration_test_typecheck_not_bool_if);
     CABOR_REGISTER_TEST("INTEGRATION typecheck not bool while", cabor_integration_test_typecheck_not_bool_while);
     CABOR_REGISTER_TEST("INTEGRATION typecheck scoping rules", cabor_integration_test_typecheck_scoping_rules);
+
+    // IR tests
+    CABOR_REGISTER_TEST("INTEGRATION IR basic expression", cabor_integration_test_ir_basic_expression);
+
 }
 #else
 void register_all_tests() {}

@@ -8,8 +8,11 @@
 #include "../logging/logging.h"
 #include "../debug/cabor_debug.h"
 
-size_t get_cabor_token_size();
-size_t get_cabor_map_entry_size();
+size_t cabor_get_token_size();
+size_t cabor_get_map_entry_size();
+size_t cabor_get_ir_instruction_size();
+size_t cabor_get_ir_var_size();
+size_t cabor_get_ir_label_size();
 
 static size_t get_element_type_size(cabor_element_type type)
 {
@@ -30,9 +33,15 @@ static size_t get_element_type_size(cabor_element_type type)
         case CABOR_PTR:
             return sizeof(void*);
         case CABOR_TOKEN:
-            return get_cabor_token_size();
+            return cabor_get_token_size();
         case CABOR_MAP_ENTRY:
-            return get_cabor_map_entry_size();
+            return cabor_get_map_entry_size();
+        case CABOR_IR_INSTRUCTION:
+            return cabor_get_ir_instruction_size();
+        case CABOR_IR_VAR:
+            return cabor_get_ir_var_size();
+        case CABOR_IR_LABEL:
+            return cabor_get_ir_label_size();
         case CABOR_UNKNOWN:
             return 0;
     }
@@ -220,13 +229,13 @@ struct cabor_instruction_t* cabor_vector_get_ir_instruction(cabor_vector* v, siz
 
 struct cabor_ir_var_t* cabor_vector_get_ir_var(cabor_vector* v, size_t idx)
 {
-    CABOR_ASSERT(v->type == CABOR_IR_INSTRUCTION, "pushing ir var from non ir var vector!");
+    CABOR_ASSERT(v->type == CABOR_IR_VAR, "getting ir var from non ir var vector!");
     return (struct cabor_ir_var_t*)vector_get(v, idx);
 }
 
 struct cabor_ir_label_t* cabor_vector_get_ir_label(cabor_vector* v, size_t idx)
 {
-    CABOR_ASSERT(v->type == CABOR_IR_LABEL, "pushing ir label from non ir label vector!");
+    CABOR_ASSERT(v->type == CABOR_IR_LABEL, "getting ir label from non ir label vector!");
     return (struct cabor_ir_label_t*)vector_get(v, idx);
 }
 

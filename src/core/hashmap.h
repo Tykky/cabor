@@ -21,7 +21,8 @@ void cabor_free_key(const char* key);
 void cabor_destroy_hash_map(cabor_hash_map* map);
 
 uint32_t cabor_hash_string(const char* str);
-void cabor_map_insert(cabor_hash_map* map, const char* key, int value);
+cabor_map_entry* cabor_map_insert(cabor_hash_map* map, const char* key, int value);
 int cabor_map_get(cabor_hash_map* map, const char* key, bool* found);
+cabor_map_entry* cabor_map_get_entry(cabor_hash_map* map, const char* key, bool* found);
 
-size_t get_cabor_map_entry_size();
+size_t cabor_get_map_entry_size();

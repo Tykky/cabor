@@ -9,7 +9,7 @@ cabor_hash_map* cabor_create_hash_map(size_t initial_size)
     CABOR_NEW(cabor_hash_map, map);
     map->table = cabor_create_vector(initial_size, CABOR_MAP_ENTRY, false);
     map->table->size = initial_size;
-    memset(map->table->vector_mem.mem, 0, get_cabor_map_entry_size() * map->table->size);
+    memset(map->table->vector_mem.mem, 0, cabor_get_map_entry_size() * map->table->size);
     return map;
 }
 
@@ -62,7 +62,7 @@ uint32_t cabor_hash_string(const char* str)
     return hash;
 }
 
-void cabor_map_insert(cabor_hash_map* map, const char* key, int value)
+cabor_map_entry* cabor_map_insert(cabor_hash_map* map, const char* key, int value)
 {
     const size_t table_size = map->table->size;
     uint32_t index = cabor_hash_string(key) % table_size;
@@ -82,7 +82,7 @@ void cabor_map_insert(cabor_hash_map* map, const char* key, int value)
         if (strcmp(entry->key, key) == 0) // No collision, allow shadowing
         {
             entry->value = value;
-            return;
+            return entry;
         }
 
         if (entry->next)
@@ -97,6 +97,8 @@ void cabor_map_insert(cabor_hash_map* map, const char* key, int value)
     new_entry->value = value;
     new_entry->next = NULL;
     entry->next = new_entry;
+
+    return entry;
 }
 
 int cabor_map_get(cabor_hash_map* map, const char* key, bool* found)
@@ -118,7 +120,27 @@ int cabor_map_get(cabor_hash_map* map, const char* key, bool* found)
     return -1;
 }
 
-size_t get_cabor_map_entry_size()
+cabor_map_entry* cabor_map_get_entry(cabor_hash_map* map, const char* key, bool* found)
+{
+    const size_t table_size = map->table->size;
+    uint32_t index = cabor_hash_string(key) % table_size;
+    cabor_map_entry* entry = cabor_vector_get_map_entry(map->table, index);
+
+    while (entry->key)
+    {
+        if (strcmp(entry->key, key) == 0)
+        {
+            *found = true;
+            return entry;
+        }
+        entry = entry->next;
+    }
+    *found = false;
+    return NULL;
+
+}
+
+size_t cabor_get_map_entry_size()
 {
     return sizeof(cabor_map_entry);
 }

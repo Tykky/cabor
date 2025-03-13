@@ -94,12 +94,18 @@ typedef struct cabor_ir_instruction_t
     };
 } cabor_ir_instruction;
 
+
+size_t cabor_get_ir_instruction_size();
+size_t cabor_get_ir_var_size();
+size_t cabor_get_ir_label_size();
+
 // These allocate and destroy all the data required for IR generation
 cabor_ir_data* cabor_create_ir_data();
 void cabor_destroy_ir_data(cabor_ir_var* ir_var_types);
 
 // No need to bother with deallocating individual ir instructions, cabor_destroy_ir_data handles that
-cabor_ir_var_idx cabor_create_ir_var(cabor_ir_data* ir_data, const char* var);
+cabor_ir_var_idx cabor_create_ir_var(cabor_ir_data* ir_data, const char* var, cabor_type type);
+cabor_map_entry* cabor_create_ir_var_with_entry(cabor_ir_data* ir_data, const char* var, cabor_type type);
 cabor_ir_var_idx cabor_create_unique_ir_var(cabor_ir_data* ir_data, cabor_type type);
 cabor_ir_label_idx cabor_create_ir_label(cabor_ir_data* ir_data, const char* label);
 cabor_ir_inst_idx cabor_create_ir_load_bool_const(cabor_ir_data* ir_data, bool value, int dest);
@@ -112,6 +118,8 @@ cabor_ir_inst_idx cabor_create_ir_condjump(cabor_ir_data* ir_data, int cond, int
 cabor_ir_var_entry* cabor_get_ir_var_entry(cabor_symbol_table* sym_tab, const char* ir_var);
 
 void cabor_generate_ir(cabor_ir_data* var_types, cabor_ast* ast, cabor_ast_node* root_expr);
+
+cabor_map_entry* cabor_require_ir_var(cabor_ir_data* ir_data, cabor_symbol_table* symtab, const char* var, cabor_type type);
 
 cabor_ir_var_idx cabor_visit_ir_binaryop(cabor_ir_data* ir_data, cabor_ast* ast, cabor_ast_node* root_expr, cabor_symbol_table* root_tab);
 cabor_ir_var_idx cabor_visit_ir_unaryop(cabor_ir_data* ir_data, cabor_ast* ast, cabor_ast_node* root_expr, cabor_symbol_table* root_tab);

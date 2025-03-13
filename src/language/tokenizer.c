@@ -347,7 +347,7 @@ static void append_token(cabor_vector* vec, cabor_token* token)
     cabor_vector_push_token(vec, token);
 }
 
-size_t get_cabor_token_size()
+size_t cabor_get_token_size()
 {
     return sizeof(cabor_token);
 }

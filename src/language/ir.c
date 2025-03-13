@@ -18,6 +18,21 @@
 #define CABOR_IR_VAR_INVALID -1
 #define CABOR_IR_VAR_UNIT -2
 
+size_t cabor_get_ir_instruction_size()
+{
+    return sizeof(cabor_ir_instruction);
+}
+
+size_t cabor_get_ir_var_size()
+{
+    return sizeof(cabor_ir_var);
+}
+
+size_t cabor_get_ir_label_size()
+{
+    return sizeof(cabor_ir_label);
+}
+
 cabor_ir_data* cabor_create_ir_data()
 {
     CABOR_NEW(cabor_ir_data, ir_data);
@@ -26,7 +41,7 @@ cabor_ir_data* cabor_create_ir_data()
     ir_data->ir_labels = cabor_create_vector(1024, CABOR_IR_LABEL, false);
     ir_data->ir_call_args = cabor_create_vector(1024, CABOR_INT, false);
     ir_data->ir_symtab = cabor_create_symbol_table();
-    ir_data->ir_instructions = cabor_create_vector(1024, CABOR_INT, false);
+    ir_data->ir_instructions = cabor_create_vector(1024, CABOR_IR_INSTRUCTION, false);
     return ir_data;
 }
 
@@ -44,12 +59,31 @@ void cabor_destroy_ir_data(cabor_ir_data* ir_data)
 cabor_ir_var_idx cabor_create_ir_var(cabor_ir_data* ir_data, const char* var, cabor_type type)
 {
     cabor_ir_var_idx idx = (cabor_ir_var_idx)ir_data->ir_vars->size;
-    cabor_ir_var ir_var = { .name = var, .id = idx, .type = type };
+    cabor_ir_var ir_var = { .id = idx, .type = type };
+    size_t len = strlen(var);
+
+    if (len > CABOR_MAX_IR_VAR_LENGTH)
+    {
+        CABOR_LOG_ERR_F("IR error: IR var storage was too small for %s", var);
+        return CABOR_IR_VAR_INVALID;
+    }
+
+    strcpy(ir_var.name, var);
+
     cabor_vector_push_ir_var(ir_data->ir_vars, &ir_var);
 
     cabor_map_insert(ir_data->ir_var_types, var, (int)type);
 
     return idx;
+}
+
+cabor_map_entry* cabor_create_ir_var_with_entry(cabor_ir_data* ir_data, const char* var, cabor_type type)
+{
+    cabor_ir_var_idx idx = (cabor_ir_var_idx)ir_data->ir_vars->size;
+    cabor_ir_var ir_var = { .name = var, .id = idx, .type = type };
+    cabor_vector_push_ir_var(ir_data->ir_vars, &ir_var);
+
+   return cabor_map_insert(ir_data->ir_var_types, var, (int)type);
 }
 
 cabor_ir_var_idx cabor_create_unique_ir_var(cabor_ir_data* ir_data, cabor_type type)
@@ -68,7 +102,7 @@ cabor_ir_var_idx cabor_create_unique_ir_var(cabor_ir_data* ir_data, cabor_type t
 
 cabor_ir_label_idx cabor_create_ir_label(cabor_ir_data* ir_data, const char* label)
 {
-    cabor_ir_label_idx idx = (int)ir_data->ir_labels = label;
+    cabor_ir_label_idx idx = (cabor_ir_label_idx)ir_data->ir_labels = label;
     cabor_ir_label ir_label = { .name = label };
     cabor_vector_push_ir_label(ir_data->ir_labels, &ir_label);
     return idx;
@@ -76,7 +110,7 @@ cabor_ir_label_idx cabor_create_ir_label(cabor_ir_data* ir_data, const char* lab
 
 cabor_ir_inst_idx cabor_create_ir_load_bool_const(cabor_ir_data* ir_data, bool value, int dest)
 {
-    cabor_ir_inst_idx idx = (int)ir_data->ir_instructions->size;
+    cabor_ir_inst_idx idx = (cabor_ir_inst_idx)ir_data->ir_instructions->size;
     cabor_ir_load_bool_const instr = 
     {
         .value = value,
@@ -88,7 +122,7 @@ cabor_ir_inst_idx cabor_create_ir_load_bool_const(cabor_ir_data* ir_data, bool v
 
 cabor_ir_inst_idx cabor_create_ir_copy(cabor_ir_data* ir_data, int source, int dest)
 {
-    cabor_ir_inst_idx idx = (int)ir_data->ir_instructions->size;
+    cabor_ir_inst_idx idx = (cabor_ir_inst_idx)ir_data->ir_instructions->size;
     cabor_ir_copy instr = 
     {
         .source = source,
@@ -100,12 +134,13 @@ cabor_ir_inst_idx cabor_create_ir_copy(cabor_ir_data* ir_data, int source, int d
 
 cabor_ir_inst_idx cabor_create_ir_call(cabor_ir_data* ir_data, int fun, int* args, int num_args, int dest)
 {
-    cabor_ir_inst_idx idx = (int)ir_data->ir_instructions->size;
+    cabor_ir_inst_idx idx = (cabor_ir_inst_idx)ir_data->ir_instructions->size;
     int args_idx = (int)ir_data->ir_call_args->size;
-    int* args_begin = cabor_vector_get_int(ir_data->ir_call_args, args_idx);
     cabor_vector_reserve(ir_data->ir_call_args, ir_data->ir_call_args->size + num_args);
+    int* args_begin = (int*)ir_data->ir_call_args->vector_mem.mem + ir_data->ir_call_args->size;
+    ir_data->ir_call_args->size += num_args;
 
-    memcpy(args_begin, args, num_args);
+    memcpy(args_begin, args, num_args * sizeof(int));
 
     cabor_ir_call instr = 
     {
@@ -121,7 +156,7 @@ cabor_ir_inst_idx cabor_create_ir_call(cabor_ir_data* ir_data, int fun, int* arg
 
 cabor_ir_inst_idx cabor_create_ir_jump(cabor_ir_data* ir_data, int label)
 {
-    cabor_ir_inst_idx idx = (int)ir_data->ir_instructions->size;
+    cabor_ir_inst_idx idx = (cabor_ir_inst_idx)ir_data->ir_instructions->size;
     cabor_ir_jump instr = 
     {
         .label = label
@@ -132,7 +167,7 @@ cabor_ir_inst_idx cabor_create_ir_jump(cabor_ir_data* ir_data, int label)
 
 cabor_ir_inst_idx cabor_create_ir_condjump(cabor_ir_data* ir_data, int cond, int then_label, int else_label)
 {
-    cabor_ir_inst_idx idx = (int)ir_data->ir_instructions->size;
+    cabor_ir_inst_idx idx = (cabor_ir_inst_idx)ir_data->ir_instructions->size;
     cabor_ir_condjump instr = 
     {
         .cond = cond,
@@ -146,7 +181,7 @@ cabor_ir_inst_idx cabor_create_ir_condjump(cabor_ir_data* ir_data, int cond, int
 cabor_ir_var_entry* cabor_get_ir_var_entry(cabor_symbol_table* sym_tab, const char* ir_var)
 {
     bool found = false;
-    cabor_map_entry* entry = cabor_vector_get_map_entry(sym_tab, ir_var);
+    cabor_map_entry* entry = cabor_map_get_entry(sym_tab->map, ir_var, &found);
     if (!found)
     {
         CABOR_LOG_ERR_F("IR gen error: failed to get ir var entry for %s", ir_var);
@@ -160,7 +195,7 @@ void cabor_generate_ir(cabor_ir_data* ir_data, cabor_ast* ast)
     // convert root types to symbtab
     for (size_t i = 0; i < ir_data->ir_var_types->table->size; i++)
     {
-        cabor_map_entry* entry = cabor_vector_get_map_entry(ir_data->ir_var_types, i);
+        cabor_map_entry* entry = cabor_vector_get_map_entry(ir_data->ir_var_types->table, i);
         const char* key = entry->key;
         if (key)
         {
@@ -173,23 +208,39 @@ void cabor_generate_ir(cabor_ir_data* ir_data, cabor_ast* ast)
 
     cabor_ir_var_idx final_var_idx = cabor_visit_ir_node(ir_data, ast, root_expr, ir_data->ir_symtab);
     cabor_ir_var* ir_var = IR_VAR_IDX(ir_data, final_var_idx);
-    cabor_ir_var_entry* entry = IR_ENTRY(ir_data->ir_symtab, ir_var->name);
-    cabor_type var_type = IR_VAR_TYPE(entry);
+    cabor_type var_type = ir_var->type;
 
     if (var_type == CABOR_TYPE_INT)
     {
         // emit call print_int
+        cabor_ir_var_idx print_int = IR_ENTRY(ir_data->ir_symtab, "print_int");
+        cabor_ir_inst_idx inst = cabor_create_ir_call(ir_data, print_int, &final_var_idx, 1, CABOR_IR_VAR_UNIT);
     }
     else if (var_type == CABOR_TYPE_BOOL)
     {
         // emit call print_bool
+        cabor_ir_var_idx print_bool = IR_ENTRY(ir_data->ir_symtab, "print_bool");
+        cabor_ir_inst_idx inst = cabor_create_ir_call(ir_data, print_bool, &final_var_idx, 1, CABOR_IR_VAR_UNIT);
     }
+}
+
+cabor_map_entry* cabor_require_ir_var(cabor_ir_data* ir_data, cabor_symbol_table* symtab, const char* var, cabor_type type)
+{
+    bool found = false;
+    cabor_map_entry* entry = cabor_map_get_entry(symtab->map, var, &found);
+
+    if (!found)
+    {
+        entry = cabor_create_ir_var_with_entry(ir_data, var, type);
+    }
+
+    return entry;
 }
 
 cabor_ir_var_idx cabor_visit_ir_binaryop(cabor_ir_data* ir_data, cabor_ast* ast, cabor_ast_node* root_expr, cabor_symbol_table* root_table)
 {
     cabor_token* root_t = TOKEN(root_expr);
-    cabor_ir_var_entry* var_op = IR_ENTRY(root_table, root_t->data);
+    cabor_ir_var_entry* var_op = cabor_require_ir_var(ir_data, root_table, root_t->data, root_expr->type);
 
     cabor_ir_var_idx left = cabor_visit_ir_node(ir_data, ast, ROOT(&root_expr->edges[0]), root_table);
     cabor_ir_var_idx right = cabor_visit_ir_node(ir_data, ast, ROOT(&root_expr->edges[1]), root_table);

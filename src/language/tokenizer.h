@@ -23,7 +23,7 @@ typedef struct cabor_token_t
     char data[CABOR_TOKENIZER_MAX_TOKEN_LENGTH];
 } cabor_token;
 
-size_t get_cabor_token_size();
+size_t cabor_get_token_size();
 
 cabor_vector* cabor_tokenize(cabor_file* file);
 
