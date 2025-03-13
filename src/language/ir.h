@@ -12,24 +12,26 @@
 typedef int cabor_ir_var_idx;
 typedef int cabor_ir_label_idx;
 typedef int cabor_ir_inst_idx;
+typedef int cabor_ir_inst_idx;
 typedef cabor_map_entry cabor_ir_var_entry;
 
 typedef struct cabor_ir_var_t
 {
     char name[CABOR_MAX_IR_VAR_LENGTH];
     cabor_ir_var_idx id; // ir vars are unique
+    cabor_type type;
 } cabor_ir_var;
 
 typedef struct
 {
-    cabor_hash_map* ir_var_types;  // maps all global names like 'print_int', '+' to to their types
-    cabor_symbol_table* ir_symtab; // maps all global names to unique ir_var
-    cabor_vector* ir_vars;
-    cabor_vector* ir_labels;
-    cabor_vector* ir_instructions;
-    cabor_vector* ir_call_args;
-} cabor_ir_data;
-
+    cabor_hash_map*      ir_var_types;     // maps all global names like 'print_int', '+' to to their types
+    cabor_symbol_table*  ir_symtab;        // maps all global names to unique ir_var
+    cabor_vector*        ir_vars;          // all cabor_ir_var objects
+    cabor_vector*        ir_labels;        // all cabor_ir_label objects
+    cabor_vector*        ir_instructions;  // all cabor_ir_instruction objects
+    cabor_vector*        ir_call_args;     // storage for all function call argument lists stored just after each other in memory:
+} cabor_ir_data;                           // [1, 4, 7 ,3], [2, 3, 8] <- indices to ir_vars array
+                                           //   call1        call2    ...
 typedef enum
 {
     CABOR_IR_INST_LOAD_BOOL,
@@ -97,13 +99,14 @@ cabor_ir_data* cabor_create_ir_data();
 void cabor_destroy_ir_data(cabor_ir_var* ir_var_types);
 
 // No need to bother with deallocating individual ir instructions, cabor_destroy_ir_data handles that
-int cabor_create_ir_var(cabor_ir_data* ir_data, const char* var);
-int cabor_create_ir_label(cabor_ir_data* ir_data, const char* label);
-int cabor_create_ir_load_bool_const(cabor_ir_data* ir_data, bool value, int dest);
-int cabor_create_ir_copy(cabor_ir_data* ir_data, int source, int dest);
-int cabor_create_ir_call(cabor_ir_data* ir_data, int fun, int* args, int num_args, int dest);
-int cabor_create_ir_jump(cabor_ir_data* ir_data, int label);
-int cabor_create_ir_condjump(cabor_ir_data* ir_data, int cond, int then_label, int else_label);
+cabor_ir_var_idx cabor_create_ir_var(cabor_ir_data* ir_data, const char* var);
+cabor_ir_var_idx cabor_create_unique_ir_var(cabor_ir_data* ir_data, cabor_type type);
+cabor_ir_label_idx cabor_create_ir_label(cabor_ir_data* ir_data, const char* label);
+cabor_ir_inst_idx cabor_create_ir_load_bool_const(cabor_ir_data* ir_data, bool value, int dest);
+cabor_ir_inst_idx cabor_create_ir_copy(cabor_ir_data* ir_data, int source, int dest);
+cabor_ir_inst_idx cabor_create_ir_call(cabor_ir_data* ir_data, int fun, int* args, int num_args, int dest);
+cabor_ir_inst_idx cabor_create_ir_jump(cabor_ir_data* ir_data, int label);
+cabor_ir_inst_idx cabor_create_ir_condjump(cabor_ir_data* ir_data, int cond, int then_label, int else_label);
 
 // Get ir var from scoped sym tab
 cabor_ir_var_entry* cabor_get_ir_var_entry(cabor_symbol_table* sym_tab, const char* ir_var);
