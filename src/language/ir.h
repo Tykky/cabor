@@ -57,6 +57,12 @@ typedef struct
 
 typedef struct
 {
+    int value;
+    cabor_ir_var_idx dest;
+} cabor_ir_load_int_const;
+
+typedef struct
+{
     cabor_ir_var_idx source;
     cabor_ir_var_idx dest;
 } cabor_ir_copy;
@@ -87,6 +93,7 @@ typedef struct cabor_ir_instruction_t
     union
     {
         cabor_ir_load_bool_const load_bool_const;
+        cabor_ir_load_int_const load_int_const;
         cabor_ir_copy copy;
         cabor_ir_call call;
         cabor_ir_jump jump;
@@ -109,6 +116,7 @@ cabor_map_entry* cabor_create_ir_var_with_entry(cabor_ir_data* ir_data, const ch
 cabor_ir_var_idx cabor_create_unique_ir_var(cabor_ir_data* ir_data, cabor_type type);
 cabor_ir_label_idx cabor_create_ir_label(cabor_ir_data* ir_data, const char* label);
 cabor_ir_inst_idx cabor_create_ir_load_bool_const(cabor_ir_data* ir_data, bool value, int dest);
+cabor_ir_inst_idx cabor_create_ir_load_int_const(cabor_ir_data* ir_data, int value, int dest);
 cabor_ir_inst_idx cabor_create_ir_copy(cabor_ir_data* ir_data, int source, int dest);
 cabor_ir_inst_idx cabor_create_ir_call(cabor_ir_data* ir_data, int fun, int* args, int num_args, int dest);
 cabor_ir_inst_idx cabor_create_ir_jump(cabor_ir_data* ir_data, int label);
@@ -118,6 +126,8 @@ cabor_ir_inst_idx cabor_create_ir_condjump(cabor_ir_data* ir_data, int cond, int
 cabor_ir_var_entry* cabor_get_ir_var_entry(cabor_symbol_table* sym_tab, const char* ir_var);
 
 void cabor_generate_ir(cabor_ir_data* var_types, cabor_ast* ast, cabor_ast_node* root_expr);
+
+void cabor_format_ir_instruction(cabor_ir_data* ir_data, cabor_ir_inst_idx inst, char* buffer, size_t bufSize);
 
 cabor_map_entry* cabor_require_ir_var(cabor_ir_data* ir_data, cabor_symbol_table* symtab, const char* var, cabor_type type);
 

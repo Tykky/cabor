@@ -111,10 +111,31 @@ cabor_ir_label_idx cabor_create_ir_label(cabor_ir_data* ir_data, const char* lab
 cabor_ir_inst_idx cabor_create_ir_load_bool_const(cabor_ir_data* ir_data, bool value, int dest)
 {
     cabor_ir_inst_idx idx = (cabor_ir_inst_idx)ir_data->ir_instructions->size;
-    cabor_ir_load_bool_const instr = 
+    cabor_ir_instruction instr =
     {
-        .value = value,
-        .dest = dest
+        .type = CABOR_IR_INST_LOAD_BOOL,
+        .load_bool_const =
+        {
+            .value = value,
+            .dest = dest
+        }
+    };
+
+    cabor_vector_push_ir_instruction(ir_data->ir_instructions, &instr);
+    return idx;
+}
+
+cabor_ir_inst_idx cabor_create_ir_load_int_const(cabor_ir_data* ir_data, int value, int dest)
+{
+    cabor_ir_inst_idx idx = (cabor_ir_inst_idx)ir_data->ir_instructions->size;
+    cabor_ir_instruction instr =
+    {
+        .type = CABOR_IR_INST_LOAD_INT,
+        .load_int_const =
+        {
+            .value = value,
+            .dest = dest
+        }
     };
     cabor_vector_push_ir_instruction(ir_data->ir_instructions, &instr);
     return idx;
@@ -123,10 +144,14 @@ cabor_ir_inst_idx cabor_create_ir_load_bool_const(cabor_ir_data* ir_data, bool v
 cabor_ir_inst_idx cabor_create_ir_copy(cabor_ir_data* ir_data, int source, int dest)
 {
     cabor_ir_inst_idx idx = (cabor_ir_inst_idx)ir_data->ir_instructions->size;
-    cabor_ir_copy instr = 
+    cabor_ir_instruction instr = 
     {
-        .source = source,
-        .dest = dest
+        .type = CABOR_IR_INST_COPY,
+        .copy = 
+        {
+            .source = source,
+            .dest = dest
+        }
     };
     cabor_vector_push_ir_instruction(ir_data->ir_instructions, &instr);
     return idx;
@@ -142,12 +167,16 @@ cabor_ir_inst_idx cabor_create_ir_call(cabor_ir_data* ir_data, int fun, int* arg
 
     memcpy(args_begin, args, num_args * sizeof(int));
 
-    cabor_ir_call instr = 
+    cabor_ir_instruction instr = 
     {
-        .fun = fun,
-        .args = args_begin,
-        .num_args = num_args,
-        .dest = dest
+        .type = CABOR_IR_INST_CALL,
+        .call =
+        {
+            .fun = fun,
+            .args = args_begin,
+            .num_args = num_args,
+            .dest = dest
+        }
     };
 
     cabor_vector_push_ir_instruction(ir_data->ir_instructions, &instr);
@@ -157,9 +186,13 @@ cabor_ir_inst_idx cabor_create_ir_call(cabor_ir_data* ir_data, int fun, int* arg
 cabor_ir_inst_idx cabor_create_ir_jump(cabor_ir_data* ir_data, int label)
 {
     cabor_ir_inst_idx idx = (cabor_ir_inst_idx)ir_data->ir_instructions->size;
-    cabor_ir_jump instr = 
+    cabor_ir_instruction instr = 
     {
-        .label = label
+        .type = CABOR_IR_INST_JUMP, 
+        .jump = 
+        {
+            .label = label
+        }
     };
     cabor_vector_push_ir_instruction(ir_data->ir_instructions, &instr);
     return idx;
@@ -168,11 +201,15 @@ cabor_ir_inst_idx cabor_create_ir_jump(cabor_ir_data* ir_data, int label)
 cabor_ir_inst_idx cabor_create_ir_condjump(cabor_ir_data* ir_data, int cond, int then_label, int else_label)
 {
     cabor_ir_inst_idx idx = (cabor_ir_inst_idx)ir_data->ir_instructions->size;
-    cabor_ir_condjump instr = 
+    cabor_ir_instruction instr = 
     {
-        .cond = cond,
-        .then_label = then_label,
-        .else_label = else_label
+        .type = CABOR_IR_INST_CONDJUMP,
+        .cond_jump = 
+        {
+            .cond = cond,
+            .then_label = then_label,
+            .else_label = else_label
+        }
     };
     cabor_vector_push_ir_instruction(ir_data->ir_instructions, &instr);
     return idx;
@@ -224,6 +261,88 @@ void cabor_generate_ir(cabor_ir_data* ir_data, cabor_ast* ast)
     }
 }
 
+void cabor_format_ir_instruction(cabor_ir_data* ir_data, cabor_ir_inst_idx inst, char* buffer, size_t bufSize)
+{
+    cabor_ir_instruction* instruction = cabor_vector_get_ir_instruction(ir_data->ir_instructions, inst);
+    switch (instruction->type)
+    {
+    case CABOR_IR_INST_LOAD_BOOL:
+    {
+        snprintf(buffer, bufSize,
+            "LoadBoolConst(%s, x%d)",
+            instruction->load_bool_const.value ? "true" : "false",
+            instruction->load_bool_const.dest);
+        break;
+    }
+
+    case CABOR_IR_INST_LOAD_INT:
+    {
+        snprintf(buffer, bufSize,
+            "LoadIntConst(%d, x%d)",
+            instruction->load_int_const.value,
+            instruction->load_int_const.dest);
+        break;
+    }
+
+    case CABOR_IR_INST_COPY:
+    {
+        snprintf(buffer, bufSize,
+            "Copy(x%d, x%d)",
+            instruction->copy.source,
+            instruction->copy.dest);
+        break;
+    }
+
+    case CABOR_IR_INST_CALL:
+    {
+        cabor_ir_var* fun_var = cabor_vector_get_ir_var(ir_data->ir_vars, instruction->call.fun);
+        int written = snprintf(buffer, bufSize, "Call(%s, [", fun_var->name);
+
+        for (int i = 0; i < instruction->call.num_args; ++i)
+        {
+            if (written < bufSize)
+            {
+                written += snprintf(buffer + written, bufSize - written,
+                    "%sx%d", i == 0 ? "" : ", ", instruction->call.args[i]);
+            }
+        }
+
+        if (written < bufSize)
+        {
+            written += snprintf(buffer + written, bufSize - written,
+                "], x%d)", instruction->call.dest);
+        }
+
+        break;
+    }
+
+    case CABOR_IR_INST_JUMP:
+    {
+        cabor_ir_label* label = cabor_vector_get_ir_label(ir_data->ir_labels, instruction->jump.label);
+        snprintf(buffer, bufSize,
+            "Jump(%s)", label->name);
+        break;
+    }
+
+    case CABOR_IR_INST_CONDJUMP:
+    {
+        cabor_ir_label* then_label = cabor_vector_get_ir_label(ir_data->ir_labels, instruction->cond_jump.then_label);
+        cabor_ir_label* else_label = cabor_vector_get_ir_label(ir_data->ir_labels, instruction->cond_jump.else_label);
+
+        snprintf(buffer, bufSize,
+            "CondJump(x%d, %s, %s)",
+            instruction->cond_jump.cond,
+            then_label->name,
+            else_label->name);
+        break;
+    }
+
+    default:
+        snprintf(buffer, bufSize, "<invalid instruction>");
+        break;
+    }
+}
+
 cabor_map_entry* cabor_require_ir_var(cabor_ir_data* ir_data, cabor_symbol_table* symtab, const char* var, cabor_type type)
 {
     bool found = false;
@@ -255,7 +374,29 @@ cabor_ir_var_idx cabor_visit_ir_binaryop(cabor_ir_data* ir_data, cabor_ast* ast,
 
 cabor_ir_var_idx cabor_visit_ir_unaryop(cabor_ir_data* ir_data, cabor_ast* ast, cabor_ast_node* root_expr, cabor_symbol_table* root_tab)
 {
-    return 0;
+    cabor_token* token = TOKEN(root_expr);
+    const char* op = token->data;
+
+    // Lookup the operator function (e.g., "-" or "!")
+    bool found = false;
+    cabor_ir_var_idx fun = cabor_map_get(root_tab->map, op, &found);
+    if (!found)
+    {
+        CABOR_LOG_ERR_F("IR error: unary operator '%s' not found in symbol table", op);
+        return CABOR_IR_VAR_INVALID;
+    }
+
+    // Evaluate the operand
+    cabor_ir_var_idx arg = cabor_visit_ir_node(ir_data, ast, ROOT(&root_expr->edges[0]), root_tab);
+
+    // Create the result variable
+    cabor_ir_var_idx result = cabor_create_unique_ir_var(ir_data, root_expr->type);
+
+    // Emit the IR call
+    cabor_ir_var_idx args[] = { arg };
+    cabor_create_ir_call(ir_data, fun, args, 1, result);
+
+    return result;
 }
 
 cabor_ir_var_idx cabor_visit_ir_literal(cabor_ir_data* ir_data, cabor_ast* ast, cabor_ast_node* root_expr, cabor_symbol_table* root_tab)
@@ -294,6 +435,7 @@ cabor_ir_var_idx cabor_visit_ir_literal(cabor_ir_data* ir_data, cabor_ast* ast, 
             {
                 CABOR_LOG_ERR_F("IR error: %s wasn't convertible to int", token->data);
             }
+            cabor_create_ir_load_int_const(ir_data, (int)num, var);
             return var;
         }
         case CABOR_TYPE_UNIT:
@@ -325,7 +467,19 @@ cabor_ir_var_idx cabor_visit_ir_identifier(cabor_ir_data* ir_data, cabor_ast* as
 
 cabor_ir_var_idx cabor_visit_ir_function_call(cabor_ir_data* ir_data, cabor_ast* ast, cabor_ast_node* root_expr, cabor_symbol_table* root_tab)
 {
-    return 0;
+    cabor_token* token = TOKEN(ROOT(&root_expr->edges[0])); // first edge is the function name
+    cabor_ir_var_idx fun_idx = cabor_map_get(root_tab->map, token->data, NULL);
+
+    int num_args = root_expr->num_edges - 1;
+    cabor_ir_var_idx args[16]; // max 16 args for now
+    for (int i = 0; i < num_args; i++)
+    {
+        args[i] = cabor_visit_ir_node(ir_data, ast, ROOT(&root_expr->edges[i + 1]), root_tab);
+    }
+
+    cabor_ir_var_idx dest = cabor_create_unique_ir_var(ir_data, root_expr->type);
+    cabor_create_ir_call(ir_data, fun_idx, args, num_args, dest);
+    return dest;
 }
 
 cabor_ir_var_idx cabor_visit_ir_unit(cabor_ir_data* ir_data, cabor_ast* ast, cabor_ast_node* root_expr, cabor_symbol_table* root_tab)
@@ -335,7 +489,14 @@ cabor_ir_var_idx cabor_visit_ir_unit(cabor_ir_data* ir_data, cabor_ast* ast, cab
 
 cabor_ir_var_idx cabor_visit_ir_block(cabor_ir_data* ir_data, cabor_ast* ast, cabor_ast_node* root_expr, cabor_symbol_table* root_tab)
 {
-    return 0;
+    cabor_ir_var_idx result = CABOR_IR_VAR_UNIT;
+
+    for (int i = 0; i < root_expr->num_edges; i++)
+    {
+        result = cabor_visit_ir_node(ir_data, ast, ROOT(&root_expr->edges[i]), root_tab);
+    }
+
+    return result;
 }
 
 cabor_ir_var_idx cabor_visit_ir_if_then_else(cabor_ir_data* ir_data, cabor_ast* ast, cabor_ast_node* root_expr, cabor_symbol_table* root_tab)
@@ -372,17 +533,42 @@ cabor_ir_var_idx cabor_visit_ir_if_then_else(cabor_ir_data* ir_data, cabor_ast* 
 
 cabor_ir_var_idx cabor_visit_ir_while(cabor_ir_data* ir_data, cabor_ast* ast, cabor_ast_node* root_expr, cabor_symbol_table* root_tab)
 {
-    return 0;
+    cabor_ir_label_idx l_cond = cabor_create_ir_label(ir_data, "while.cond");
+    cabor_ir_label_idx l_body = cabor_create_ir_label(ir_data, "while.body");
+    cabor_ir_label_idx l_end = cabor_create_ir_label(ir_data, "while.end");
+
+    cabor_create_ir_jump(ir_data, l_cond);
+
+    // condition check
+    cabor_ir_var_idx cond = cabor_visit_ir_node(ir_data, ast, ROOT(&root_expr->edges[0]), root_tab);
+    cabor_create_ir_condjump(ir_data, cond, l_body, l_end);
+
+    // body
+    cabor_visit_ir_node(ir_data, ast, ROOT(&root_expr->edges[1]), root_tab);
+    cabor_create_ir_jump(ir_data, l_cond);
+
+    return CABOR_IR_VAR_UNIT;
 }
 
 cabor_ir_var_idx cabor_visit_ir_var_expr(cabor_ir_data* ir_data, cabor_ast* ast, cabor_ast_node* root_expr, cabor_symbol_table* root_tab)
 {
-    return 0;
+    cabor_token* token = TOKEN(ROOT(&root_expr->edges[0]));
+    cabor_ir_var_idx value = cabor_visit_ir_node(ir_data, ast, ROOT(&root_expr->edges[1]), root_tab);
+    cabor_map_insert(root_tab->map, token->data, value);
+    return CABOR_IR_VAR_UNIT;
 }
 
 cabor_ir_var_idx cabor_visit_ir_declaration(cabor_ir_data* ir_data, cabor_ast* ast, cabor_ast_node* root_expr, cabor_symbol_table* root_tab)
 {
-    return 0;
+    cabor_token* token = TOKEN(ROOT(&root_expr->edges[0]));
+    cabor_type type = root_expr->type;
+    cabor_ir_var_idx var = cabor_create_ir_var(ir_data, token->data, type);
+
+    cabor_ir_var_idx value = cabor_visit_ir_node(ir_data, ast, ROOT(&root_expr->edges[1]), root_tab);
+    cabor_create_ir_copy(ir_data, value, var);
+    cabor_map_insert(root_tab->map, token->data, var);
+
+    return CABOR_IR_VAR_UNIT;
 }
 
 cabor_ir_var_idx cabor_visit_ir_node(cabor_ir_data* ir_data, cabor_ast* ast, cabor_ast_node* root_expr, cabor_symbol_table* root_tab)

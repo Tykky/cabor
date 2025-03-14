@@ -24,6 +24,7 @@ void free_ir_common(cabor_ir_data* ir_data, cabor_symbol_table* symbtab)
     cabor_destroy_symbol_table(symbtab);
 }
 
+// This just produces something we can visuall inspect so not 'testing' anything in automated way
 int cabor_integration_test_ir_basic_expression()
 {
     const char* code = "1 + 2 * 3";
@@ -32,6 +33,15 @@ int cabor_integration_test_ir_basic_expression()
     cabor_symbol_table* symtab;
 
     ir_common(&ir_data, &symtab, code);
+    cabor_vector* instructions = ir_data->ir_instructions;
+
+    for (size_t i = 0; i < instructions->size; i++)
+    {
+        cabor_ir_instruction* inst = cabor_vector_get_ir_instruction(instructions, i);
+        char buffer[128] = {0};
+        cabor_format_ir_instruction(ir_data, i, buffer, 128);
+        CABOR_LOG_F("%s", buffer);
+    }
 
     free_ir_common(ir_data, symtab);
 
