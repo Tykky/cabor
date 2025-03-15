@@ -65,7 +65,15 @@ uint32_t cabor_hash_string(const char* str)
 cabor_map_entry* cabor_map_insert(cabor_hash_map* map, const char* key, int value)
 {
     const size_t table_size = map->table->size;
-    uint32_t index = cabor_hash_string(key) % table_size;
+    uint32_t index;
+    if (table_size > 0)
+    {
+        index = cabor_hash_string(key) % table_size;
+    }
+    else
+    {
+        index = cabor_hash_string(key) % table_size;
+    }
 
     cabor_map_entry* entry = cabor_vector_get_map_entry(map->table, index);
 
@@ -74,7 +82,7 @@ cabor_map_entry* cabor_map_insert(cabor_hash_map* map, const char* key, int valu
         entry->key = cabor_strdup(key);
         entry->value = value;
         entry->next = NULL;
-        return;
+        return entry;
     }
 
     while (true) // Check for collisions
