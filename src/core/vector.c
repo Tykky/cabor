@@ -13,6 +13,7 @@ size_t cabor_get_map_entry_size();
 size_t cabor_get_ir_instruction_size();
 size_t cabor_get_ir_var_size();
 size_t cabor_get_ir_label_size();
+size_t cabor_get_stack_location_size();
 
 static size_t get_element_type_size(cabor_element_type type)
 {
@@ -42,6 +43,8 @@ static size_t get_element_type_size(cabor_element_type type)
             return cabor_get_ir_var_size();
         case CABOR_IR_LABEL:
             return cabor_get_ir_label_size();
+        case CABOR_STACK_LOCATION:
+            return cabor_get_stack_location_size();
         case CABOR_UNKNOWN:
             return 0;
     }
@@ -161,6 +164,12 @@ void cabor_vector_push_ir_label(cabor_vector* v, struct cabor_ir_label_t* ir_lab
     pushback_vector(v, (void*)ir_label);
 }
 
+void cabor_vector_push_stack_location(cabor_vector* v, struct cabor_stack_location_t* stack_location)
+{
+    CABOR_ASSERT(v->type == CABOR_STACK_LOCATION, "pushing stack location to non stack location vector!");
+    pushback_vector(v, (void*)stack_location);
+}
+
 void cabor_vector_push_ir_var(cabor_vector* v, struct cabor_ir_var* ir_var)
 {
     CABOR_ASSERT(v->type == CABOR_IR_VAR, "pushing ir var to non ir var vector!");
@@ -237,6 +246,12 @@ struct cabor_ir_label_t* cabor_vector_get_ir_label(cabor_vector* v, size_t idx)
 {
     CABOR_ASSERT(v->type == CABOR_IR_LABEL, "getting ir label from non ir label vector!");
     return (struct cabor_ir_label_t*)vector_get(v, idx);
+}
+
+struct cabor_stack_location_t* cabor_vector_get_stack_location(cabor_vector* v, size_t idx)
+{
+    CABOR_ASSERT(v->type == CABOR_STACK_LOCATION, "getting stack location from stack location vector!");
+    return (struct cabor_stack_location_t*)vector_get(v, idx);
 }
 
 void cabor_vector_push_str(cabor_vector* v, const char* str, bool push_null_character)
@@ -340,5 +355,11 @@ struct cabor_ir_label_t* cabor_peek_ir_label(cabor_vector* v)
 {
     CABOR_ASSERT(v->type == CABOR_IR_LABEL, "getting ir label from non ir label vector!");
     return (struct cabor_ir_lavel*)peek_next(v);
+}
+
+struct cabor_stack_location_t* cabor_peek_stack_location(cabor_vector* v)
+{
+    CABOR_ASSERT(v->type == CABOR_STACK_LOCATION, "getting stack location from non stack location vector!");
+    return (struct cabor_stack_location_t*)peek_next(v);
 }
 

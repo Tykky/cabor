@@ -24,6 +24,8 @@ set(SOURCES
     "language/type_checker.c"
     "language/ir.h"
     "language/ir.c"
+    "language/codegen.h"
+    "language/codegen.c"
     "test/test_framework.c"
     "test/test_framework.h"
     "test/registered_tests.c"
