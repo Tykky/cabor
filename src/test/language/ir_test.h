@@ -8,6 +8,7 @@
 #include "../../language/parser.h"
 
 int cabor_integration_test_ir_basic_expression();
+int cabor_integration_test_ir_if_then_else();
 
 #endif
 

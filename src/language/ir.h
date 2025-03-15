@@ -44,10 +44,18 @@ typedef enum
     CABOR_IR_INST_UNKNOWN
 } cabor_ir_instruction_type;
 
+// We separate cabor_ir_label and cabor_ir_label_instruction so
+// labels can be decalred without inserting them into instruction list
+
 typedef struct cabor_ir_label_t
 {
     char name[CABOR_MAX_LABEL_LENGTH];
 } cabor_ir_label;
+
+typedef struct
+{
+    cabor_ir_label_idx idx;
+} cabor_ir_label_instruction;
 
 typedef struct
 {
@@ -97,6 +105,7 @@ typedef struct cabor_ir_instruction_t
         cabor_ir_copy copy;
         cabor_ir_call call;
         cabor_ir_jump jump;
+        cabor_ir_label_instruction label;
         cabor_ir_condjump cond_jump;
     };
 } cabor_ir_instruction;
@@ -112,9 +121,10 @@ void cabor_destroy_ir_data(cabor_ir_var* ir_var_types);
 
 // No need to bother with deallocating individual ir instructions, cabor_destroy_ir_data handles that
 cabor_ir_var_idx cabor_create_ir_var(cabor_ir_data* ir_data, const char* var, cabor_type type);
-cabor_map_entry* cabor_create_ir_var_with_entry(cabor_ir_data* ir_data, const char* var, cabor_type type);
+cabor_map_entry* cabor_create_ir_var_with_entry(cabor_ir_data* ir_data, const char* var, cabor_type type, cabor_symbol_table* symtab);
 cabor_ir_var_idx cabor_create_unique_ir_var(cabor_ir_data* ir_data, cabor_type type);
 cabor_ir_label_idx cabor_create_ir_label(cabor_ir_data* ir_data, const char* label);
+cabor_ir_inst_idx cabor_push_ir_label(cabor_ir_data* ir_data, cabor_ir_label_idx label);
 cabor_ir_inst_idx cabor_create_ir_load_bool_const(cabor_ir_data* ir_data, bool value, int dest);
 cabor_ir_inst_idx cabor_create_ir_load_int_const(cabor_ir_data* ir_data, int value, int dest);
 cabor_ir_inst_idx cabor_create_ir_copy(cabor_ir_data* ir_data, int source, int dest);

@@ -77,13 +77,25 @@ cabor_ir_var_idx cabor_create_ir_var(cabor_ir_data* ir_data, const char* var, ca
     return idx;
 }
 
-cabor_map_entry* cabor_create_ir_var_with_entry(cabor_ir_data* ir_data, const char* var, cabor_type type)
+cabor_map_entry* cabor_create_ir_var_with_entry(cabor_ir_data* ir_data, const char* var, cabor_type type, cabor_symbol_table* symbtab)
 {
     cabor_ir_var_idx idx = (cabor_ir_var_idx)ir_data->ir_vars->size;
-    cabor_ir_var ir_var = { .name = var, .id = idx, .type = type };
+    cabor_ir_var ir_var = { .id = idx, .type = type };
+
+    size_t len = strlen(var);
+    if (len < CABOR_MAX_IR_VAR_LENGTH)
+    {
+        strcpy(ir_var.name, var);
+    }
+    else
+    {
+        CABOR_LOG_ERR_F("IR error: IR var storage was too small for %s", var);
+        return CABOR_IR_VAR_INVALID;
+    }
+
     cabor_vector_push_ir_var(ir_data->ir_vars, &ir_var);
 
-   return cabor_map_insert(ir_data->ir_var_types, var, (int)type);
+   return cabor_map_insert(symbtab->map, var, (int)idx);
 }
 
 cabor_ir_var_idx cabor_create_unique_ir_var(cabor_ir_data* ir_data, cabor_type type)
@@ -102,11 +114,40 @@ cabor_ir_var_idx cabor_create_unique_ir_var(cabor_ir_data* ir_data, cabor_type t
 
 cabor_ir_label_idx cabor_create_ir_label(cabor_ir_data* ir_data, const char* label)
 {
-    cabor_ir_label_idx idx = (cabor_ir_label_idx)ir_data->ir_labels = label;
-    cabor_ir_label ir_label = { .name = label };
+    cabor_ir_label_idx idx = (cabor_ir_label_idx)ir_data->ir_labels->size;
+
+    cabor_ir_label ir_label;
+
+    size_t len = strlen(label);
+
+    if (len <= CABOR_MAX_LABEL_LENGTH)
+    {
+        strcpy(ir_label.name, label);
+    }
+    else
+    {
+        CABOR_LOG_ERR_F("IR error: label name overflow: %s", label);
+    }
+
     cabor_vector_push_ir_label(ir_data->ir_labels, &ir_label);
     return idx;
 }
+
+cabor_ir_inst_idx cabor_push_ir_label(cabor_ir_data* ir_data, cabor_ir_label_idx label)
+{
+    cabor_ir_inst_idx idx = (cabor_ir_inst_idx)ir_data->ir_instructions->size;
+    cabor_ir_instruction instr =
+    {
+        .type = CABOR_IR_INST_LABEL,
+        .label =
+        {
+            .idx = label 
+        }
+    };
+    cabor_vector_push_ir_instruction(ir_data->ir_instructions, &instr);
+    return idx;
+}
+
 
 cabor_ir_inst_idx cabor_create_ir_load_bool_const(cabor_ir_data* ir_data, bool value, int dest)
 {
@@ -229,7 +270,10 @@ cabor_ir_var_entry* cabor_get_ir_var_entry(cabor_symbol_table* sym_tab, const ch
 
 void cabor_generate_ir(cabor_ir_data* ir_data, cabor_ast* ast)
 {
-    // convert root types to symbtab
+    cabor_ir_var_idx print_int = cabor_create_ir_var(ir_data, "print_int", CABOR_TYPE_INT);
+    cabor_ir_var_idx print_bool = cabor_create_ir_var(ir_data, "print_bool", CABOR_TYPE_BOOL);
+
+    // convert root types to symtab
     for (size_t i = 0; i < ir_data->ir_var_types->table->size; i++)
     {
         cabor_map_entry* entry = cabor_vector_get_map_entry(ir_data->ir_var_types->table, i);
@@ -244,19 +288,25 @@ void cabor_generate_ir(cabor_ir_data* ir_data, cabor_ast* ast)
     cabor_ast_node* root_expr = cabor_access_ast_node(ast->root);
 
     cabor_ir_var_idx final_var_idx = cabor_visit_ir_node(ir_data, ast, root_expr, ir_data->ir_symtab);
-    cabor_ir_var* ir_var = IR_VAR_IDX(ir_data, final_var_idx);
-    cabor_type var_type = ir_var->type;
+    cabor_type var_type;
+    if (final_var_idx > 0)
+    {
+        cabor_ir_var* ir_var = IR_VAR_IDX(ir_data, final_var_idx);
+        var_type = ir_var->type;
+    }
+    else
+    {
+        var_type = CABOR_TYPE_UNIT;
+    }
 
     if (var_type == CABOR_TYPE_INT)
     {
         // emit call print_int
-        cabor_ir_var_idx print_int = IR_ENTRY(ir_data->ir_symtab, "print_int");
         cabor_ir_inst_idx inst = cabor_create_ir_call(ir_data, print_int, &final_var_idx, 1, CABOR_IR_VAR_UNIT);
     }
     else if (var_type == CABOR_TYPE_BOOL)
     {
         // emit call print_bool
-        cabor_ir_var_idx print_bool = IR_ENTRY(ir_data->ir_symtab, "print_bool");
         cabor_ir_inst_idx inst = cabor_create_ir_call(ir_data, print_bool, &final_var_idx, 1, CABOR_IR_VAR_UNIT);
     }
 }
@@ -337,6 +387,15 @@ void cabor_format_ir_instruction(cabor_ir_data* ir_data, cabor_ir_inst_idx inst,
         break;
     }
 
+    case CABOR_IR_INST_LABEL:
+    {
+        cabor_ir_label* label = cabor_vector_get_ir_label(ir_data->ir_labels, instruction->label.idx);
+        snprintf(buffer, bufSize,
+            "Label(%s)",
+            label->name);
+        break;
+    }
+
     default:
         snprintf(buffer, bufSize, "<invalid instruction>");
         break;
@@ -350,7 +409,7 @@ cabor_map_entry* cabor_require_ir_var(cabor_ir_data* ir_data, cabor_symbol_table
 
     if (!found)
     {
-        entry = cabor_create_ir_var_with_entry(ir_data, var, type);
+        entry = cabor_create_ir_var_with_entry(ir_data, var, type, symtab);
     }
 
     return entry;
@@ -377,7 +436,6 @@ cabor_ir_var_idx cabor_visit_ir_unaryop(cabor_ir_data* ir_data, cabor_ast* ast, 
     cabor_token* token = TOKEN(root_expr);
     const char* op = token->data;
 
-    // Lookup the operator function (e.g., "-" or "!")
     bool found = false;
     cabor_ir_var_idx fun = cabor_map_get(root_tab->map, op, &found);
     if (!found)
@@ -386,13 +444,10 @@ cabor_ir_var_idx cabor_visit_ir_unaryop(cabor_ir_data* ir_data, cabor_ast* ast, 
         return CABOR_IR_VAR_INVALID;
     }
 
-    // Evaluate the operand
     cabor_ir_var_idx arg = cabor_visit_ir_node(ir_data, ast, ROOT(&root_expr->edges[0]), root_tab);
 
-    // Create the result variable
     cabor_ir_var_idx result = cabor_create_unique_ir_var(ir_data, root_expr->type);
 
-    // Emit the IR call
     cabor_ir_var_idx args[] = { arg };
     cabor_create_ir_call(ir_data, fun, args, 1, result);
 
@@ -505,12 +560,17 @@ cabor_ir_var_idx cabor_visit_ir_if_then_else(cabor_ir_data* ir_data, cabor_ast* 
     {
         cabor_ir_label_idx l_then = cabor_create_ir_label(ir_data, "then");
         cabor_ir_label_idx l_end = cabor_create_ir_label(ir_data, "end");
+
         cabor_ir_var_idx var_cond = cabor_visit_ir_node(ir_data, ast, ROOT(&root_expr->edges[0]), root_tab);
         cabor_ir_inst_idx cond_jump = cabor_create_ir_condjump(ir_data, var_cond, l_then, l_end);
+
+        cabor_push_ir_label(ir_data, l_then);
         cabor_ir_var_idx var_then = cabor_visit_ir_node(ir_data, ast, ROOT(&root_expr->edges[1]), root_tab);
         cabor_ir_inst_idx jump_end = cabor_create_ir_jump(ir_data, l_end);
 
-        return CABOR_IR_VAR_UNIT; // lets reserve -2 for unit type, -1 is error
+        cabor_push_ir_label(ir_data, l_then);
+
+        return CABOR_IR_VAR_UNIT;
     }
     else
     {
@@ -522,12 +582,21 @@ cabor_ir_var_idx cabor_visit_ir_if_then_else(cabor_ir_data* ir_data, cabor_ast* 
         cabor_ir_inst_idx cond_jump = cabor_create_ir_condjump(ir_data, var_cond, l_then, l_else);
 
         cabor_ir_var_idx var_then = cabor_visit_ir_node(ir_data, ast, ROOT(&root_expr->edges[1]), root_tab);
+        cabor_ir_var_idx var_result = cabor_create_unique_ir_var(ir_data, IR_VAR_IDX(ir_data, var_then)->type);
+        cabor_ir_var_idx copy1 = cabor_create_ir_copy(ir_data, var_then, var_result);
+
+        cabor_push_ir_label(ir_data, l_then);
         cabor_ir_inst_idx jump_to_end_from_then = cabor_create_ir_jump(ir_data, l_end);
 
+
+        cabor_push_ir_label(ir_data, l_else);
         cabor_ir_var_idx var_else = cabor_visit_ir_node(ir_data, ast, ROOT(&root_expr->edges[2]), root_tab);
+        cabor_ir_var_idx copy2 = cabor_create_ir_copy(ir_data, var_then, var_result);
         cabor_ir_inst_idx jump_to_end_from_else = cabor_create_ir_jump(ir_data, l_end);
 
-        return CABOR_IR_VAR_UNIT;
+        cabor_push_ir_label(ir_data, l_end);
+
+        return var_result;
     }
 }
 
@@ -539,11 +608,9 @@ cabor_ir_var_idx cabor_visit_ir_while(cabor_ir_data* ir_data, cabor_ast* ast, ca
 
     cabor_create_ir_jump(ir_data, l_cond);
 
-    // condition check
     cabor_ir_var_idx cond = cabor_visit_ir_node(ir_data, ast, ROOT(&root_expr->edges[0]), root_tab);
     cabor_create_ir_condjump(ir_data, cond, l_body, l_end);
 
-    // body
     cabor_visit_ir_node(ir_data, ast, ROOT(&root_expr->edges[1]), root_tab);
     cabor_create_ir_jump(ir_data, l_cond);
 

@@ -88,7 +88,7 @@ void register_all_tests()
 
     // IR tests
     CABOR_REGISTER_TEST("INTEGRATION IR basic expression", cabor_integration_test_ir_basic_expression);
-
+    CABOR_REGISTER_TEST("INTEGRATION IR if then else", cabor_integration_test_ir_if_then_else);
 }
 #else
 void register_all_tests() {}
