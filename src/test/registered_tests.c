@@ -89,6 +89,11 @@ void register_all_tests()
     // IR tests
     CABOR_REGISTER_TEST("INTEGRATION IR basic expression", cabor_integration_test_ir_basic_expression);
     CABOR_REGISTER_TEST("INTEGRATION IR if then else", cabor_integration_test_ir_if_then_else);
+    CABOR_REGISTER_TEST("INTEGRATION IR if then", cabor_integration_test_ir_if_then);
+    CABOR_REGISTER_TEST("INTEGRATION IR var expr 1", cabor_integration_test_ir_var_expr);
+    CABOR_REGISTER_TEST("INTEGRATION IR var expr 2", cabor_integration_test_ir_var_expr2);
+    CABOR_REGISTER_TEST("INTEGRATION IR unary op", cabor_integration_test_ir_unary_op);
+    CABOR_REGISTER_TEST("INTEGRATION IR while", cabor_integration_test_ir_while);
 }
 #else
 void register_all_tests() {}

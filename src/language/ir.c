@@ -436,8 +436,12 @@ cabor_ir_var_idx cabor_visit_ir_unaryop(cabor_ir_data* ir_data, cabor_ast* ast, 
     cabor_token* token = TOKEN(root_expr);
     const char* op = token->data;
 
+    char unary_op_buf[64];
+    snprintf(unary_op_buf, sizeof(unary_op_buf), "unary_%s", op);
+
     bool found = false;
-    cabor_ir_var_idx fun = cabor_map_get(root_tab->map, op, &found);
+    cabor_map_entry* fun_entry = cabor_require_ir_var(ir_data, root_tab, unary_op_buf, token->type);
+    cabor_ir_var_idx fun = cabor_map_get(root_tab->map, unary_op_buf, &found);
     if (!found)
     {
         CABOR_LOG_ERR_F("IR error: unary operator '%s' not found in symbol table", op);
@@ -466,17 +470,17 @@ cabor_ir_var_idx cabor_visit_ir_literal(cabor_ir_data* ir_data, cabor_ast* ast, 
         case CABOR_TYPE_BOOL:
         {
             bool value;
-            if (strcmp(token->data, "True") == 0)
+            if (strcmp(token->data, "true") == 0)
             {
                 value = true;
             }
-            else if (strcmp(token->data, "False") == 0)
+            else if (strcmp(token->data, "false") == 0)
             {
                 value = false;
             }
             else
             {
-                CABOR_LOG_ERR_F("IR error: bool wasn't 'True' or 'False' it was %s", token->data);
+                CABOR_LOG_ERR_F("IR error: bool wasn't 'true' or 'false' it was %s", token->data);
                 return CABOR_IR_VAR_INVALID;
             }
             cabor_create_ir_load_bool_const(ir_data, value, var);
@@ -602,30 +606,24 @@ cabor_ir_var_idx cabor_visit_ir_if_then_else(cabor_ir_data* ir_data, cabor_ast* 
 
 cabor_ir_var_idx cabor_visit_ir_while(cabor_ir_data* ir_data, cabor_ast* ast, cabor_ast_node* root_expr, cabor_symbol_table* root_tab)
 {
-    cabor_ir_label_idx l_cond = cabor_create_ir_label(ir_data, "while.cond");
-    cabor_ir_label_idx l_body = cabor_create_ir_label(ir_data, "while.body");
-    cabor_ir_label_idx l_end = cabor_create_ir_label(ir_data, "while.end");
+    cabor_ir_label_idx l_start = cabor_create_ir_label(ir_data, "while_start");
+    cabor_ir_label_idx l_body = cabor_create_ir_label(ir_data, "while_body");
+    cabor_ir_label_idx l_end = cabor_create_ir_label(ir_data, "while_end");
 
-    cabor_create_ir_jump(ir_data, l_cond);
-
+    cabor_push_ir_label(ir_data, l_start);
     cabor_ir_var_idx cond = cabor_visit_ir_node(ir_data, ast, ROOT(&root_expr->edges[0]), root_tab);
     cabor_create_ir_condjump(ir_data, cond, l_body, l_end);
 
+    cabor_push_ir_label(ir_data, l_body);
     cabor_visit_ir_node(ir_data, ast, ROOT(&root_expr->edges[1]), root_tab);
-    cabor_create_ir_jump(ir_data, l_cond);
+    cabor_create_ir_jump(ir_data, l_start);
+
+    cabor_push_ir_label(ir_data, l_end);
 
     return CABOR_IR_VAR_UNIT;
 }
 
 cabor_ir_var_idx cabor_visit_ir_var_expr(cabor_ir_data* ir_data, cabor_ast* ast, cabor_ast_node* root_expr, cabor_symbol_table* root_tab)
-{
-    cabor_token* token = TOKEN(ROOT(&root_expr->edges[0]));
-    cabor_ir_var_idx value = cabor_visit_ir_node(ir_data, ast, ROOT(&root_expr->edges[1]), root_tab);
-    cabor_map_insert(root_tab->map, token->data, value);
-    return CABOR_IR_VAR_UNIT;
-}
-
-cabor_ir_var_idx cabor_visit_ir_declaration(cabor_ir_data* ir_data, cabor_ast* ast, cabor_ast_node* root_expr, cabor_symbol_table* root_tab)
 {
     cabor_token* token = TOKEN(ROOT(&root_expr->edges[0]));
     cabor_type type = root_expr->type;
@@ -636,6 +634,11 @@ cabor_ir_var_idx cabor_visit_ir_declaration(cabor_ir_data* ir_data, cabor_ast* a
     cabor_map_insert(root_tab->map, token->data, var);
 
     return CABOR_IR_VAR_UNIT;
+}
+
+cabor_ir_var_idx cabor_visit_ir_declaration(cabor_ir_data* ir_data, cabor_ast* ast, cabor_ast_node* root_expr, cabor_symbol_table* root_tab)
+{
+    // no reason to do anything here
 }
 
 cabor_ir_var_idx cabor_visit_ir_node(cabor_ir_data* ir_data, cabor_ast* ast, cabor_ast_node* root_expr, cabor_symbol_table* root_tab)

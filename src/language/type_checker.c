@@ -237,7 +237,7 @@ cabor_type cabor_typecheck_literal(cabor_ast* ast, cabor_ast_node* node, cabor_s
 {
     CABOR_ASSERT(node->node_type == CABOR_NODE_TYPE_LITERAL && node->num_edges == 0, "not a valid literal");
 
-    if (strcmp(TOKEN(node)->data, "True") == 0 || strcmp(TOKEN(node)->data, "False") == 0)
+    if (strcmp(TOKEN(node)->data, "true") == 0 || strcmp(TOKEN(node)->data, "false") == 0)
     {
         node->type = CABOR_TYPE_BOOL;
         return CABOR_TYPE_BOOL;

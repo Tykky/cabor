@@ -299,7 +299,7 @@ cabor_ast_allocated_node cabor_parse_identifier(cabor_vector* tokens, size_t op_
     // make the tokenizer recognize these as literals but that's tricky due to how the code works. As a hack we
     // instead switch the type here to literal;
     cabor_type type = CABOR_NODE_TYPE_IDENTIFIER;
-    if (strcmp(token->data, "True") == 0 || strcmp(token->data, "False") == 0)
+    if (strcmp(token->data, "true") == 0 || strcmp(token->data, "false") == 0)
     {
         type = CABOR_NODE_TYPE_LITERAL;
     }
