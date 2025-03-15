@@ -17,7 +17,7 @@ static void ir_common(cabor_ir_data** ir_data, cabor_symbol_table** symtab, cons
      *symtab = cabor_create_symbol_table();
      cabor_type type = cabor_typecheck(ast, root, *symtab);
      *ir_data = cabor_create_ir_data();
-     cabor_generate_ir(*ir_data, ast, root);
+     cabor_generate_ir(*ir_data, ast);
 
     cabor_vector* instructions = (*ir_data)->ir_instructions;
 

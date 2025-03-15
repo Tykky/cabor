@@ -52,6 +52,14 @@ cabor_x64_assembly* cabor_generate_assembly(cabor_ir_data* ir_data)
 {
     CABOR_NEW(cabor_x64_assembly, asm);
     asm->instructions = cabor_create_vector(1024, CABOR_X64_INSTRUCTION, false);
+
+    for (cabor_ir_inst_idx idx = 0; idx < ir_data->ir_instructions; idx++)
+    {
+        cabor_ir_instruction* inst = cabor_vector_get_ir_instruction(ir_data->ir_instructions, idx);
+        switch (inst->type)
+        {
+        }
+    }
 }
 
 void cabor_destroy_x64_assembly(cabor_x64_assembly* asm)

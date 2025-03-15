@@ -135,7 +135,7 @@ cabor_ir_inst_idx cabor_create_ir_condjump(cabor_ir_data* ir_data, int cond, int
 // Get ir var from scoped sym tab
 cabor_ir_var_entry* cabor_get_ir_var_entry(cabor_symbol_table* sym_tab, const char* ir_var);
 
-void cabor_generate_ir(cabor_ir_data* var_types, cabor_ast* ast, cabor_ast_node* root_expr);
+void cabor_generate_ir(cabor_ir_data* ir_data, cabor_ast* ast);
 
 void cabor_format_ir_instruction(cabor_ir_data* ir_data, cabor_ir_inst_idx inst, char* buffer, size_t bufSize);
 
