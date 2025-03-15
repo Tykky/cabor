@@ -426,7 +426,10 @@ cabor_ir_var_idx cabor_visit_ir_binaryop(cabor_ir_data* ir_data, cabor_ast* ast,
     cabor_ir_var_idx var_result = cabor_create_unique_ir_var(ir_data, root_expr->type);
 
     cabor_ir_var_idx args[] = { left, right };
-    cabor_ir_inst_idx inst = cabor_create_ir_call(ir_data, var_op->value, args, 2, var_result);
+    if (var_op > 0 && var_op->value < ir_data->ir_vars->size)
+    {
+        cabor_ir_inst_idx inst = cabor_create_ir_call(ir_data, var_op->value, args, 2, var_result);
+    }
 
     return var_result;
 }

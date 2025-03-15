@@ -170,6 +170,12 @@ void cabor_vector_push_stack_location(cabor_vector* v, struct cabor_stack_locati
     pushback_vector(v, (void*)stack_location);
 }
 
+void cabor_vector_push_x64_instruction(cabor_vector* v, struct cabor_x64_instruction_t* instruction)
+{
+    CABOR_ASSERT(v->type == CABOR_X64_INSTRUCTION, "pushing x64 instruction to non x64 instruction vector!");
+    pushback_vector(v, (void*)instruction);
+}
+
 void cabor_vector_push_ir_var(cabor_vector* v, struct cabor_ir_var* ir_var)
 {
     CABOR_ASSERT(v->type == CABOR_IR_VAR, "pushing ir var to non ir var vector!");
@@ -250,8 +256,14 @@ struct cabor_ir_label_t* cabor_vector_get_ir_label(cabor_vector* v, size_t idx)
 
 struct cabor_stack_location_t* cabor_vector_get_stack_location(cabor_vector* v, size_t idx)
 {
-    CABOR_ASSERT(v->type == CABOR_STACK_LOCATION, "getting stack location from stack location vector!");
+    CABOR_ASSERT(v->type == CABOR_STACK_LOCATION, "getting stack location from non stack location vector!");
     return (struct cabor_stack_location_t*)vector_get(v, idx);
+}
+
+struct cabor_x64_instruction_t* cabor_vector_get_x64_instruction(cabor_vector* v, size_t idx)
+{
+    CABOR_ASSERT(v->type == CABOR_X64_INSTRUCTION, "getting x64 instruction from non x64 vector!");
+    return (struct cabor_x64_instruction_t*)vector_get(v, idx);
 }
 
 void cabor_vector_push_str(cabor_vector* v, const char* str, bool push_null_character)
@@ -361,5 +373,11 @@ struct cabor_stack_location_t* cabor_peek_stack_location(cabor_vector* v)
 {
     CABOR_ASSERT(v->type == CABOR_STACK_LOCATION, "getting stack location from non stack location vector!");
     return (struct cabor_stack_location_t*)peek_next(v);
+}
+
+struct cabor_x64_instruction_t* cabor_peek_x64_instruction(cabor_vector* v)
+{
+    CABOR_ASSERT(v->type == CABOR_X64_INSTRUCTION, "getting x64 instruction from non x64 instruction vector!");
+    return (struct cabor_x64_instruction_t*)peek_next(v);
 }
 

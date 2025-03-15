@@ -14,6 +14,7 @@ struct cabor_ir_instruction_t;
 struct cabor_ir_var_t;
 struct cabor_ir_label_t;
 struct cabor_stack_location_t;
+struct cabor_x64_instruction_t;
 
 // Similar to std::vector from C++. Since C doesn't support function overloading or templates we 
 // manually create 'overload' for each type. If Debug build is used the implementation 
@@ -34,6 +35,7 @@ typedef enum
     CABOR_IR_VAR,
     CABOR_IR_LABEL,
     CABOR_STACK_LOCATION,
+    CABOR_X64_INSTRUCTION,
     CABOR_UNKNOWN
 } cabor_element_type;
 
@@ -61,6 +63,7 @@ void cabor_vector_push_ir_instruction (cabor_vector* v, struct cabor_ir_instruct
 void cabor_vector_push_ir_var (cabor_vector* v, struct cabor_ir_var_t* ir_var);
 void cabor_vector_push_ir_label (cabor_vector* v, struct cabor_ir_label_t* ir_label);
 void cabor_vector_push_stack_location (cabor_vector* v, struct cabor_stack_location_t* stack_location);
+void cabor_vector_push_x64_instruction (cabor_vector* v, struct cabor_x64_instruction_t* instruction);
 
 void cabor_vector_push_str(cabor_vector* v, const char* str, bool push_null_character);
 
@@ -77,6 +80,7 @@ struct cabor_instruction_t* cabor_vector_get_ir_instruction (cabor_vector* v, si
 struct cabor_ir_var_t* cabor_vector_get_ir_var (cabor_vector* v, size_t idx);
 struct cabor_ir_label_t* cabor_vector_get_ir_label (cabor_vector* v, size_t idx);
 struct cabor_stack_location_t* cabor_vector_get_stack_location (cabor_vector* v, size_t idx);
+struct cabor_x64_instruction_t* cabor_vector_get_x64_instruction (cabor_vector* v, size_t idx);
 
 void cabor_vector_reserve(cabor_vector* v, size_t size);
 
@@ -94,3 +98,4 @@ struct cabor_map_entry_t* cabor_vector_peek_map_entry  (cabor_vector* v);
 struct cabor_instruction_t* cabor_peek_ir_instruction (cabor_vector* v);
 struct cabor_ir_label_t* cabor_peek_ir_label (cabor_vector* v);
 struct cabor_stack_location_t* cabor_peek_stack_location (cabor_vector* v);
+struct cabor_x64_instruction_t* cabor_peek_x64_instruction (cabor_vector* v);

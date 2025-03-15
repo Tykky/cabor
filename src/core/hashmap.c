@@ -98,7 +98,7 @@ cabor_map_entry* cabor_map_insert(cabor_hash_map* map, const char* key, int valu
     new_entry->next = NULL;
     entry->next = new_entry;
 
-    return entry;
+    return new_entry;
 }
 
 int cabor_map_get(cabor_hash_map* map, const char* key, bool* found)

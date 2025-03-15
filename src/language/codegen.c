@@ -42,3 +42,15 @@ void cabor_init_locals(cabor_ir_data* ir_data, cabor_locals* locals)
         }
     }
 }
+
+cabor_x64_assembly* cabor_generate_assembly(cabor_ir_data* ir_data)
+{
+    CABOR_NEW(cabor_x64_assembly, asm);
+    asm->instructions = cabor_create_vector(1024, CABOR_X64_INSTRUCTION, false);
+}
+
+void cabor_destroy_x64_assembly(cabor_x64_assembly* asm)
+{
+    cabor_destroy_vector(asm->instructions);
+    CABOR_DELETE(cabor_x64_assembly, asm);
+}
