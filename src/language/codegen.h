@@ -7,6 +7,7 @@
 #define CABOR_MAX_X64_INSTRUCTION_LENGTH 64
 
 size_t cabor_get_stack_location_size();
+size_t cabor_get_x64_instruction_size();
 
 typedef struct cabor_stack_location_t
 {

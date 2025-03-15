@@ -14,6 +14,7 @@ size_t cabor_get_ir_instruction_size();
 size_t cabor_get_ir_var_size();
 size_t cabor_get_ir_label_size();
 size_t cabor_get_stack_location_size();
+size_t cabor_get_x64_instruction_size();
 
 static size_t get_element_type_size(cabor_element_type type)
 {
@@ -45,6 +46,8 @@ static size_t get_element_type_size(cabor_element_type type)
             return cabor_get_ir_label_size();
         case CABOR_STACK_LOCATION:
             return cabor_get_stack_location_size();
+        case CABOR_X64_INSTRUCTION:
+            return cabor_get_x64_instruction_size();
         case CABOR_UNKNOWN:
             return 0;
     }
@@ -176,7 +179,7 @@ void cabor_vector_push_x64_instruction(cabor_vector* v, struct cabor_x64_instruc
     pushback_vector(v, (void*)instruction);
 }
 
-void cabor_vector_push_ir_var(cabor_vector* v, struct cabor_ir_var* ir_var)
+void cabor_vector_push_ir_var(cabor_vector* v, struct cabor_ir_var_t* ir_var)
 {
     CABOR_ASSERT(v->type == CABOR_IR_VAR, "pushing ir var to non ir var vector!");
     pushback_vector(v, (void*)ir_var);

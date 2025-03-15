@@ -9,6 +9,11 @@ size_t cabor_get_stack_location_size()
     return sizeof(cabor_stack_location);
 }
 
+size_t cabor_get_x64_instruction_size()
+{
+    return sizeof(cabor_x64_instruction);
+}
+
 cabor_locals* cabor_create_locals()
 {
     CABOR_NEW(cabor_locals, locals);
