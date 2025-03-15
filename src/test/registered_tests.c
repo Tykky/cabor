@@ -94,6 +94,7 @@ void register_all_tests()
     CABOR_REGISTER_TEST("INTEGRATION IR var expr 2", cabor_integration_test_ir_var_expr2);
     CABOR_REGISTER_TEST("INTEGRATION IR unary op", cabor_integration_test_ir_unary_op);
     CABOR_REGISTER_TEST("INTEGRATION IR while", cabor_integration_test_ir_while);
+    CABOR_REGISTER_TEST("INTEGARTION IR blocks", cabor_integration_test_blocks);
 }
 #else
 void register_all_tests() {}

@@ -14,6 +14,7 @@ int cabor_integration_test_ir_var_expr();
 int cabor_integration_test_ir_var_expr2();
 int cabor_integration_test_ir_unary_op();
 int cabor_integration_test_ir_while();
+int cabor_integration_test_blocks();
 
 
 #endif

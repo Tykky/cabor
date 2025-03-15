@@ -103,6 +103,12 @@ int cabor_integration_test_ir_while()
     return 0;
 }
 
+// todo figure out this later
+int cabor_integration_test_blocks()
+{
+    return 0;
+}
+
 int cabor_integration_test_ir_unary_op()
 {
     const char* code = "while true do 1 + 2";

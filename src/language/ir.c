@@ -550,9 +550,11 @@ cabor_ir_var_idx cabor_visit_ir_block(cabor_ir_data* ir_data, cabor_ast* ast, ca
 {
     cabor_ir_var_idx result = CABOR_IR_VAR_UNIT;
 
+    cabor_symbol_table* new_scope = cabor_create_new_symbol_scope(root_tab);
+
     for (int i = 0; i < root_expr->num_edges; i++)
     {
-        result = cabor_visit_ir_node(ir_data, ast, ROOT(&root_expr->edges[i]), root_tab);
+        result = cabor_visit_ir_node(ir_data, ast, ROOT(&root_expr->edges[i]), new_scope);
     }
 
     return result;
