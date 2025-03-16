@@ -90,7 +90,7 @@ cabor_map_entry* cabor_create_ir_var_with_entry(cabor_ir_data* ir_data, const ch
     else
     {
         CABOR_LOG_ERR_F("IR error: IR var storage was too small for %s", var);
-        return CABOR_IR_VAR_INVALID;
+        return NULL;
     }
 
     cabor_vector_push_ir_var(ir_data->ir_vars, &ir_var);
