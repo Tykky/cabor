@@ -40,7 +40,7 @@ typedef struct
     int num_args;
 } cabor_intrinsic_args;
 
-typedef void (*cabor_intr_func)(cabor_intrinsic_args*);
+typedef void (*cabor_intr_func)(cabor_intrinsic_args* args);
 
 typedef struct cabor_intrinsic_t
 {

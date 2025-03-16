@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdio.h>
 
-cabor_x64_assembly* cabor_compile(const char* code)
+cabor_x64_assembly* cabor_compile(const char* code, const char* filename)
 {
     cabor_ir_data* ir_data;
     cabor_symbol_table* symtab;
@@ -38,7 +38,6 @@ cabor_x64_assembly* cabor_compile(const char* code)
     cabor_emit_line(asm, "    movq %%rax, -32(%%rbp)\n");
     cabor_emit_line(asm, "    ret\n\n");
 
-
     cabor_vector* instructions = (ir_data)->ir_instructions;
 
     for (size_t i = 0; i < instructions->size; i++)
@@ -54,6 +53,9 @@ cabor_x64_assembly* cabor_compile(const char* code)
         cabor_x64_instruction* inst = cabor_vector_get_x64_instruction(asm->instructions, i);
         CABOR_LOG_F("COMPILED x64: %s", inst->text);
     }
+
+    // write to output to a file and feed it to assembler + linker
+    cabor_write_asm_to_file(filename, asm); // writes to "filename.asm"
 
     cabor_destroy_ast(ast);
     cabor_destroy_vector(tokens);

@@ -151,8 +151,7 @@ _CrtSetDbgFlag(CRTDBFLAGS);
 	{
 		const char* filename = argv[compile_arg];
 		cabor_file* code = cabor_load_file(filename);
-		cabor_x64_assembly* asm = cabor_compile(code->file_memory.mem);
-		cabor_write_asm_to_file(filename, asm);
+		cabor_x64_assembly* asm = cabor_compile(code->file_memory.mem, filename);
 		cabor_destroy_x64_assembly(asm);
 	}
 
