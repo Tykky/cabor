@@ -56,3 +56,13 @@ int cabor_integration_test_codegen_basic()
     codegen_common(&ir_data, &symtab, code);
     return 0;
 }
+
+int cabor_integration_test_codegen_print_int()
+{
+    const char* code = "print_int(1)";
+    cabor_ir_data* ir_data;
+    cabor_symbol_table* symtab;
+    codegen_common(&ir_data, &symtab, code);
+    return 0;
+}
+

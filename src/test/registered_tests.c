@@ -99,6 +99,7 @@ void register_all_tests()
 
     // Codegen tests
     CABOR_REGISTER_TEST("INTEGRATION codegen basic", cabor_integration_test_codegen_basic);
+    CABOR_REGISTER_TEST("INTEGRATION codegen print_int", cabor_integration_test_codegen_print_int);
 }
 #else
 void register_all_tests() {}

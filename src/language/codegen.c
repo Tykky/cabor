@@ -214,7 +214,7 @@ void cabor_call_args_to_intrinisc_args(cabor_ir_data* ir_data, cabor_ir_call* ca
 
     args->num_args = call->num_args;
 
-    CABOR_ASSERT(args->num_args != 1 && args->num_args != 2, "invalid number of args");
+    CABOR_ASSERT(args->num_args != 1 || args->num_args != 2, "invalid number of args");
 
     if (strlen(resulterf) < CABOR_MAX_X64_INTRINSIC_LENGTH)
     {
@@ -363,11 +363,34 @@ cabor_x64_assembly* cabor_generate_assembly(cabor_ir_data* ir_data, cabor_locals
 
             // Handle non intrinsic calls
 
+            const char* arg_regs[] = { "%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9" };
+
+            if (call->num_args > 6)
+            {
+                CABOR_LOG_ERR_F("codegen error: function call has more than 6 arguments, not supported");
+                break;
+            }
+
+            for (size_t i = 0; i < call->num_args; i++)
+            {
+                const char* arg_slot = cabor_get_stack_slot(call->args[i], locals);
+                cabor_emit_mov_reg(asm, arg_slot, arg_regs[i]);
+            }
+
+            cabor_emit_call(asm, fun->name);
+
+            const char* dest = cabor_get_stack_slot(call->dest, locals);
+            if (strcmp(dest, "%rax") != 0)
+            {
+                cabor_emit_mov_reg(asm, "%rax", dest);
+            }
+
+            break;
         }
 
         case CABOR_IR_INST_UNKNOWN:
         default:
-            fprintf(stderr, "Unknown instruction type at index %d\n", idx);
+            CABOR_LOG_ERR_F("Unknown instruction type at index %d\n", idx);
             break;
         }
     }

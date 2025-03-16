@@ -280,10 +280,15 @@ void cabor_generate_ir(cabor_ir_data* ir_data, cabor_ast* ast)
         const char* key = entry->key;
         if (key)
         {
-            // right now this just needs to exist, we don't care about the value
             cabor_map_insert(ir_data->ir_symtab->map, key, -1);
         }
     }
+
+    cabor_map_entry* print_int_entry = cabor_get_ir_var_entry(ir_data->ir_symtab, "print_int");
+    cabor_map_entry* print_bool_entry = cabor_get_ir_var_entry(ir_data->ir_symtab, "print_bool");
+
+    print_int_entry->value = print_int;
+    print_bool_entry->value = print_bool;
 
     cabor_ast_node* root_expr = cabor_access_ast_node(ast->root);
 
@@ -526,14 +531,15 @@ cabor_ir_var_idx cabor_visit_ir_identifier(cabor_ir_data* ir_data, cabor_ast* as
 
 cabor_ir_var_idx cabor_visit_ir_function_call(cabor_ir_data* ir_data, cabor_ast* ast, cabor_ast_node* root_expr, cabor_symbol_table* root_tab)
 {
-    cabor_token* token = TOKEN(ROOT(&root_expr->edges[0])); // first edge is the function name
-    cabor_ir_var_idx fun_idx = cabor_map_get(root_tab->map, token->data, NULL);
+    cabor_token* token = TOKEN(root_expr);
+    bool found = false;
+    cabor_ir_var_idx fun_idx = cabor_map_get(root_tab->map, token->data, &found);
 
-    int num_args = root_expr->num_edges - 1;
+    int num_args = root_expr->num_edges;
     cabor_ir_var_idx args[16]; // max 16 args for now
     for (int i = 0; i < num_args; i++)
     {
-        args[i] = cabor_visit_ir_node(ir_data, ast, ROOT(&root_expr->edges[i + 1]), root_tab);
+        args[i] = cabor_visit_ir_node(ir_data, ast, ROOT(&root_expr->edges[i]), root_tab);
     }
 
     cabor_ir_var_idx dest = cabor_create_unique_ir_var(ir_data, root_expr->type);
