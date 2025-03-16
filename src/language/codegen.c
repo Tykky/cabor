@@ -30,7 +30,7 @@ cabor_locals* cabor_create_locals()
     return locals;
 }
 
-void add_intrinsic(cabor_x64_assembly* asm, const char* name, cabor_intr_func intrinsic)
+void add_intrinsic(cabor_x64_assembly* asmbl, const char* name, cabor_intr_func intrinsic)
 {
     cabor_intrinsic intr;
 
@@ -45,113 +45,113 @@ void add_intrinsic(cabor_x64_assembly* asm, const char* name, cabor_intr_func in
 
     intr.intrinsic = intrinsic;
 
-    cabor_vector_push_x64_instruction(asm->intrinsics, &intr);
+    cabor_vector_push_x64_instruction(asmbl->intrinsics, &intr);
 }
 
-void cabor_intr_unary_minus(cabor_intrinsic_args* arg, cabor_x64_assembly* asm) 
+void cabor_intr_unary_minus(cabor_intrinsic_args* arg, cabor_x64_assembly* asmbl) 
 {
-    cabor_emit_line(asm, "movq %s, %s", arg->arg_refs[0], arg->result_register);
-    cabor_emit_line(asm, "negq %s", arg->result_register);
+    cabor_emit_line(asmbl, "movq %s, %s", arg->arg_refs[0], arg->result_register);
+    cabor_emit_line(asmbl, "negq %s", arg->result_register);
 }
 
-void cabor_intr_unary_not(cabor_intrinsic_args* arg, cabor_x64_assembly* asm)
+void cabor_intr_unary_not(cabor_intrinsic_args* arg, cabor_x64_assembly* asmbl)
 {
-    cabor_emit_line(asm, "movq %s, %s", arg->arg_refs[0], arg->result_register);
-    cabor_emit_line(asm, "xorq $1, %s", arg->result_register);
+    cabor_emit_line(asmbl, "movq %s, %s", arg->arg_refs[0], arg->result_register);
+    cabor_emit_line(asmbl, "xorq $1, %s", arg->result_register);
 }
 
-void cabor_intr_plus(cabor_intrinsic_args* arg, cabor_x64_assembly* asm) 
-{
-    if (strcmp(arg->result_register, arg->arg_refs[0]) != 0) 
-    {
-        cabor_emit_line(asm, "movq %s, %s", arg->arg_refs[0], arg->result_register);
-    }
-    cabor_emit_line(asm, "addq %s, %s", arg->arg_refs[1], arg->result_register);
-}
-
-void cabor_intr_minus(cabor_intrinsic_args* arg, cabor_x64_assembly* asm) 
+void cabor_intr_plus(cabor_intrinsic_args* arg, cabor_x64_assembly* asmbl) 
 {
     if (strcmp(arg->result_register, arg->arg_refs[0]) != 0) 
     {
-        cabor_emit_line(asm, "movq %s, %s", arg->arg_refs[0], arg->result_register);
+        cabor_emit_line(asmbl, "movq %s, %s", arg->arg_refs[0], arg->result_register);
     }
-    cabor_emit_line(asm, "subq %s, %s", arg->arg_refs[1], arg->result_register);
+    cabor_emit_line(asmbl, "addq %s, %s", arg->arg_refs[1], arg->result_register);
 }
 
-void cabor_intr_multiply(cabor_intrinsic_args* arg, cabor_x64_assembly* asm)
+void cabor_intr_minus(cabor_intrinsic_args* arg, cabor_x64_assembly* asmbl) 
 {
     if (strcmp(arg->result_register, arg->arg_refs[0]) != 0) 
     {
-        cabor_emit_line(asm, "movq %s, %s", arg->arg_refs[0], arg->result_register);
+        cabor_emit_line(asmbl, "movq %s, %s", arg->arg_refs[0], arg->result_register);
     }
-    cabor_emit_line(asm, "imulq %s, %s", arg->arg_refs[1], arg->result_register);
+    cabor_emit_line(asmbl, "subq %s, %s", arg->arg_refs[1], arg->result_register);
 }
 
-void cabor_intr_divide(cabor_intrinsic_args* arg, cabor_x64_assembly* asm) 
+void cabor_intr_multiply(cabor_intrinsic_args* arg, cabor_x64_assembly* asmbl)
 {
-    cabor_emit_line(asm, "movq %s, %%rax", arg->arg_refs[0]);
-    cabor_emit_line(asm, "cqto");
-    cabor_emit_line(asm, "idivq %s", arg->arg_refs[1]);
+    if (strcmp(arg->result_register, arg->arg_refs[0]) != 0) 
+    {
+        cabor_emit_line(asmbl, "movq %s, %s", arg->arg_refs[0], arg->result_register);
+    }
+    cabor_emit_line(asmbl, "imulq %s, %s", arg->arg_refs[1], arg->result_register);
+}
+
+void cabor_intr_divide(cabor_intrinsic_args* arg, cabor_x64_assembly* asmbl) 
+{
+    cabor_emit_line(asmbl, "movq %s, %%rax", arg->arg_refs[0]);
+    cabor_emit_line(asmbl, "cqto");
+    cabor_emit_line(asmbl, "idivq %s", arg->arg_refs[1]);
     if (strcmp(arg->result_register, "%rax") != 0) 
     {
-        cabor_emit_line(asm, "movq %%rax, %s", arg->result_register);
+        cabor_emit_line(asmbl, "movq %%rax, %s", arg->result_register);
     }
 }
 
-void cabor_intr_remainder(cabor_intrinsic_args* arg, cabor_x64_assembly* asm) 
+void cabor_intr_remainder(cabor_intrinsic_args* arg, cabor_x64_assembly* asmbl) 
 {
-    cabor_emit_line(asm, "movq %s, %%rax", arg->arg_refs[0]);
-    cabor_emit_line(asm, "cqto");
-    cabor_emit_line(asm, "idivq %s", arg->arg_refs[1]);
+    cabor_emit_line(asmbl, "movq %s, %%rax", arg->arg_refs[0]);
+    cabor_emit_line(asmbl, "cqto");
+    cabor_emit_line(asmbl, "idivq %s", arg->arg_refs[1]);
     if (strcmp(arg->result_register, "%rdx") != 0) 
     {
-        cabor_emit_line(asm, "movq %%rdx, %s", arg->result_register);
+        cabor_emit_line(asmbl, "movq %%rdx, %s", arg->result_register);
     }
 }
 
-void cabor_intr_comparison(cabor_intrinsic_args* arg, const char* setcc_insn, cabor_x64_assembly* asm)
+void cabor_intr_comparison(cabor_intrinsic_args* arg, const char* setcc_insn, cabor_x64_assembly* asmbl)
 {
-    cabor_emit_line(asm, "xor %%rax, %%rax");  // Clear all bits of rax
-    cabor_emit_line(asm, "movq %s, %%rdx", arg->arg_refs[0]);
-    cabor_emit_line(asm, "cmpq %s, %%rdx", arg->arg_refs[1]);
-    cabor_emit_line(asm, "%s %%al", setcc_insn);  // Set lowest byte of rax to comparison result
+    cabor_emit_line(asmbl, "xor %%rax, %%rax");  // Clear all bits of rax
+    cabor_emit_line(asmbl, "movq %s, %%rdx", arg->arg_refs[0]);
+    cabor_emit_line(asmbl, "cmpq %s, %%rdx", arg->arg_refs[1]);
+    cabor_emit_line(asmbl, "%s %%al", setcc_insn);  // Set lowest byte of rax to comparison result
     if (strcmp(arg->result_register, "%rax") != 0) 
     {
-        cabor_emit_line(asm, "movq %%rax, %s", arg->result_register);
+        cabor_emit_line(asmbl, "movq %%rax, %s", arg->result_register);
     }
 }
 
-void cabor_intr_eq(cabor_intrinsic_args* arg, cabor_x64_assembly* asm)
+void cabor_intr_eq(cabor_intrinsic_args* arg, cabor_x64_assembly* asmbl)
 {
-    cabor_intr_comparison(arg, "sete", asm);
+    cabor_intr_comparison(arg, "sete", asmbl);
 }
 
-void cabor_intr_ne(cabor_intrinsic_args* arg, cabor_x64_assembly* asm)
+void cabor_intr_ne(cabor_intrinsic_args* arg, cabor_x64_assembly* asmbl)
 {
-    cabor_intr_comparison(arg, "setne", asm);
+    cabor_intr_comparison(arg, "setne", asmbl);
 }
 
-void cabor_intr_lt(cabor_intrinsic_args* arg, cabor_x64_assembly* asm)
+void cabor_intr_lt(cabor_intrinsic_args* arg, cabor_x64_assembly* asmbl)
 {
-    cabor_intr_comparison(arg, "setl", asm);
+    cabor_intr_comparison(arg, "setl", asmbl);
 }
 
-void cabor_intr_le(cabor_intrinsic_args* arg, cabor_x64_assembly* asm)
+void cabor_intr_le(cabor_intrinsic_args* arg, cabor_x64_assembly* asmbl)
 {
-    cabor_intr_comparison(arg, "setle", asm);
+    cabor_intr_comparison(arg, "setle", asmbl);
 }
 
-void cabor_intr_gt(cabor_intrinsic_args* arg, cabor_x64_assembly* asm)
+void cabor_intr_gt(cabor_intrinsic_args* arg, cabor_x64_assembly* asmbl)
 {
-    cabor_intr_comparison(arg, "setg", asm);
+    cabor_intr_comparison(arg, "setg", asmbl);
 }
 
-void cabor_intr_ge(cabor_intrinsic_args* arg, cabor_x64_assembly* asm)
+void cabor_intr_ge(cabor_intrinsic_args* arg, cabor_x64_assembly* asmbl)
 {
-    cabor_intr_comparison(arg, "setge", asm);
+    cabor_intr_comparison(arg, "setge", asmbl);
 }
 
-void cabor_emit_line(cabor_x64_assembly* asm, const char* fmt, ...)
+void cabor_emit_line(cabor_x64_assembly* asmbl, const char* fmt, ...)
 {
     va_list args;
 
@@ -161,7 +161,7 @@ void cabor_emit_line(cabor_x64_assembly* asm, const char* fmt, ...)
     vsnprintf(inst.text, CABOR_MAX_X64_INSTRUCTION_LENGTH, fmt, args);
     va_end(args);
 
-    cabor_vector_push_x64_instruction(asm->instructions, &inst);
+    cabor_vector_push_x64_instruction(asmbl->instructions, &inst);
 }
 
 void cabor_destroy_locals(cabor_locals* locals)
@@ -242,7 +242,7 @@ void cabor_call_args_to_intrinisc_args(cabor_ir_data* ir_data, cabor_ir_call* ca
     }
 }
 
-void cabor_generate_assembly(cabor_ir_data* ir_data, cabor_locals* locals, cabor_x64_assembly* asm)
+void cabor_generate_assembly(cabor_ir_data* ir_data, cabor_locals* locals, cabor_x64_assembly* asmbl)
 {
     for (cabor_ir_inst_idx idx = 0; idx < ir_data->ir_instructions->size; idx++)
     {
@@ -252,14 +252,14 @@ void cabor_generate_assembly(cabor_ir_data* ir_data, cabor_locals* locals, cabor
         case CABOR_IR_INST_LOAD_BOOL:
         {
             const char* dest = cabor_get_stack_slot(inst->load_bool_const.dest, locals);
-            cabor_emit_mov_imm(asm, inst->load_bool_const.value ? 1 : 0, dest);
+            cabor_emit_mov_imm(asmbl, inst->load_bool_const.value ? 1 : 0, dest);
             break;
         }
 
         case CABOR_IR_INST_LOAD_INT:
         {
             const char* dest = cabor_get_stack_slot(inst->load_int_const.dest, locals);
-            cabor_emit_mov_imm(asm, inst->load_int_const.value, dest);
+            cabor_emit_mov_imm(asmbl, inst->load_int_const.value, dest);
             break;
         }
 
@@ -267,33 +267,33 @@ void cabor_generate_assembly(cabor_ir_data* ir_data, cabor_locals* locals, cabor
         {
             const char* src = cabor_get_stack_slot(inst->copy.source, locals);
             const char* dest = cabor_get_stack_slot(inst->copy.dest, locals);
-            cabor_emit_mov_reg(asm, src, "%rax");
-            cabor_emit_mov_reg(asm, "%rax", dest);
+            cabor_emit_mov_reg(asmbl, src, "%rax");
+            cabor_emit_mov_reg(asmbl, "%rax", dest);
             break;
         }
 
         case CABOR_IR_INST_CONDJUMP:
         {
             const char* cond = cabor_get_stack_slot(inst->cond_jump.cond, locals);
-            cabor_emit_cmp_imm(asm, 0, cond);
+            cabor_emit_cmp_imm(asmbl, 0, cond);
             cabor_ir_label* then_label = cabor_vector_get_ir_label(ir_data->ir_labels, inst->cond_jump.then_label);
             cabor_ir_label* else_label = cabor_vector_get_ir_label(ir_data->ir_labels, inst->cond_jump.else_label);
-            cabor_emit_jne(asm, then_label);
-            cabor_emit_jmp(asm, else_label);
+            cabor_emit_jne(asmbl, then_label);
+            cabor_emit_jmp(asmbl, else_label);
             break;
         }
 
         case CABOR_IR_INST_JUMP:
         {
             cabor_ir_label* jmp_label = cabor_vector_get_ir_label(ir_data->ir_labels, inst->jump.label);
-            cabor_emit_jmp(asm, jmp_label);
+            cabor_emit_jmp(asmbl, jmp_label);
             break;
         }
 
         case CABOR_IR_INST_LABEL:
         {
             cabor_ir_label* inst_label = cabor_vector_get_ir_label(ir_data->ir_labels, inst->label.idx);
-            cabor_emit_label(asm, inst_label->name);
+            cabor_emit_label(asmbl, inst_label->name);
             break;
         }
 
@@ -306,55 +306,55 @@ void cabor_generate_assembly(cabor_ir_data* ir_data, cabor_locals* locals, cabor
 
             if (strcmp(fun, "unary_-") == 0)
             {
-                cabor_intr_unary_minus(&args, asm);
+                cabor_intr_unary_minus(&args, asmbl);
             }
             else if (strcmp(fun, "unary_not") == 0)
             {
-                cabor_intr_unary_not(&args, asm);
+                cabor_intr_unary_not(&args, asmbl);
             }
             else if (strcmp(fun, "+") == 0)
             {
-                cabor_intr_plus(&args, asm);
+                cabor_intr_plus(&args, asmbl);
             }
             else if (strcmp(fun, "-") == 0)
             {
-                cabor_intr_minus(&args, asm);
+                cabor_intr_minus(&args, asmbl);
             }
             else if (strcmp(fun, "*") == 0)
             {
-                cabor_intr_multiply(&args, asm);
+                cabor_intr_multiply(&args, asmbl);
             }
             else if (strcmp(fun, "/") == 0)
             {
-                cabor_intr_divide(&args, asm);
+                cabor_intr_divide(&args, asmbl);
             }
             else if (strcmp(fun, "%") == 0)
             {
-                cabor_intr_remainder(&args, asm);
+                cabor_intr_remainder(&args, asmbl);
             }
             else if (strcmp(fun, "==") == 0)
             {
-                cabor_intr_eq(&args, asm);
+                cabor_intr_eq(&args, asmbl);
             }
             else if (strcmp(fun, "!=") == 0)
             {
-                cabor_intr_ne(&args, asm);
+                cabor_intr_ne(&args, asmbl);
             }
             else if (strcmp(fun, "<") == 0)
             {
-                cabor_intr_le(&args, asm);
+                cabor_intr_le(&args, asmbl);
             }
             else if (strcmp(fun, "<=") == 0)
             {
-                cabor_intr_lt(&args, asm);
+                cabor_intr_lt(&args, asmbl);
             }
             else if (strcmp(fun, ">") == 0)
             {
-                cabor_intr_gt(&args, asm);
+                cabor_intr_gt(&args, asmbl);
             }
             else if (strcmp(fun, ">=") == 0)
             {
-                cabor_intr_ge(&args, asm);
+                cabor_intr_ge(&args, asmbl);
             }
 
             // Handle non intrinsic calls
@@ -370,15 +370,15 @@ void cabor_generate_assembly(cabor_ir_data* ir_data, cabor_locals* locals, cabor
             for (size_t i = 0; i < call->num_args; i++)
             {
                 const char* arg_slot = cabor_get_stack_slot(call->args[i], locals);
-                cabor_emit_mov_reg(asm, arg_slot, arg_regs[i]);
+                cabor_emit_mov_reg(asmbl, arg_slot, arg_regs[i]);
             }
 
-            cabor_emit_call(asm, fun->name);
+            cabor_emit_call(asmbl, fun->name);
 
             const char* dest = cabor_get_stack_slot(call->dest, locals);
             if (strcmp(dest, "%rax") != 0)
             {
-                cabor_emit_mov_reg(asm, "%rax", dest);
+                cabor_emit_mov_reg(asmbl, "%rax", dest);
             }
 
             break;
@@ -390,56 +390,56 @@ void cabor_generate_assembly(cabor_ir_data* ir_data, cabor_locals* locals, cabor
             break;
         }
     }
-    return asm;
+    return asmbl;
 }
 
 cabor_x64_assembly* cabor_create_assembly()
 {
-    CABOR_NEW(cabor_x64_assembly, asm);
-    asm->instructions = cabor_create_vector(1024, CABOR_X64_INSTRUCTION, false);
-    asm->intrinsics = cabor_create_vector(1024, CABOR_X64_INTRINSIC, false);
-    return asm;
+    CABOR_NEW(cabor_x64_assembly, asmbl);
+    asmbl->instructions = cabor_create_vector(1024, CABOR_X64_INSTRUCTION, false);
+    asmbl->intrinsics = cabor_create_vector(1024, CABOR_X64_INTRINSIC, false);
+    return asmbl;
 }
 
-void cabor_destroy_x64_assembly(cabor_x64_assembly* asm)
+void cabor_destroy_x64_assembly(cabor_x64_assembly* asmbl)
 {
-    cabor_destroy_vector(asm->instructions);
-    cabor_destroy_vector(asm->intrinsics);
-    CABOR_DELETE(cabor_x64_assembly, asm);
+    cabor_destroy_vector(asmbl->instructions);
+    cabor_destroy_vector(asmbl->intrinsics);
+    CABOR_DELETE(cabor_x64_assembly, asmbl);
 }
 
 
-void cabor_emit_mov_imm(cabor_x64_assembly* asm, int64_t imm, const char* dest)
+void cabor_emit_mov_imm(cabor_x64_assembly* asmbl, int64_t imm, const char* dest)
 {
-    cabor_emit_line(asm, "movq $%ld, %s", imm, dest);
+    cabor_emit_line(asmbl, "movq $%ld, %s", imm, dest);
 }
 
-void cabor_emit_mov_reg(cabor_x64_assembly* asm, const char* src, const char* dest)
+void cabor_emit_mov_reg(cabor_x64_assembly* asmbl, const char* src, const char* dest)
 {
-    cabor_emit_line(asm, "movq %s, %s", src, dest);
+    cabor_emit_line(asmbl, "movq %s, %s", src, dest);
 }
 
-void cabor_emit_cmp_imm(cabor_x64_assembly* asm, int64_t imm, const char* operand)
+void cabor_emit_cmp_imm(cabor_x64_assembly* asmbl, int64_t imm, const char* operand)
 {
-    cabor_emit_line(asm, "cmpq $%ld, %s", imm, operand);
+    cabor_emit_line(asmbl, "cmpq $%ld, %s", imm, operand);
 }
 
-void cabor_emit_jmp(cabor_x64_assembly* asm, const char* label)
+void cabor_emit_jmp(cabor_x64_assembly* asmbl, const char* label)
 {
-    cabor_emit_line(asm, "jmp %s", label);
+    cabor_emit_line(asmbl, "jmp %s", label);
 }
 
-void cabor_emit_jne(cabor_x64_assembly* asm, const char* label)
+void cabor_emit_jne(cabor_x64_assembly* asmbl, const char* label)
 {
-    cabor_emit_line(asm, "jne %s", label);
+    cabor_emit_line(asmbl, "jne %s", label);
 }
 
-void cabor_emit_label(cabor_x64_assembly* asm, const char* label)
+void cabor_emit_label(cabor_x64_assembly* asmbl, const char* label)
 {
-    cabor_emit_line(asm, "%s:", label);
+    cabor_emit_line(asmbl, "%s:", label);
 }
 
-void cabor_emit_call(cabor_x64_assembly* asm, const char* label)
+void cabor_emit_call(cabor_x64_assembly* asmbl, const char* label)
 {
-    cabor_emit_line(asm, "call %s", label);
+    cabor_emit_line(asmbl, "call %s", label);
 }

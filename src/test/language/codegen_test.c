@@ -20,9 +20,9 @@ static void codegen_common(cabor_ir_data** ir_data, cabor_symbol_table** symtab,
      cabor_locals* locals = cabor_create_locals();
      cabor_init_locals(*ir_data, locals);
 
-     cabor_x64_assembly* asm = cabor_create_assembly();
+     cabor_x64_assembly* asmbl = cabor_create_assembly();
 
-     cabor_generate_assembly(*ir_data, locals, asm);
+     cabor_generate_assembly(*ir_data, locals, asmbl);
 
     cabor_vector* instructions = (*ir_data)->ir_instructions;
 
@@ -34,9 +34,9 @@ static void codegen_common(cabor_ir_data** ir_data, cabor_symbol_table** symtab,
         CABOR_LOG_F("IR %s", buffer);
     }
 
-    for (size_t i = 0; i < asm->instructions->size; i++)
+    for (size_t i = 0; i < asmbl->instructions->size; i++)
     {
-        cabor_x64_instruction* inst = cabor_vector_get_x64_instruction(asm->instructions, i);
+        cabor_x64_instruction* inst = cabor_vector_get_x64_instruction(asmbl->instructions, i);
         CABOR_LOG_F("ASM %s", inst->text);
     }
 
@@ -44,7 +44,7 @@ static void codegen_common(cabor_ir_data** ir_data, cabor_symbol_table** symtab,
      cabor_destroy_vector(tokens);
      cabor_destroy_file(file);
      cabor_destroy_locals(locals);
-     cabor_destroy_x64_assembly(asm);
+     cabor_destroy_x64_assembly(asmbl);
 
     free_codegen_common(*ir_data, *symtab);
 }
