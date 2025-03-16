@@ -20,7 +20,9 @@ static void codegen_common(cabor_ir_data** ir_data, cabor_symbol_table** symtab,
      cabor_locals* locals = cabor_create_locals();
      cabor_init_locals(*ir_data, locals);
 
-     cabor_x64_assembly* asm = cabor_generate_assembly(*ir_data, locals);
+     cabor_x64_assembly* asm = cabor_create_assembly();
+
+     cabor_generate_assembly(*ir_data, locals, asm);
 
     cabor_vector* instructions = (*ir_data)->ir_instructions;
 
@@ -63,6 +65,11 @@ int cabor_integration_test_codegen_print_int()
     cabor_ir_data* ir_data;
     cabor_symbol_table* symtab;
     codegen_common(&ir_data, &symtab, code);
+    return 0;
+}
+
+int cabor_compiler_test1()
+{
     return 0;
 }
 

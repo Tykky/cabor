@@ -242,12 +242,8 @@ void cabor_call_args_to_intrinisc_args(cabor_ir_data* ir_data, cabor_ir_call* ca
     }
 }
 
-cabor_x64_assembly* cabor_generate_assembly(cabor_ir_data* ir_data, cabor_locals* locals)
+void cabor_generate_assembly(cabor_ir_data* ir_data, cabor_locals* locals, cabor_x64_assembly* asm)
 {
-    CABOR_NEW(cabor_x64_assembly, asm);
-    asm->instructions = cabor_create_vector(1024, CABOR_X64_INSTRUCTION, false);
-    asm->intrinsics = cabor_create_vector(1024, CABOR_X64_INTRINSIC, false);
-
     for (cabor_ir_inst_idx idx = 0; idx < ir_data->ir_instructions->size; idx++)
     {
         cabor_ir_instruction* inst = cabor_vector_get_ir_instruction(ir_data->ir_instructions, idx);
@@ -394,6 +390,14 @@ cabor_x64_assembly* cabor_generate_assembly(cabor_ir_data* ir_data, cabor_locals
             break;
         }
     }
+    return asm;
+}
+
+cabor_x64_assembly* cabor_create_assembly()
+{
+    CABOR_NEW(cabor_x64_assembly, asm);
+    asm->instructions = cabor_create_vector(1024, CABOR_X64_INSTRUCTION, false);
+    asm->intrinsics = cabor_create_vector(1024, CABOR_X64_INTRINSIC, false);
     return asm;
 }
 

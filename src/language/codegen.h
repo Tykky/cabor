@@ -77,7 +77,8 @@ bool cabor_is_binary_args(int num_args);
 void cabor_call_args_to_intrinisc_args(cabor_ir_data* ir_data, cabor_ir_call* call, cabor_intrinsic_args* args, cabor_locals* locals);
 
 void cabor_init_locals(cabor_ir_data* ir_data, cabor_locals* cabor_locals);
-cabor_x64_assembly* cabor_generate_assembly(cabor_ir_data* ir_data, cabor_locals* locals);
+void cabor_generate_assembly(cabor_ir_data* ir_data, cabor_locals* locals, cabor_x64_assembly* asm);
+cabor_x64_assembly* cabor_create_assembly();
 void cabor_destroy_x64_assembly(cabor_x64_assembly* asm);
 
 void cabor_emit_mov_imm(cabor_x64_assembly* asm, int64_t imm, const char* dest);
