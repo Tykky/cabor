@@ -390,7 +390,6 @@ void cabor_generate_assembly(cabor_ir_data* ir_data, cabor_locals* locals, cabor
             break;
         }
     }
-    return asmbl;
 }
 
 cabor_x64_assembly* cabor_create_assembly()
