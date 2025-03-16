@@ -170,7 +170,6 @@ static void on_work(uv_work_t* work)
     {
         CABOR_FREE(&request.source);
     }
-
 }
 
 void count_open_handles(uv_handle_t* handle, void* arg)

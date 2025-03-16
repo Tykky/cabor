@@ -586,18 +586,17 @@ cabor_ir_var_idx cabor_visit_ir_if_then_else(cabor_ir_data* ir_data, cabor_ast* 
 
         cabor_ir_var_idx var_cond = cabor_visit_ir_node(ir_data, ast, ROOT(&root_expr->edges[0]), root_tab);
         cabor_ir_inst_idx cond_jump = cabor_create_ir_condjump(ir_data, var_cond, l_then, l_else);
+        cabor_push_ir_label(ir_data, l_then);
 
         cabor_ir_var_idx var_then = cabor_visit_ir_node(ir_data, ast, ROOT(&root_expr->edges[1]), root_tab);
         cabor_ir_var_idx var_result = cabor_create_unique_ir_var(ir_data, IR_VAR_IDX(ir_data, var_then)->type);
         cabor_ir_var_idx copy1 = cabor_create_ir_copy(ir_data, var_then, var_result);
 
-        cabor_push_ir_label(ir_data, l_then);
         cabor_ir_inst_idx jump_to_end_from_then = cabor_create_ir_jump(ir_data, l_end);
-
 
         cabor_push_ir_label(ir_data, l_else);
         cabor_ir_var_idx var_else = cabor_visit_ir_node(ir_data, ast, ROOT(&root_expr->edges[2]), root_tab);
-        cabor_ir_var_idx copy2 = cabor_create_ir_copy(ir_data, var_then, var_result);
+        cabor_ir_var_idx copy2 = cabor_create_ir_copy(ir_data, var_else, var_result);
         cabor_ir_inst_idx jump_to_end_from_else = cabor_create_ir_jump(ir_data, l_end);
 
         cabor_push_ir_label(ir_data, l_end);

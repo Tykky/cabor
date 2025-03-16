@@ -10,6 +10,7 @@
 #include "language/parser_test.h"
 #include "language/type_checker_test.h"
 #include "language/ir_test.h"
+#include "language/codegen_test.h"
 
 void register_all_tests()
 {
@@ -95,6 +96,9 @@ void register_all_tests()
     CABOR_REGISTER_TEST("INTEGRATION IR unary op", cabor_integration_test_ir_unary_op);
     CABOR_REGISTER_TEST("INTEGRATION IR while", cabor_integration_test_ir_while);
     CABOR_REGISTER_TEST("INTEGARTION IR blocks", cabor_integration_test_blocks);
+
+    // Codegen tests
+    CABOR_REGISTER_TEST("INTEGRATION codegen basic", cabor_integration_test_codegen_basic);
 }
 #else
 void register_all_tests() {}

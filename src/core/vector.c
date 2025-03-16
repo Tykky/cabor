@@ -15,6 +15,7 @@ size_t cabor_get_ir_var_size();
 size_t cabor_get_ir_label_size();
 size_t cabor_get_stack_location_size();
 size_t cabor_get_x64_instruction_size();
+size_t cabor_get_x64_intrinsic_size();
 
 static size_t get_element_type_size(cabor_element_type type)
 {
@@ -48,6 +49,8 @@ static size_t get_element_type_size(cabor_element_type type)
             return cabor_get_stack_location_size();
         case CABOR_X64_INSTRUCTION:
             return cabor_get_x64_instruction_size();
+        case CABOR_X64_INTRINSIC:
+            return cabor_get_x64_intrinsic_size();
         case CABOR_UNKNOWN:
             return 0;
     }
@@ -179,6 +182,12 @@ void cabor_vector_push_x64_instruction(cabor_vector* v, struct cabor_x64_instruc
     pushback_vector(v, (void*)instruction);
 }
 
+void cabor_vector_push_x64_intrinsic(cabor_vector* v, struct cabor_x64_intrinsic_t* intrinsic)
+{
+    CABOR_ASSERT(v->type == CABOR_X64_INTRINSIC, "pushing x64 intrinsic to non x64 intrinsic vector!");
+    pushback_vector(v, (void*)intrinsic);
+}
+
 void cabor_vector_push_ir_var(cabor_vector* v, struct cabor_ir_var_t* ir_var)
 {
     CABOR_ASSERT(v->type == CABOR_IR_VAR, "pushing ir var to non ir var vector!");
@@ -267,6 +276,12 @@ struct cabor_x64_instruction_t* cabor_vector_get_x64_instruction(cabor_vector* v
 {
     CABOR_ASSERT(v->type == CABOR_X64_INSTRUCTION, "getting x64 instruction from non x64 vector!");
     return (struct cabor_x64_instruction_t*)vector_get(v, idx);
+}
+
+struct cabor_x64_intrinsic_t* cabor_vector_get_x64_intrinsic(cabor_vector* v, size_t idx)
+{
+    CABOR_ASSERT(v->type == CABOR_X64_INTRINSIC, "getting x64 intrinsic from non x64 intrinsic vector!");
+    return (struct cabor_x64_intrinsic_t*)vector_get(v, idx);
 }
 
 void cabor_vector_push_str(cabor_vector* v, const char* str, bool push_null_character)
@@ -382,5 +397,11 @@ struct cabor_x64_instruction_t* cabor_peek_x64_instruction(cabor_vector* v)
 {
     CABOR_ASSERT(v->type == CABOR_X64_INSTRUCTION, "getting x64 instruction from non x64 instruction vector!");
     return (struct cabor_x64_instruction_t*)peek_next(v);
+}
+
+struct cabor_x64_intrinsic_t* cabor_peek_x64_intrinsic(cabor_vector* v)
+{
+    CABOR_ASSERT(v->type == CABOR_X64_INTRINSIC, "getting x64 intrinsic from non x64 intrinsci vector!");
+    return (struct cabor_intrinsic_t*)peek_next(v);
 }
 
