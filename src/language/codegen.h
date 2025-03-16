@@ -16,7 +16,7 @@ typedef struct cabor_stack_location_t
 
 typedef struct cabor_x64_instruction_t
 {
-    char* instruction[CABOR_MAX_X64_INSTRUCTION_LENGTH]; // x64 instruction in string format, includes operands etc..
+    char* text[CABOR_MAX_X64_INSTRUCTION_LENGTH];
 } cabor_x64_instruction;
 
 typedef struct
@@ -30,9 +30,21 @@ typedef struct
     cabor_vector* instructions;
 } cabor_x64_assembly;
 
+void cabor_emit_line(cabor_x64_assembly* asm, const char* fmt, ...);
+
 cabor_locals* cabor_create_locals();
-void cabor_destroy_locals(cabor_locals* localsk);
+void cabor_destroy_locals(cabor_locals* locals);
+
+const char* cabor_get_stack_slot(cabor_ir_var_idx ir_var, cabor_locals* locals);
 
 void cabor_init_locals(cabor_ir_data* ir_data, cabor_locals* cabor_locals);
-cabor_x64_assembly* cabor_generate_assembly(cabor_ir_data* ir_data);
+cabor_x64_assembly* cabor_generate_assembly(cabor_ir_data* ir_data, cabor_locals* locals);
 void cabor_destroy_x64_assembly(cabor_x64_assembly* asm);
+
+void cabor_emit_mov_imm(cabor_x64_assembly* asm, int64_t imm, const char* dest);
+void cabor_emit_mov_reg(cabor_x64_assembly* asm, const char* src, const char* dest);
+void cabor_emit_cmp_imm(cabor_x64_assembly* asm, int64_t imm, const char* operand);
+void cabor_emit_jmp(cabor_x64_assembly* asm, const char* label);
+void cabor_emit_jne(cabor_x64_assembly* asm, const char* label);
+void cabor_emit_label(cabor_x64_assembly* asm, const char* label);
+void cabor_emit_call(cabor_x64_assembly* asm, const char* label);

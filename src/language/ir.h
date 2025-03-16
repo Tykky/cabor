@@ -117,7 +117,7 @@ size_t cabor_get_ir_label_size();
 
 // These allocate and destroy all the data required for IR generation
 cabor_ir_data* cabor_create_ir_data();
-void cabor_destroy_ir_data(cabor_ir_var* ir_var_types);
+void cabor_destroy_ir_data(cabor_ir_data* ir_var_types);
 
 // No need to bother with deallocating individual ir instructions, cabor_destroy_ir_data handles that
 cabor_ir_var_idx cabor_create_ir_var(cabor_ir_data* ir_data, const char* var, cabor_type type);

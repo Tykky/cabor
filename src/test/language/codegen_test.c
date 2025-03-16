@@ -1,0 +1,48 @@
+#include "codegen_test.h"
+
+static void free_codegen_common(cabor_ir_data* ir_data, cabor_symbol_table* symbtab)
+{
+    cabor_destroy_ir_data(ir_data);
+    cabor_destroy_symbol_table(symbtab);
+}
+
+static void codegen_common(cabor_ir_data** ir_data, cabor_symbol_table** symtab, const char* code)
+{
+     cabor_file* file = cabor_file_from_buffer(code, strlen(code));
+     cabor_vector* tokens = cabor_tokenize(file);
+     cabor_ast* ast = cabor_parse(tokens);
+     cabor_ast_node* root = cabor_access_ast_node(ast->root);
+     *symtab = cabor_create_symbol_table();
+     cabor_type type = cabor_typecheck(ast, root, *symtab);
+     *ir_data = cabor_create_ir_data();
+     cabor_generate_ir(*ir_data, ast);
+
+     cabor_locals* locals = cabor_create_locals();
+
+     cabor_x64_assembly* asm = cabor_generate_assembly(ir_data, locals);
+
+    cabor_vector* instructions = (*ir_data)->ir_instructions;
+
+    for (size_t i = 0; i < instructions->size; i++)
+    {
+        cabor_ir_instruction* inst = cabor_vector_get_ir_instruction(instructions, i);
+        char buffer[128] = {0};
+        cabor_format_ir_instruction(*ir_data, i, buffer, 128);
+        CABOR_LOG_F("%s", buffer);
+    }
+
+     cabor_destroy_ast(ast);
+     cabor_destroy_vector(tokens);
+     cabor_destroy_file(file);
+     cabor_destroy_locals(locals);
+     cabor_destroy_x64_assembly(asm);
+
+    free_ir_common(*ir_data, *symtab);
+}
+
+
+int cabor_integration_codegen_test_basic()
+{
+    const char* code = "{ var x = true; if x then 1 else 2; }";
+    return 0;
+}

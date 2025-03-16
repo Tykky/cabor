@@ -46,6 +46,8 @@ set(SOURCES
     "test/language/type_checker_test.c"
     "test/language/ir_test.h"
     "test/language/ir_test.c"
+    "test/language/codegen_test.c"
+    "test/language/codegen_test.h"
     "debug/cabor_debug.h"
     "cabor_defines.h"
 	"network/network.h"
