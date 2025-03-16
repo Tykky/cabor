@@ -38,8 +38,8 @@ cabor_file* cabor_load_file(const char* filename)
     *file = (cabor_file)
     {
         .filename = filename,
-        .size = file_size * sizeof(char),
-        .file_memory = CABOR_MALLOC(file_size * sizeof(char))
+        .size = file_size * sizeof(char) + 1,
+        .file_memory = CABOR_MALLOC(file_size * sizeof(char) + 1)
     };
 
     size_t result = fread(file->file_memory.mem, sizeof(char), file_size, file_handle);
@@ -49,6 +49,9 @@ cabor_file* cabor_load_file(const char* filename)
         CABOR_LOG_ERR_F("Read %d bytes when actual file size was %d bytes", result, file_size);
         CABOR_RUNTIME_ERROR("Failed to read file!");
     }
+
+    char* file_content = (char*)file->file_memory.mem;
+    file_content[file_size] = '\0';
 
     return file;
 }

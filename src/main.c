@@ -16,6 +16,7 @@
 #include "filesystem/filesystem.h"
 #include "language/tokenizer.h"
 #include "language/parser.h"
+#include "language/compiler.h"
 
 #include "logging/logging.h"
 
@@ -37,8 +38,9 @@
 #define CABOR_ARG_TOKENIZE (1 << 1)
 #define CABOR_ARG_PARSE (1 << 2)
 #define CABOR_ARG_SERVER (1 << 3)
+#define CABOR_ARG_COMPILE (1 << 4)
 
-static unsigned int parse_cmd_args(int argc, char** argv, int* tokenize_arg, int* parse_arg)
+static unsigned int parse_cmd_args(int argc, char** argv, int* tokenize_arg, int* parse_arg, int* compile_arg)
 {
 	if (argc < 2)
 		return 0;
@@ -70,6 +72,11 @@ static unsigned int parse_cmd_args(int argc, char** argv, int* tokenize_arg, int
 			bit_flags |= CABOR_ARG_SERVER;
 		}
 
+		if (!strcmp(arg, "--compile") || !strcmp(arg, "-c"))
+		{
+			bit_flags |= CABOR_ARG_COMPILE;
+			*compile_arg = i + 1;
+		}
 	}
 
 	return bit_flags;
@@ -115,8 +122,9 @@ _CrtSetDbgFlag(CRTDBFLAGS);
 
 	int tokenize_arg;
 	int parse_arg;
+	int compile_arg;
 
-	unsigned int flags = parse_cmd_args(argc, argv, &tokenize_arg, &parse_arg);
+	unsigned int flags = parse_cmd_args(argc, argv, &tokenize_arg, &parse_arg, &compile_arg);
 	unsigned int test_results = 0;
 
 	if (flags & CABOR_ARG_ENABLE_TESTING)
@@ -137,6 +145,15 @@ _CrtSetDbgFlag(CRTDBFLAGS);
 	if (flags & CABOR_ARG_PARSE)
 	{
 		run_parser(argv[tokenize_arg]);
+	}
+
+	if (flags & CABOR_ARG_COMPILE)
+	{
+		const char* filename = argv[compile_arg];
+		cabor_file* code = cabor_load_file(filename);
+		cabor_x64_assembly* asm = cabor_compile(code->file_memory.mem);
+		cabor_write_asm_to_file(filename, asm);
+		cabor_destroy_x64_assembly(asm);
 	}
 
 	if (flags & CABOR_ARG_SERVER)

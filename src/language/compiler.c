@@ -1,5 +1,7 @@
 #include "compiler.h"
 #include "../logging/logging.h"
+#include <string.h>
+#include <stdio.h>
 
 cabor_x64_assembly* cabor_compile(const char* code)
 {
@@ -62,4 +64,33 @@ cabor_x64_assembly* cabor_compile(const char* code)
     cabor_destroy_symbol_table(symtab);
 
     return asm;
+}
+
+void cabor_write_asm_to_file(const char* filename, cabor_x64_assembly* asm)
+{
+    size_t total_size = 0;
+    for (size_t i = 0; i < asm->instructions; i++)
+    {
+        cabor_x64_instruction* instr = cabor_vector_get_x64_instruction(asm->instructions, i);
+        total_size += strlen(instr);
+    }
+
+    cabor_allocation alloc = CABOR_MALLOC(total_size);
+    char* buffer = (char*)alloc.mem;
+    cabor_file* file = cabor_file_from_buffer(buffer, total_size);
+
+    char name[128] = {0};
+    int result = snprintf(name, sizeof(name), "%s.asm", filename);
+
+    if (result < sizeof(name))
+    {
+        cabor_dump_file_to_disk(file, name);
+    }
+    else
+    {
+        CABOR_LOG_ERR("Failed to write asm to file due filename was too large");
+    }
+
+    CABOR_FREE(&alloc);
+    cabor_destroy_file(file);
 }

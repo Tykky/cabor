@@ -17,7 +17,7 @@ int cabor_test_load_file()
 
     int res = 0;
 
-    CABOR_CHECK_EQUALS(file->size, strlen(expected), res);
+    CABOR_CHECK_EQUALS(file->size, strlen(expected) + 1, res);
 
     for (size_t i = 0; i < file->size; i++)
     {

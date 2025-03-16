@@ -168,6 +168,6 @@ static const char* cabor_preamble =
 "read_int_error_str_len = . - read_int_error_str\n";
 
 
-
 cabor_x64_assembly* cabor_compile(const char* code);
+void cabor_write_asm_to_file(const char* filename, cabor_x64_assembly* asm);
 
