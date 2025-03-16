@@ -26,6 +26,8 @@ set(SOURCES
     "language/ir.c"
     "language/codegen.h"
     "language/codegen.c"
+    "language/assembler.h"
+    "language/assembler.c"
     "test/test_framework.c"
     "test/test_framework.h"
     "test/registered_tests.c"

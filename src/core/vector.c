@@ -182,7 +182,7 @@ void cabor_vector_push_x64_instruction(cabor_vector* v, struct cabor_x64_instruc
     pushback_vector(v, (void*)instruction);
 }
 
-void cabor_vector_push_x64_intrinsic(cabor_vector* v, struct cabor_intrinisc_t* intrinsic)
+void cabor_vector_push_x64_intrinsic (cabor_vector* v, struct cabor_intrinsic_t* intrinsic)
 {
     CABOR_ASSERT(v->type == CABOR_X64_INTRINSIC, "pushing x64 intrinsic to non x64 intrinsic vector!");
     pushback_vector(v, (void*)intrinsic);
