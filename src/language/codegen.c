@@ -363,7 +363,7 @@ void cabor_generate_assembly(cabor_ir_data* ir_data, cabor_locals* locals, cabor
 
             if (call->num_args > 6)
             {
-                CABOR_LOG_ERR_F("codegen error: function call has more than 6 arguments, not supported");
+                CABOR_LOG_ERR("codegen error: function call has more than 6 arguments, not supported");
                 break;
             }
 
