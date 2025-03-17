@@ -55,7 +55,7 @@ cabor_x64_assembly* cabor_compile(const char* code, const char* filename)
     }
 
     // write to output to a file and feed it to assembler + linker
-    cabor_write_asmbl_to_file(filename, asmbl); // writes to "filename.asmbl"
+    cabor_write_asmbl_to_file(filename, asmbl); // writes to "filename.s"
 
     cabor_destroy_ast(ast);
     cabor_destroy_vector(tokens);
@@ -93,7 +93,7 @@ void cabor_write_asmbl_to_file(const char* filename, cabor_x64_assembly* asmbl)
     cabor_file* file = cabor_file_from_buffer(buffer, total_size);
 
     char name[128] = {0};
-    int result = snprintf(name, sizeof(name), "%s.asmbl", filename);
+    int result = snprintf(name, sizeof(name), "%s.s", filename);
 
     if (result < sizeof(name))
     {

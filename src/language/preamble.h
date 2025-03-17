@@ -1,22 +1,10 @@
 #pragma once
 
 static const char* cabor_preamble =
-".global _start\n"
 ".global print_int\n"
 ".global print_bool\n"
 ".global read_int\n"
-".extern main\n"
 ".section .text\n\n"
-
-"# BEGIN START (we skip this part when linking with C)\n"
-"# ***** Function '_start' *****\n"
-"# Calls function 'main' and halts the program\n\n"
-"_start:\n"
-"    call main\n"
-"    movq $60, %rax\n"
-"    xorq %rdi, %rdi\n"
-"    syscall\n"
-"# END START\n\n"
 
 "# ***** Function 'print_int' *****\n"
 "# Prints a 64-bit signed integer followed by a newline.\n"

@@ -27,6 +27,8 @@
 
 #include "core/cabortime.h"
 
+#include "language/preamble.h"
+
 #ifdef _DEBUG 
 #define _CRTDBG_MAP_ALLOC
 #include <stdlib.h>
@@ -109,6 +111,16 @@ static void run_server()
 	cabor_start_compile_server(&ctx);
 }
 
+static void cabor_compile_premable()
+{
+	// Write preamble to disk
+	cabor_file* file = cabor_file_from_buffer(cabor_preamble, strlen(cabor_preamble));
+	cabor_dump_file_to_disk(file, "preamble.s");
+	cabor_destroy_file(file);
+
+	int result = system("gcc -c -no-pie preamble.s -o preamble.o");
+}
+
 int main(int argc, char **argv) 
 {
 #if _DEBUG && WIN32
@@ -149,6 +161,7 @@ _CrtSetDbgFlag(CRTDBFLAGS);
 
 	if (flags & CABOR_ARG_COMPILE)
 	{
+		cabor_compile_premable();
 		const char* filename = argv[compile_arg];
 		cabor_file* code = cabor_load_file(filename);
 		cabor_x64_assembly* asmbl = cabor_compile(code->file_memory.mem, filename);
@@ -157,6 +170,7 @@ _CrtSetDbgFlag(CRTDBFLAGS);
 
 	if (flags & CABOR_ARG_SERVER)
 	{
+		cabor_compile_premable();
 		run_server();
 	}
 

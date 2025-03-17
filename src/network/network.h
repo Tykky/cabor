@@ -2,6 +2,7 @@
 
 #include "../cabor_defines.h"
 #include "../core/memory.h"
+#include "../filesystem/filesystem.h"
 #include <stdbool.h>
 
 typedef struct

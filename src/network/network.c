@@ -121,6 +121,61 @@ static void alloc_buffer(uv_handle_t* client, size_t suggested_size, uv_buf_t* b
     buf->len = suggested_size;
 }
 
+static char* convert_to_base_64(const char* input, size_t len, size_t* outlen)
+{
+    static const char b64_table[] =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "abcdefghijklmnopqrstuvwxyz"
+        "0123456789+/";
+
+    size_t encoded_len = 4 * ((len + 2) / 3);
+    char* output = (char*)malloc(encoded_len + 1);
+    if (!output) 
+    {
+        if (outlen) 
+        {
+            *outlen = 0;
+        }
+        return NULL;
+    }
+
+    size_t i = 0;
+    size_t j = 0;
+
+    while (i < len) 
+    {
+        unsigned int octet_a = (i < len) ? (unsigned char)input[i++] : 0;
+        unsigned int octet_b = (i < len) ? (unsigned char)input[i++] : 0;
+        unsigned int octet_c = (i < len) ? (unsigned char)input[i++] : 0;
+
+        unsigned int triple = (octet_a << 16) | (octet_b << 8) | (octet_c);
+
+        output[j++] = b64_table[(triple >> 18) & 0x3F];
+        output[j++] = b64_table[(triple >> 12) & 0x3F];
+        output[j++] = b64_table[(triple >> 6) & 0x3F];
+        output[j++] = b64_table[(triple) & 0x3F];
+    }
+
+    size_t mod = len % 3;
+    if (mod > 0) 
+    {
+        output[encoded_len - 1] = '=';
+        if (mod == 1) 
+        {
+            output[encoded_len - 2] = '=';
+        }
+    }
+
+    output[encoded_len] = '\0';
+
+    if (outlen) 
+    {
+        *outlen = encoded_len;
+    }
+
+    return output;
+}
+
 // Called from worker thread
 static void on_work(uv_work_t* work)
 {
@@ -145,7 +200,7 @@ static void on_work(uv_work_t* work)
     {
         CABOR_LOG_F("Compile request: %.*s", request.source_size, request.source.mem);
 
-        // run compiler (TODO) ... respond with program
+        // run compiler ... respond with program
 
         uint32_t source_hash = cabor_hash_string_with_size((char*)request.source.mem, request.source_size);
 
@@ -154,18 +209,43 @@ static void on_work(uv_work_t* work)
 
 		cabor_x64_assembly* asmbl = cabor_compile((char*)request.source.mem, filename);
 
-		cabor_destroy_x64_assembly(asmbl);
+        char* command[128] = { 0 };
+        int command_res = snprintf(command, sizeof(command), "gcc -c -no-pie %s.s -o %s.o", filename, filename);
+        CABOR_LOG_F("Running command: %s", command);
+        int system_res = system(command);
+
+        // link
+        char* link_command[128] = { 0 };
+        int link_command_res = snprintf(link_command, sizeof(link_command), "gcc %s.s preamble.o -o %s", filename, filename);
+        int link_res = system(link_command);
+
+        // load linked program
+        char* load_program_name[128] = {0};
+
+#ifdef __unix__
+        int load_program_res = snprintf(load_program_name, sizeof(load_program_name), "%s", filename);
+#else
+        int load_program_res = snprintf(load_program_name, sizeof(load_program_name), "%s.exe", filename);
+#endif
+
+        cabor_file* program = cabor_load_file(load_program_name);
+
+        size_t outlen;
+        char* program_base64 = convert_to_base_64(program->file_memory.mem, program->size, &outlen);
 
         cabor_network_response resp =
         {
-            .program_text = cabor_dummy_program,
-            .size = strlen(cabor_dummy_program),
-            .error = false
+            .program_text = program_base64,
+            .size = outlen,
+            .error = link_res,
         };
 
         // Sending the data back happens in on_after_work
         cabor_encode_network_response(&resp, &cabor_client->response, &cabor_client->response_size);
 
+        free(program_base64);
+        cabor_destroy_file(program);
+		cabor_destroy_x64_assembly(asmbl);
     }
     else if (request.type == CABOR_PING)
     {
