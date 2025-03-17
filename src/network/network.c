@@ -233,6 +233,7 @@ static void on_work(uv_work_t* work)
         size_t outlen;
         char* program_base64 = convert_to_base_64(program->file_memory.mem, program->size, &outlen);
 
+        /*
         if (link_res == 0 && command_res == 0)
         {
             cabor_network_response resp =
@@ -246,6 +247,7 @@ static void on_work(uv_work_t* work)
             cabor_encode_network_response(&resp, &cabor_client->response, &cabor_client->response_size);
         }
         else
+        */
         {
             cabor_network_response resp =
             {
