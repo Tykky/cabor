@@ -222,20 +222,19 @@ static void on_work(uv_work_t* work)
         // load linked program
         char* load_program_name[128] = {0};
 
-        if (link_res == 0 && command_res == 0)
-        {
-
 #ifdef __unix__
-            int load_program_res = snprintf(load_program_name, sizeof(load_program_name), "%s", filename);
+        int load_program_res = snprintf(load_program_name, sizeof(load_program_name), "%s", filename);
 #else
-            int load_program_res = snprintf(load_program_name, sizeof(load_program_name), "%s.exe", filename);
+        int load_program_res = snprintf(load_program_name, sizeof(load_program_name), "%s.exe", filename);
 #endif
 
-            cabor_file* program = cabor_load_file(load_program_name);
+        cabor_file* program = cabor_load_file(load_program_name);
 
-            size_t outlen;
-            char* program_base64 = convert_to_base_64(program->file_memory.mem, program->size, &outlen);
+        size_t outlen;
+        char* program_base64 = convert_to_base_64(program->file_memory.mem, program->size, &outlen);
 
+        if (link_res == 0 && command_res == 0)
+        {
             cabor_network_response resp =
             {
                 .program_text = program_base64,
@@ -245,11 +244,20 @@ static void on_work(uv_work_t* work)
 
             // Sending the data back happens in on_after_work
             cabor_encode_network_response(&resp, &cabor_client->response, &cabor_client->response_size);
-
-            free(program_base64);
-            cabor_destroy_file(program);
+        }
+        else
+        {
+            cabor_network_response resp =
+            {
+                .program_text = cabor_dummy_program,
+                .size = sizeof(cabor_dummy_program),
+                .error = false,
+            };
+            cabor_encode_network_response(&resp, &cabor_client->response, &cabor_client->response_size);
         }
 
+        free(program_base64);
+        cabor_destroy_file(program);
 		cabor_destroy_x64_assembly(asmbl);
     }
     else if (request.type == CABOR_PING)
