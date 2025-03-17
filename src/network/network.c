@@ -1,6 +1,7 @@
 #include "network.h"
 #include "../logging/logging.h"
 #include "../core/vector.h"
+#include "../language/compiler.h"
 #include "dummy.h"
 
 #include <string.h>
@@ -137,6 +138,7 @@ static void on_work(uv_work_t* work)
 
     if (result != 0)
     {
+        CABOR_LOG_ERR("failed to decode network request");
     }
 
     if (request.type == CABOR_COMPILE)
@@ -144,6 +146,16 @@ static void on_work(uv_work_t* work)
         CABOR_LOG_F("Compile request: %.*s", request.source_size, request.source.mem);
 
         // run compiler (TODO) ... respond with program
+
+        uint32_t source_hash = cabor_hash_string_with_size((char*)request.source.mem, request.source_size);
+
+        char* filename[128] = {0};
+        int res = snprintf(filename, sizeof(filename), "compile_request_%u", source_hash);
+
+        cabor_file* file = cabor_file_from_buffer(request.source.mem, request.source_size);
+		cabor_x64_assembly* asmbl = cabor_compile(file->file_memory.mem, filename);
+
+		cabor_destroy_x64_assembly(asmbl);
 
         cabor_network_response resp =
         {

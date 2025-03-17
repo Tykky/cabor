@@ -62,6 +62,21 @@ uint32_t cabor_hash_string(const char* str)
     return hash;
 }
 
+uint32_t cabor_hash_string_with_size(const char* str, size_t size)
+{
+    // FNV-1a hashing
+    uint32_t hash = 2166136261u;
+    while (*str)
+    {
+        if (str > size)
+            break;
+        hash ^= (uint8_t)(*str);
+        hash *= 16777619u;
+        str++;
+    }
+    return hash;
+}
+
 cabor_map_entry* cabor_map_insert(cabor_hash_map* map, const char* key, int value)
 {
     const size_t table_size = map->table->size;
