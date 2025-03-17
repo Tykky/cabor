@@ -7,7 +7,7 @@ r = 1
 
 data = {
     "command": "compile",
-    "code": "true"
+    "code": "true or true"
 }
 
 json_data = json.dumps(data)
