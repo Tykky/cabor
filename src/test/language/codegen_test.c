@@ -1,4 +1,5 @@
 #include "codegen_test.h"
+#include <string.h>
 
 static void free_codegen_common(cabor_ir_data* ir_data, cabor_symbol_table* symbtab)
 {
