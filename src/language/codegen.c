@@ -50,74 +50,74 @@ void add_intrinsic(cabor_x64_assembly* asmbl, const char* name, cabor_intr_func 
 
 void cabor_intr_unary_minus(cabor_intrinsic_args* arg, cabor_x64_assembly* asmbl) 
 {
-    cabor_emit_line(asmbl, "movq %s, %s", arg->arg_refs[0], arg->result_register);
-    cabor_emit_line(asmbl, "negq %s", arg->result_register);
+    cabor_emit_line(asmbl, "movq %s, %s\n", arg->arg_refs[0], arg->result_register);
+    cabor_emit_line(asmbl, "negq %s\n", arg->result_register);
 }
 
 void cabor_intr_unary_not(cabor_intrinsic_args* arg, cabor_x64_assembly* asmbl)
 {
-    cabor_emit_line(asmbl, "movq %s, %s", arg->arg_refs[0], arg->result_register);
-    cabor_emit_line(asmbl, "xorq $1, %s", arg->result_register);
+    cabor_emit_line(asmbl, "movq %s, %s\n", arg->arg_refs[0], arg->result_register);
+    cabor_emit_line(asmbl, "xorq $1, %s\n", arg->result_register);
 }
 
 void cabor_intr_plus(cabor_intrinsic_args* arg, cabor_x64_assembly* asmbl) 
 {
     if (strcmp(arg->result_register, arg->arg_refs[0]) != 0) 
     {
-        cabor_emit_line(asmbl, "movq %s, %s", arg->arg_refs[0], arg->result_register);
+        cabor_emit_line(asmbl, "movq %s, %s\n", arg->arg_refs[0], arg->result_register);
     }
-    cabor_emit_line(asmbl, "addq %s, %s", arg->arg_refs[1], arg->result_register);
+    cabor_emit_line(asmbl, "addq %s, %s\n", arg->arg_refs[1], arg->result_register);
 }
 
 void cabor_intr_minus(cabor_intrinsic_args* arg, cabor_x64_assembly* asmbl) 
 {
     if (strcmp(arg->result_register, arg->arg_refs[0]) != 0) 
     {
-        cabor_emit_line(asmbl, "movq %s, %s", arg->arg_refs[0], arg->result_register);
+        cabor_emit_line(asmbl, "movq %s, %s\n", arg->arg_refs[0], arg->result_register);
     }
-    cabor_emit_line(asmbl, "subq %s, %s", arg->arg_refs[1], arg->result_register);
+    cabor_emit_line(asmbl, "subq %s, %s\n", arg->arg_refs[1], arg->result_register);
 }
 
 void cabor_intr_multiply(cabor_intrinsic_args* arg, cabor_x64_assembly* asmbl)
 {
     if (strcmp(arg->result_register, arg->arg_refs[0]) != 0) 
     {
-        cabor_emit_line(asmbl, "movq %s, %s", arg->arg_refs[0], arg->result_register);
+        cabor_emit_line(asmbl, "movq %s, %s\n", arg->arg_refs[0], arg->result_register);
     }
-    cabor_emit_line(asmbl, "imulq %s, %s", arg->arg_refs[1], arg->result_register);
+    cabor_emit_line(asmbl, "imulq %s, %s\n", arg->arg_refs[1], arg->result_register);
 }
 
 void cabor_intr_divide(cabor_intrinsic_args* arg, cabor_x64_assembly* asmbl) 
 {
-    cabor_emit_line(asmbl, "movq %s, %%rax", arg->arg_refs[0]);
-    cabor_emit_line(asmbl, "cqto");
-    cabor_emit_line(asmbl, "idivq %s", arg->arg_refs[1]);
+    cabor_emit_line(asmbl, "movq %s, %%rax\n", arg->arg_refs[0]);
+    cabor_emit_line(asmbl, "cqto\n");
+    cabor_emit_line(asmbl, "idivq %s\n", arg->arg_refs[1]);
     if (strcmp(arg->result_register, "%rax") != 0) 
     {
-        cabor_emit_line(asmbl, "movq %%rax, %s", arg->result_register);
+        cabor_emit_line(asmbl, "movq %%rax, %s\n", arg->result_register);
     }
 }
 
 void cabor_intr_remainder(cabor_intrinsic_args* arg, cabor_x64_assembly* asmbl) 
 {
-    cabor_emit_line(asmbl, "movq %s, %%rax", arg->arg_refs[0]);
-    cabor_emit_line(asmbl, "cqto");
-    cabor_emit_line(asmbl, "idivq %s", arg->arg_refs[1]);
+    cabor_emit_line(asmbl, "movq %s, %%rax\n", arg->arg_refs[0]);
+    cabor_emit_line(asmbl, "cqto\n");
+    cabor_emit_line(asmbl, "idivq %s\n", arg->arg_refs[1]);
     if (strcmp(arg->result_register, "%rdx") != 0) 
     {
-        cabor_emit_line(asmbl, "movq %%rdx, %s", arg->result_register);
+        cabor_emit_line(asmbl, "movq %%rdx, %s\n", arg->result_register);
     }
 }
 
 void cabor_intr_comparison(cabor_intrinsic_args* arg, const char* setcc_insn, cabor_x64_assembly* asmbl)
 {
-    cabor_emit_line(asmbl, "xor %%rax, %%rax");  // Clear all bits of rax
-    cabor_emit_line(asmbl, "movq %s, %%rdx", arg->arg_refs[0]);
-    cabor_emit_line(asmbl, "cmpq %s, %%rdx", arg->arg_refs[1]);
+    cabor_emit_line(asmbl, "xor %%rax, %%rax\n");  // Clear all bits of rax
+    cabor_emit_line(asmbl, "movq %s, %%rdx\n", arg->arg_refs[0]);
+    cabor_emit_line(asmbl, "cmpq %s, %%rdx\n", arg->arg_refs[1]);
     cabor_emit_line(asmbl, "%s %%al", setcc_insn);  // Set lowest byte of rax to comparison result
-    if (strcmp(arg->result_register, "%rax") != 0) 
+    if (strcmp(arg->result_register, "%rax\n") != 0) 
     {
-        cabor_emit_line(asmbl, "movq %%rax, %s", arg->result_register);
+        cabor_emit_line(asmbl, "movq %%rax, %s\n", arg->result_register);
     }
 }
 
@@ -410,35 +410,35 @@ void cabor_destroy_x64_assembly(cabor_x64_assembly* asmbl)
 
 void cabor_emit_mov_imm(cabor_x64_assembly* asmbl, int64_t imm, const char* dest)
 {
-    cabor_emit_line(asmbl, "movq $%ld, %s", imm, dest);
+    cabor_emit_line(asmbl, "movq $%ld, %s\n", imm, dest);
 }
 
 void cabor_emit_mov_reg(cabor_x64_assembly* asmbl, const char* src, const char* dest)
 {
-    cabor_emit_line(asmbl, "movq %s, %s", src, dest);
+    cabor_emit_line(asmbl, "movq %s, %s\n", src, dest);
 }
 
 void cabor_emit_cmp_imm(cabor_x64_assembly* asmbl, int64_t imm, const char* operand)
 {
-    cabor_emit_line(asmbl, "cmpq $%ld, %s", imm, operand);
+    cabor_emit_line(asmbl, "cmpq $%ld, %s\n", imm, operand);
 }
 
 void cabor_emit_jmp(cabor_x64_assembly* asmbl, const char* label)
 {
-    cabor_emit_line(asmbl, "jmp %s", label);
+    cabor_emit_line(asmbl, "jmp %s\n", label);
 }
 
 void cabor_emit_jne(cabor_x64_assembly* asmbl, const char* label)
 {
-    cabor_emit_line(asmbl, "jne %s", label);
+    cabor_emit_line(asmbl, "jne %s\n", label);
 }
 
 void cabor_emit_label(cabor_x64_assembly* asmbl, const char* label)
 {
-    cabor_emit_line(asmbl, "%s:", label);
+    cabor_emit_line(asmbl, "%s:\n", label);
 }
 
 void cabor_emit_call(cabor_x64_assembly* asmbl, const char* label)
 {
-    cabor_emit_line(asmbl, "call %s", label);
+    cabor_emit_line(asmbl, "call %s\n", label);
 }

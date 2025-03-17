@@ -71,14 +71,25 @@ cabor_x64_assembly* cabor_compile(const char* code, const char* filename)
 void cabor_write_asmbl_to_file(const char* filename, cabor_x64_assembly* asmbl)
 {
     size_t total_size = 0;
-    for (size_t i = 0; i < asmbl->instructions; i++)
+    for (size_t i = 0; i < asmbl->instructions->size; i++)
     {
         cabor_x64_instruction* instr = cabor_vector_get_x64_instruction(asmbl->instructions, i);
-        total_size += strlen(instr);
+        total_size += strlen(instr->text);
     }
 
     cabor_allocation alloc = CABOR_MALLOC(total_size);
     char* buffer = (char*)alloc.mem;
+    char* line_begin = buffer;
+
+    for (size_t i = 0; i < asmbl->instructions->size; i++)
+    {
+        cabor_x64_instruction* instr = cabor_vector_get_x64_instruction(asmbl->instructions, i);
+        size_t line_size = strlen(instr->text);
+        memcpy(line_begin, instr->text, line_size);
+        line_begin += line_size;
+    }
+
+
     cabor_file* file = cabor_file_from_buffer(buffer, total_size);
 
     char name[128] = {0};

@@ -152,8 +152,7 @@ static void on_work(uv_work_t* work)
         char* filename[128] = {0};
         int res = snprintf(filename, sizeof(filename), "compile_request_%u", source_hash);
 
-        cabor_file* file = cabor_file_from_buffer(request.source.mem, request.source_size);
-		cabor_x64_assembly* asmbl = cabor_compile(file->file_memory.mem, filename);
+		cabor_x64_assembly* asmbl = cabor_compile((char*)request.source.mem, filename);
 
 		cabor_destroy_x64_assembly(asmbl);
 

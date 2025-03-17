@@ -427,7 +427,7 @@ cabor_vector* cabor_tokenize(cabor_file* file)
         }
 
         // if we end up here there were no matches
-        CABOR_LOG_WARN_F("Tokenizer encountered character that did not match to anything, the character: %c", c);
+       CABOR_LOG_WARN_F("Tokenizer encountered character that did not match to anything, the character: %c", c);
         cursor++; // skip over the unmatched character
     }
 
