@@ -193,6 +193,12 @@ void cabor_init_locals(cabor_ir_data* ir_data, cabor_locals* locals)
 
 const char* cabor_get_stack_slot(cabor_ir_var_idx ir_var, cabor_locals* locals)
 {
+    if (ir_var == -2)
+    {
+        cabor_stack_location* l0 = cabor_vector_get_stack_location(locals->locations, 0);
+        return l0->location;
+    }
+
     cabor_stack_location* loc = cabor_vector_get_stack_location(locals->locations, ir_var);
     return loc->location;
 }

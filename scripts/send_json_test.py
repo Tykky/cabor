@@ -7,7 +7,7 @@ r = 1
 
 data = {
     "command": "compile",
-    "code": "print_int(100)"
+    "code": "true"
 }
 
 json_data = json.dumps(data)
@@ -17,7 +17,7 @@ sock.sendall(json_data.encode())
 sock.shutdown(socket.SHUT_WR)
 sockets.append(sock)
 
-response = sockets[0].recv(1024)
+response = sockets[0].recv(100 * 1024 * 1024)
 if len(response) > 0:
     json_response = json.loads(response)
     print(json_response)
